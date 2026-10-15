@@ -23,7 +23,7 @@ table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:4px 6px;b
 .r2,.r3{display:grid;grid-column:1/-1;gap:12px;grid-template-columns:1fr 2fr}.r3{grid-template-columns:1fr 1fr}@media(max-width:700px){.r2,.r3{grid-template-columns:1fr}}
 .n{color:var(--mu);font-size:12px;margin-top:6px}
 </style></head><body>
-<h1>藥局機器人任務 Dashboard <small id="rng" style="font-weight:400;color:var(--mu)"></small></h1>
+<h1>藥局機器人任務 Dashboard <small id="rng" style="font-weight:400;color:var(--mu)"></small> <button id="rs" style="font-size:11px;font-weight:400;padding:1px 6px;background:transparent;color:var(--mu);border:1px dashed var(--bd);opacity:.45">還原內建資料</button></h1>
 <div class="bar">
 <label>班別 <select id="fs"><option value="">全部</option><option>早班</option><option>小夜</option><option>大夜</option></select></label>
 <label>機器人 <select id="fr"><option value="">全部</option><option>諾寶</option><option>安寶</option></select></label>
@@ -32,7 +32,7 @@ table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:4px 6px;b
 <div class="bar"><label>日期 <input type="date" id="d1"> ～ <input type="date" id="d2"></label>
 <button id="q0">全部</button><button id="q7">最近7天</button><button id="q30">最近30天</button>
 <label>匯入CSV（可多選，自動合併） <input type="file" id="up" accept=".csv" multiple></label>
-<button id="rs">還原內建資料</button><span id="msg" class="n"></span></div>
+<span id="msg" class="n"></span></div>
 <div class="top"><div class="k" id="kpi"></div><div class="c"><h2>任務結果佔比</h2><div class="pie" id="pie"></div></div></div>
 <div class="g">
 <div class="r3"><div class="c"><h2>單點／多點任務結果</h2><div id="mode"></div><div class="n">單點=1個病房；多點=2個以上；無點位=按啟動後就取消／失敗，尚未裝藥。其中「僅啟動」=只有「啟動」一個動作；「啟動後2分鐘內／超過2分鐘取消」=只有「啟動→取消」，依兩動作間隔分類；「其他」=其餘情況</div></div>
