@@ -65,7 +65,7 @@ const F=$('d1').value,E=$('d2').value,DD=D.filter(x=>(!F||x.d>=F)&&(!E||x.d<=E))
 $('rng').textContent=(F||'').replace(/-/g,'/')+' ～ '+(E||'').replace(/-/g,'/')+'（資料共 '+D.length+' 筆）';
 const A=DD.filter(x=>(!s||x.sh==s)&&(!r||x.r==r)&&(!m||x.md==m)&&(!t||!x.t));
 const o=cnt(A),n=A.length;
-$('kpi').innerHTML=[['任務總數',n,'big'],['完成率',pc(o.完成,n),'ok big'],['失敗率',pc(o.失敗,n),'fa big'],['取消',o.取消,'ca'],['失敗',o.失敗,'fa'],['機器人故障訊息',A.reduce((a,x)=>a+x.f,0),'']].map(x=>`<div><b class="${x[2]}">${String(x[1]).replace(/%$/,'<i style="font-size:24px;font-style:normal">%</i>')}</b><span>${x[0]}</span></div>`).join('');
+$('kpi').innerHTML=[['任務總數',n,'big'],['完成率',pc(o.完成,n),'ok big'],['未完成率',pc(o.取消+o.失敗,n),'fa big'],['取消',o.取消,'ca'],['失敗',o.失敗,'fa'],['機器人故障訊息',A.reduce((a,x)=>a+x.f,0),'']].map(x=>`<div><b class="${x[2]}">${String(x[1]).replace(/%$/,'<i style="font-size:24px;font-style:normal">%</i>')}</b><span>${x[0]}</span></div>`).join('');
 let acc=0,gr=['完成','取消','失敗'].map(k=>{const p=o[k]/(n||1)*100,a=acc;acc+=p;return `var(${C[k]}) ${a}% ${acc}%`}).join(',');
 $('pie').innerHTML=`<div style="background:conic-gradient(${gr})"></div><div>`+['完成','取消','失敗'].map(k=>`<div><span style="color:var(${C[k]})">■</span> ${k} ${o[k]}（${pc(o[k],n)}）</div>`).join('')+'</div>';
 const byMode=grp(A,x=>x.md);$('mode').innerHTML=tbl(H,['單點','多點','無點位'].filter(k=>byMode[k]).flatMap(k=>[row(k,byMode[k]),...(k=='無點位'?subs(byMode[k]):[])]));
