@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>醫療生理體徵人形示意圖</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            /* 提供一個網格背景讓使用者看清楚這是去背圖 */
+            background-color: #f3f4f6;
+            background-image: 
+                linear-gradient(45deg, #e5e7eb 25%, transparent 25%, transparent 75%, #e5e7eb 75%, #e5e7eb), 
+                linear-gradient(45deg, #e5e7eb 25%, transparent 25%, transparent 75%, #e5e7eb 75%, #e5e7eb);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+        }
+        
+        /* 隱藏下載時不需要的 UI 元素 */
+        .hide-on-export {
+            display: block;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="max-w-4xl w-full bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl overflow-hidden border border-gray-200">
+        
+        <!-- Header -->
+        <div class="bg-blue-600 p-6 text-white flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold">生理體徵示意圖 (向量去背)</h1>
+                <p class="text-blue-100 text-sm mt-1">預覽圖案，點擊右方按鈕即可下載為透明背景的 PNG 圖檔</p>
+            </div>
+            <button onclick="downloadAsPNG()" class="bg-white text-blue-600 hover:bg-blue-50 transition-colors px-6 py-3 rounded-lg font-bold shadow-md flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                下載透明去背圖 (PNG)
+            </button>
+        </div>
+
+        <!-- Canvas Container -->
+        <div class="p-8 flex justify-center bg-gray-50/50" id="svg-container">
+            
+            <!-- SVG Graphic: Set background to transparent -->
+            <svg id="vital-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 650" width="100%" height="auto" style="max-width: 800px; background-color: transparent;">
+                
+                <defs>
+                    <!-- Shadow for cards -->
+                    <filter id="drop-shadow" x="-10%" y="-10%" width="130%" height="130%">
+                        <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.1"/>
+                    </filter>
+                    
+                    <!-- Glowing dot effect -->
+                    <filter id="glow">
+                        <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+                        <feMerge>
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                </defs>
+
+                <!-- ================= HUMAN FIGURE (Detailed Outline) ================= -->
+                <g id="human-outline" stroke="#1E293B" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                    <path d="
+                        M 400 135 
+                        C 425 135, 435 110, 435 85
+                        C 435 50, 420 30, 400 30
+                        C 380 30, 365 50, 365 85
+                        C 365 110, 375 135, 400 135 Z
+                        
+                        M 365 100 C 355 100, 350 90, 350 80 C 350 70, 355 60, 365 60
+                        M 435 100 C 445 100, 450 90, 450 80 C 450 70, 445 60, 435 60
+                        
+                        M 400 110 L 400 115
+                        
+                        M 385 130 C 385 145, 380 150, 365 155
+                        C 330 165, 310 180, 290 230
+                        L 250 350
+                        
+                        C 245 365, 230 360, 230 375 C 230 385, 235 390, 240 390 C 245 390, 250 385, 250 375
+                        L 245 400 C 245 410, 255 415, 260 405 L 265 385
+                        L 260 410 C 260 420, 270 420, 275 410 L 280 385
+                        L 275 405 C 275 415, 285 415, 290 405 L 295 380
+                        L 295 400 C 295 410, 305 405, 305 395 C 305 385, 300 370, 300 360
+                        
+                        L 325 240
+                        
+                        C 335 280, 340 300, 345 330
+                        L 345 570
+                        
+                        C 345 590, 335 600, 325 600 C 315 600, 310 610, 310 615 C 310 620, 315 625, 320 625 
+                        C 325 625, 330 620, 330 615 L 330 625 C 330 630, 340 630, 340 625 L 340 615
+                        L 345 625 C 345 630, 355 630, 355 625 L 355 615
+                        L 360 625 C 360 630, 370 630, 370 625 L 370 615
+                        L 375 620 C 375 625, 385 625, 385 620 C 385 610, 380 600, 380 590
+                        L 390 380
+                        
+                        M 415 130 C 415 145, 420 150, 435 155
+                        C 470 165, 490 180, 510 230
+                        L 550 350
+                        
+                        C 555 365, 570 360, 570 375 C 570 385, 565 390, 560 390 C 555 390, 550 385, 550 375
+                        L 555 400 C 555 410, 545 415, 540 405 L 535 385
+                        L 540 410 C 540 420, 530 420, 525 410 L 520 385
+                        L 525 405 C 525 415, 515 415, 510 405 L 505 380
+                        L 505 400 C 505 410, 495 405, 495 395 C 495 385, 500 370, 500 360
+                        
+                        L 475 240
+                        
+                        C 465 280, 460 300, 455 330
+                        L 455 570
+                        
+                        C 455 590, 465 600, 475 600 C 485 600, 490 610, 490 615 C 490 620, 485 625, 480 625 
+                        C 475 625, 470 620, 470 615 L 470 625 C 470 630, 460 630, 460 625 L 460 615
+                        L 455 625 C 455 630, 445 630, 445 625 L 445 615
+                        L 440 625 C 440 630, 430 630, 430 625 L 430 615
+                        L 425 620 C 425 625, 415 625, 415 620 C 415 610, 420 600, 420 590
+                        L 410 380
+                        
+                        M 390 380 L 410 380
+                    " fill="#F8FAFC"/>
+                </g>
+
+                <!-- ================= LABEL 1: GCS (Head) ================= -->
+                <!-- Connection Line -->
+                <path d="M 435 85 L 530 60 L 560 60" stroke="#6366F1" stroke-width="2.5" stroke-dasharray="6,4" fill="none" />
+                <circle cx="435" cy="85" r="6" fill="#6366F1" filter="url(#glow)" />
+                <circle cx="560" cy="60" r="4" fill="#6366F1" />
+                
+                <!-- Label Box -->
+                <g transform="translate(570, 25)" filter="url(#drop-shadow)">
+                    <rect x="0" y="0" width="190" height="70" rx="12" fill="#EEF2FF" stroke="#818CF8" stroke-width="2"/>
+                    <text x="95" y="32" font-family="'Noto Sans TC', sans-serif" font-size="20" font-weight="bold" fill="#3730A3" text-anchor="middle">GCS / 意識狀態</text>
+                    <text x="95" y="55" font-family="'Noto Sans TC', sans-serif" font-size="14" fill="#4F46E5" text-anchor="middle">昏迷指數與神經學評估</text>
+                </g>
+
+                <!-- ================= LABEL 2: Vitals (Chest) ================= -->
+                <!-- Connection Line -->
+                <path d="M 400 210 L 530 210 L 560 210" stroke="#EF4444" stroke-width="2.5" stroke-dasharray="6,4" fill="none" />
+                <circle cx="400" cy="210" r="6" fill="#EF4444" filter="url(#glow)" />
+                <circle cx="560" cy="210" r="4" fill="#EF4444" />
+
+                <!-- Label Box -->
+                <g transform="translate(570, 175)" filter="url(#drop-shadow)">
+                    <rect x="0" y="0" width="190" height="85" rx="12" fill="#FEF2F2" stroke="#F87171" stroke-width="2"/>
+                    <text x="95" y="32" font-family="'Noto Sans TC', sans-serif" font-size="20" font-weight="bold" fill="#991B1B" text-anchor="middle">生命徵象摘要</text>
+                    <text x="95" y="55" font-family="'Noto Sans TC', sans-serif" font-size="14" fill="#B91C1C" text-anchor="middle">血壓 BP / 心跳 HR</text>
+                    <text x="95" y="75" font-family="'Noto Sans TC', sans-serif" font-size="14" fill="#B91C1C" text-anchor="middle">呼吸 RR / 體溫 BT</text>
+                </g>
+
+                <!-- ================= LABEL 3: Height/Weight/BMI (Body) ================= -->
+                <!-- Bracket and Connection Line -->
+                <path d="M 270 40 L 210 40 L 210 620 L 270 620 M 210 330 L 180 330" stroke="#10B981" stroke-width="3" fill="none" />
+                <circle cx="180" cy="330" r="4" fill="#10B981" />
+
+                <!-- Label Box -->
+                <g transform="translate(10, 285)" filter="url(#drop-shadow)">
+                    <rect x="0" y="0" width="160" height="90" rx="12" fill="#ECFDF5" stroke="#34D399" stroke-width="2"/>
+                    <text x="80" y="32" font-family="'Noto Sans TC', sans-serif" font-size="18" font-weight="bold" fill="#065F46" text-anchor="middle">身高 / 體重</text>
+                    <text x="80" y="55" font-family="'Noto Sans TC', sans-serif" font-size="18" font-weight="bold" fill="#065F46" text-anchor="middle">BMI 指數</text>
+                    <text x="80" y="77" font-family="'Noto Sans TC', sans-serif" font-size="13" fill="#059669" text-anchor="middle">體格與基本營養指標</text>
+                </g>
+
+                <!-- Watermark / Footer text -->
+                <text x="400" y="640" font-family="'Noto Sans TC', sans-serif" font-size="12" fill="#CBD5E1" text-anchor="middle">Physiological Signs Chart</text>
+            </svg>
+        </div>
+        
+        <!-- UI Message Box for notifications -->
+        <div id="notification" class="hidden bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mx-6 mb-6" role="alert">
+            <strong class="font-bold">成功！</strong>
+            <span class="block sm:inline">您的去背圖檔已開始下載。</span>
+        </div>
+    </div>
+
+    <script>
+        function downloadAsPNG() {
+            const svgElement = document.getElementById('vital-svg');
+            const notifyElement = document.getElementById('notification');
+            
+            // 1. Convert SVG to string
+            const serializer = new XMLSerializer();
+            let svgString = serializer.serializeToString(svgElement);
+            
+            // 2. Add namespace if missing (safeguard)
+            if (!svgString.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
+                svgString = svgString.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+            }
+
+            // 3. Create a canvas element
+            const canvas = document.createElement('canvas');
+            // Hardcode output resolution for crisp image (matching viewBox)
+            canvas.width = 800;
+            canvas.height = 600;
+            const ctx = canvas.getContext('2d');
+            
+            // Important: Do NOT fill the background with white, keep it transparent!
+            
+            // 4. Create an Image object from the SVG string
+            const img = new Image();
+            const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(svgBlob);
+            
+            img.onload = function() {
+                // Draw image on canvas
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                
+                // Free memory
+                URL.revokeObjectURL(url);
+                
+                // 5. Convert canvas to PNG Data URL
+                const pngUrl = canvas.toDataURL('image/png');
+                
+                // 6. Trigger download
+                const downloadLink = document.createElement('a');
+                downloadLink.href = pngUrl;
+                downloadLink.download = '生理體徵示意圖_去背版.png';
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+
+                // Show success message
+                notifyElement.classList.remove('hidden');
+                setTimeout(() => {
+                    notifyElement.classList.add('hidden');
+                }, 3000);
+            };
+            
+            img.src = url;
+        }
+    </script>
+</body>
+</html>
