@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<svg version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="265.5px" height="25px" xmlns="http://www.w3.org/2000/svg">
-  <g transform="matrix(1 0 0 1 -1622 -614 )">
-    <path d="M 1641.16066017178 630.43933982822  L 1637.22132034356 626.5  L 1641.16066017178 622.56066017178  L 1639.03933982822 620.43933982822  L 1634.03933982822 625.43933982822  L 1632.97867965644 626.5  L 1634.03933982822 627.56066017178  L 1639.03933982822 632.56066017178  L 1641.16066017178 630.43933982822  Z " fill-rule="nonzero" fill="#f59a23" stroke="none" />
-    <path d="M 1636 626.5  L 1885 626.5  " stroke-width="3" stroke="#f59a23" fill="none" />
+<svg version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="33px" height="33px" xmlns="http://www.w3.org/2000/svg">
+  <g transform="matrix(1 0 0 1 -1770 -470 )">
+    <path d="M 1786.5 472  C 1794.62 472  1801 478.38  1801 486.5  C 1801 494.62  1794.62 501  1786.5 501  C 1778.38 501  1772 494.62  1772 486.5  C 1772 478.38  1778.38 472  1786.5 472  Z " fill-rule="nonzero" fill="#ffffff" stroke="none" fill-opacity="0" />
+    <path d="M 1786.5 471.5  C 1794.9 471.5  1801.5 478.1  1801.5 486.5  C 1801.5 494.9  1794.9 501.5  1786.5 501.5  C 1778.1 501.5  1771.5 494.9  1771.5 486.5  C 1771.5 478.1  1778.1 471.5  1786.5 471.5  Z " stroke-width="3" stroke="#00bfbf" fill="none" />
   </g>
 </svg>
