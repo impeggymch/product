@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<svg version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="41px" height="19px" xmlns="http://www.w3.org/2000/svg">
-  <g transform="matrix(1 0 0 1 -184 -1820 )">
-    <path d="M 196 1826.5  A 3 3 0 0 0 193 1829.5 A 3 3 0 0 0 196 1832.5 A 3 3 0 0 0 199 1829.5 A 3 3 0 0 0 196 1826.5 Z " fill-rule="nonzero" fill="#555555" stroke="none" />
-    <path d="M 194 1829.5  L 224 1829.5  " stroke-width="1" stroke="#555555" fill="none" />
+<svg version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="210px" height="32px" xmlns="http://www.w3.org/2000/svg">
+  <g transform="matrix(1 0 0 1 -184 -1749 )">
+    <path d="M 0.67017725730507 21.375117263132  L 19.5195530726257 0.5  L 200 0.5  " stroke-width="1" stroke="#555555" fill="none" transform="matrix(1 0 0 1 193 1749 )" />
+    <path d="M 2.0105316350114 16.8907150695045  C 0.353677385519024 16.8907150695045  -0.989468364988596 18.2338608200121  -0.989468364988596 19.8907150695045  C -0.989468364988596 21.5475693189968  0.353677385519024 22.8907150695045  2.0105316350114 22.8907150695045  C 3.66738588450378 22.8907150695045  5.0105316350114 21.5475693189968  5.0105316350114 19.8907150695045  C 5.0105316350114 18.2338608200121  3.66738588450378 16.8907150695045  2.0105316350114 16.8907150695045  Z " fill-rule="nonzero" fill="#555555" stroke="none" transform="matrix(1 0 0 1 193 1749 )" />
   </g>
 </svg>
