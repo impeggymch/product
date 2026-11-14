@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Google Tag Manager（GA4 請在 GTM 後台以「Google 代碼」設定） -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-W8F42SPD');</script>
+  <!-- End Google Tag Manager -->
+
+  <title>綠星球手作甜點｜花蓮客製化生日蛋糕</title>
+  <meta name="description" content="綠星球手作甜點，花蓮客製化生日蛋糕與節慶糕點。當季鮮果、手寫祝福小卡，歡迎透過 Instagram 預約訂購。" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            sage: {
+              50:  '#F3F7F1',
+              100: '#E3EDE0',
+              300: '#B5D0AF',
+              500: '#8CB485', // 主色（原站導覽列綠）
+              600: '#6F9868',
+              700: '#557A50',
+              800: '#456641',
+            },
+            leaf:     '#A0D26D', // Logo 亮綠
+            cream:    '#FAF7F0', // 主背景
+            beige:    '#EDE8D8', // 區塊交替底色
+            ink:      '#3F4349', // 內文
+            charcoal: '#333333',
+          },
+          fontFamily: {
+            sans:  ['"Noto Sans TC"', '"PingFang TC"', '"Microsoft JhengHei"', 'sans-serif'],
+            serif: ['"Noto Serif TC"', '"Songti TC"', 'serif'],
+          },
+          boxShadow: {
+            soft: '0 10px 30px -12px rgba(63, 67, 73, 0.18)',
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    html { scroll-behavior: smooth; }
+    body { -webkit-font-smoothing: antialiased; }
+
+    /* 捲動淡入 */
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s ease, transform .7s ease; }
+    .reveal.is-visible { opacity: 1; transform: none; }
+
+    /* 作品卡片篩選動畫 */
+    .work-card { transition: opacity .35s ease, transform .35s ease; }
+    .work-card.is-hidden { display: none; }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .reveal, .work-card { transition: none; opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+
+<body class="bg-cream font-sans text-ink leading-relaxed">
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W8F42SPD"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+
+  <!-- ============ 1. Navbar ============ -->
+  <header id="navbar" class="fixed inset-x-0 top-0 z-50 transition-all duration-300">
+    <nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
+      <!-- Logo -->
+      <a href="#top" class="flex items-center gap-2.5" aria-label="綠星球手作甜點 首頁">
+        <svg class="h-10 w-10 shrink-0" viewBox="0 0 48 48" aria-hidden="true">
+          <circle cx="24" cy="24" r="15" fill="#8CB485" />
+          <path d="M14 20c4 3 9 2 12-1s7-4 10-1" stroke="#A0D26D" stroke-width="3" fill="none" stroke-linecap="round" />
+          <circle cx="19" cy="28" r="2.2" fill="#FAF7F0" opacity=".85" />
+          <ellipse cx="24" cy="24" rx="22" ry="7" fill="none" stroke="#557A50" stroke-width="2" transform="rotate(-18 24 24)" />
+          <path d="M30 6c3-1 6 0 7 3-3 1-6 0-7-3z" fill="#A0D26D" />
+        </svg>
+        <span class="font-serif text-lg font-bold tracking-wide text-sage-800">綠星球手作甜點</span>
+      </a>
+
+      <!-- Desktop links -->
+      <div class="hidden items-center gap-9 md:flex">
+        <a href="#products" class="nav-link text-[15px] font-medium hover:text-sage-700">商品</a>
+        <a href="#works" class="nav-link text-[15px] font-medium hover:text-sage-700">作品</a>
+        <a href="#order" class="nav-link text-[15px] font-medium hover:text-sage-700">訂購須知</a>
+        <a data-track="instagram" data-track-location="navbar" href="https://www.instagram.com/green_planet_dessert/" target="_blank" rel="noopener"
+           class="inline-flex items-center gap-2 rounded-full bg-sage-700 px-5 py-2.5 text-sm font-medium text-white shadow-soft transition hover:bg-sage-800">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+          IG 訂購
+        </a>
+      </div>
+
+      <!-- Mobile toggle -->
+      <button id="menuBtn" class="rounded-lg p-2 text-sage-800 md:hidden" aria-label="開啟選單" aria-expanded="false" aria-controls="mobileMenu">
+        <svg id="iconOpen" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        <svg id="iconClose" class="hidden h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </nav>
+
+    <!-- Mobile menu -->
+    <div id="mobileMenu" class="hidden border-t border-sage-100 bg-cream/95 backdrop-blur md:hidden">
+      <div class="flex flex-col gap-1 px-4 py-4">
+        <a href="#products" class="mobile-link rounded-lg px-3 py-3 font-medium hover:bg-sage-50">商品</a>
+        <a href="#works" class="mobile-link rounded-lg px-3 py-3 font-medium hover:bg-sage-50">作品</a>
+        <a href="#order" class="mobile-link rounded-lg px-3 py-3 font-medium hover:bg-sage-50">訂購須知</a>
+        <a data-track="instagram" data-track-location="mobile_menu" href="https://www.instagram.com/green_planet_dessert/" target="_blank" rel="noopener"
+           class="mt-2 rounded-full bg-sage-700 px-5 py-3 text-center font-medium text-white">IG 訂購</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- ============ 2. Hero ============ -->
+    <section class="relative overflow-hidden pt-28 pb-16 sm:pt-36 lg:pb-24">
+      <!-- 裝飾圓 -->
+      <div class="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-sage-100/70 blur-2xl" aria-hidden="true"></div>
+      <div class="pointer-events-none absolute -left-24 bottom-0 h-72 w-72 rounded-full bg-beige blur-2xl" aria-hidden="true"></div>
+
+      <div class="relative mx-auto grid max-w-6xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:gap-16">
+        <div class="reveal">
+          <span class="inline-flex items-center gap-2 rounded-full bg-sage-100 px-4 py-1.5 text-sm font-medium text-sage-800">
+            <span class="h-2 w-2 rounded-full bg-leaf"></span>
+            花蓮・客製化生日蛋糕
+          </span>
+          <h1 class="mt-6 font-serif text-4xl font-bold leading-tight text-charcoal sm:text-5xl lg:text-[3.4rem]">
+            為重要的人，<br />
+            訂一顆<span class="text-sage-700">只屬於他</span>的蛋糕
+          </h1>
+          <p class="mt-6 max-w-lg text-lg text-ink/80">
+            綠星球手作甜點，客製化生日蛋糕與節慶糕點，用當季鮮果與手寫祝福小卡，把心意裝進每一口。
+          </p>
+          <div class="mt-9 flex flex-wrap gap-4">
+            <a data-track="instagram" data-track-location="hero" href="https://www.instagram.com/green_planet_dessert/" target="_blank" rel="noopener"
+               class="inline-flex items-center gap-2 rounded-full bg-sage-700 px-7 py-3.5 font-medium text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-sage-800">
+              IG 預約訂購
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+            <a href="#works"
+               class="inline-flex items-center rounded-full border-2 border-sage-700 px-7 py-3 font-medium text-sage-800 transition hover:bg-sage-700 hover:text-white">
+              看看作品
+            </a>
+          </div>
+          <dl class="mt-12 flex gap-10 border-t border-sage-300/60 pt-6">
+            <div><dt class="text-sm text-ink/60">完成作品</dt><dd class="font-serif text-2xl font-bold text-sage-800">100+</dd></div>
+            <div><dt class="text-sm text-ink/60">蛋糕尺寸</dt><dd class="font-serif text-2xl font-bold text-sage-800">4″–8″</dd></div>
+            <div><dt class="text-sm text-ink/60">祝福小卡</dt><dd class="font-serif text-2xl font-bold text-sage-800">每顆都有</dd></div>
+          </dl>
+        </div>
+
+        <div class="reveal relative">
+          <div class="aspect-[4/5] overflow-hidden rounded-[2rem] bg-beige shadow-soft sm:aspect-[5/5] lg:aspect-[4/5]">
+            <img src="https://images.unsplash.com/photo-1557925923-cd4648e211a0?auto=format&fit=crop&w=1000&q=80"
+                 alt="雙手捧著一顆手作蛋糕" class="h-full w-full object-cover" loading="eager" />
+          </div>
+          <!-- 浮動小卡 -->
+          <div class="absolute -bottom-6 left-4 flex max-w-[16rem] items-center gap-3 rounded-2xl bg-white p-4 shadow-soft sm:-left-6">
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-sage-100 text-sage-700">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>
+            </div>
+            <p class="text-sm leading-snug"><strong class="block text-charcoal">手寫祝福小卡</strong>每顆蛋糕都有，不只是生日快樂</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 3. 商品（3 欄） ============ -->
+    <section id="products" class="bg-beige/60 py-20 sm:py-28">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6">
+        <div class="reveal mx-auto max-w-2xl text-center">
+          <p class="text-sm font-medium tracking-[0.2em] text-sage-700">OUR CAKES</p>
+          <h2 class="mt-3 font-serif text-3xl font-bold text-charcoal sm:text-4xl">客製化商品</h2>
+          <p class="mt-4 text-ink/75">每一顆都從討論開始。告訴我們收禮的人喜歡什麼，我們把故事做成蛋糕。</p>
+        </div>
+
+        <div class="mt-14 grid gap-8 md:grid-cols-3">
+          <!-- 卡片 1 -->
+          <article class="reveal group overflow-hidden rounded-3xl bg-white shadow-soft transition hover:-translate-y-1">
+            <div class="aspect-[4/3] overflow-hidden bg-beige">
+              <img src="https://images.unsplash.com/photo-1535141192574-5d4897c12636?auto=format&fit=crop&w=800&q=80"
+                   alt="造型鮮奶油蛋糕" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+            </div>
+            <div class="p-7">
+              <h3 class="font-serif text-xl font-bold text-charcoal">微造型蛋糕</h3>
+              <p class="mt-2 text-ink/75">以戚風蛋糕與香緹奶油為基底，依主題做簡約造型，適合生日、紀念日與驚喜派對。</p>
+              <p class="mt-5 text-sm font-medium text-sage-700">4″｜6″｜8″</p>
+            </div>
+          </article>
+          <!-- 卡片 2 -->
+          <article class="reveal group overflow-hidden rounded-3xl bg-white shadow-soft transition hover:-translate-y-1">
+            <div class="aspect-[4/3] overflow-hidden bg-beige">
+              <img src="https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?auto=format&fit=crop&w=800&q=80"
+                   alt="古早味蛋糕" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+            </div>
+            <div class="p-7">
+              <h3 class="font-serif text-xl font-bold text-charcoal">古早味小蛋糕</h3>
+              <p class="mt-2 text-ink/75">濕潤綿密的古早味蛋糕體，蛋香樸實、甜度剛好，下午茶或伴手禮都合適。</p>
+              <p class="mt-5 text-sm font-medium text-sage-700">原味｜巧克力｜黑森林</p>
+            </div>
+          </article>
+          <!-- 卡片 3 -->
+          <article class="reveal group overflow-hidden rounded-3xl bg-white shadow-soft transition hover:-translate-y-1">
+            <div class="aspect-[4/3] overflow-hidden bg-beige">
+              <img src="https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=800&q=80"
+                   alt="節慶手作餅乾" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+            </div>
+            <div class="p-7">
+              <h3 class="font-serif text-xl font-bold text-charcoal">節慶糕點</h3>
+              <p class="mt-2 text-ink/75">母親節、中秋、聖誕節的限定點心，數量有限，開放預訂時會在 Instagram 公告。</p>
+              <p class="mt-5 text-sm font-medium text-sage-700">限定開放・請追蹤 IG</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 4. 作品集 ============ -->
+    <section id="works" class="py-20 sm:py-28">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6">
+        <div class="reveal flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p class="text-sm font-medium tracking-[0.2em] text-sage-700">PORTFOLIO</p>
+            <h2 class="mt-3 font-serif text-3xl font-bold text-charcoal sm:text-4xl">生日蛋糕作品集</h2>
+            <p class="mt-4 max-w-xl text-ink/75">每一顆蛋糕都有一個名字，記錄著訂購者想傳遞的心意。</p>
+          </div>
+          <!-- 篩選 -->
+          <div class="flex flex-wrap gap-2" role="group" aria-label="作品分類篩選">
+            <button class="filter-btn rounded-full px-5 py-2 text-sm font-medium transition" data-filter="all">全部</button>
+            <button class="filter-btn rounded-full px-5 py-2 text-sm font-medium transition" data-filter="strawberry">草莓系</button>
+            <button class="filter-btn rounded-full px-5 py-2 text-sm font-medium transition" data-filter="chocolate">巧克力系</button>
+            <button class="filter-btn rounded-full px-5 py-2 text-sm font-medium transition" data-filter="fruit">水果系</button>
+          </div>
+        </div>
+
+        <!-- 由 JS 渲染作品卡片 -->
+        <div id="worksGrid" class="mt-12 grid gap-7 sm:grid-cols-2 lg:grid-cols-3"></div>
+
+        <div class="reveal mt-12 text-center">
+          <a data-track="instagram" data-track-location="portfolio" href="https://www.instagram.com/green_planet_dessert/" target="_blank" rel="noopener"
+             class="inline-flex items-center gap-2 font-medium text-sage-700 underline-offset-4 hover:underline">
+            到 Instagram 看更多作品
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 5. 關於我們 ============ -->
+    <section id="about" class="bg-sage-50 py-20 sm:py-28">
+      <div class="mx-auto grid max-w-6xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:gap-20">
+        <div class="reveal relative order-2 lg:order-1">
+          <div class="aspect-[4/3] overflow-hidden rounded-[2rem] bg-beige shadow-soft">
+            <img src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=1000&q=80"
+                 alt="在廚房裡手作甜點" class="h-full w-full object-cover" loading="lazy" />
+          </div>
+          <div class="absolute -right-3 -top-5 rounded-2xl bg-sage-700 px-5 py-4 text-white shadow-soft sm:-right-6">
+            <p class="font-serif text-2xl font-bold">Since 2019</p>
+            <p class="text-sm text-white/85">花蓮・林森路</p>
+          </div>
+        </div>
+
+        <div class="reveal order-1 lg:order-2">
+          <p class="text-sm font-medium tracking-[0.2em] text-sage-700">ABOUT US</p>
+          <h2 class="mt-3 font-serif text-3xl font-bold leading-snug text-charcoal sm:text-4xl">喜歡做甜點的玩具人</h2>
+          <div class="mt-6 space-y-4 text-ink/80">
+            <p>
+              <strong class="text-charcoal">手作</strong>，以職人精神；<strong class="text-charcoal">甜點</strong>，做自己喜愛的點心。
+            </p>
+            <p>
+              綠星球是一間藏在花蓮老屋裡的小小甜點工作室。在沒有正職工作的日子裡，我們練習體驗生活——漫步、聆聽、講故事、勇敢嘗試，還有少吃一點飯，把肚子留給蛋糕。
+            </p>
+            <p>
+              我們不追求繁複的外觀，只想把基本功做好：鬆軟濕潤的戚風、細緻滑順的香緹、每天挑選的新鮮水果，再附上一張手寫的祝福小卡，讓收到蛋糕的人會心一笑。
+            </p>
+            <p class="text-ink/65">目前沒有店面，採預約制接單，歡迎有空來綠星球坐坐。</p>
+          </div>
+
+          <ul class="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <li class="flex items-center gap-2 text-sm font-medium"><span class="flex h-6 w-6 items-center justify-center rounded-full bg-leaf/30 text-sage-800">✓</span>不添加人工香精</li>
+            <li class="flex items-center gap-2 text-sm font-medium"><span class="flex h-6 w-6 items-center justify-center rounded-full bg-leaf/30 text-sage-800">✓</span>當季在地鮮果</li>
+            <li class="flex items-center gap-2 text-sm font-medium"><span class="flex h-6 w-6 items-center justify-center rounded-full bg-leaf/30 text-sage-800">✓</span>少量預約製作</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 6. 訂購須知與聯絡 ============ -->
+    <section id="order" class="py-20 sm:py-28">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6">
+        <div class="reveal mx-auto max-w-2xl text-center">
+          <p class="text-sm font-medium tracking-[0.2em] text-sage-700">HOW TO ORDER</p>
+          <h2 class="mt-3 font-serif text-3xl font-bold text-charcoal sm:text-4xl">訂購須知</h2>
+          <p class="mt-4 text-ink/75">採預約制，建議於取貨日 <strong class="text-charcoal">7 天前</strong> 聯繫，節日檔期請更早預訂。</p>
+        </div>
+
+        <!-- 3 步驟 -->
+        <ol class="mt-14 grid gap-6 md:grid-cols-3">
+          <li class="reveal relative rounded-3xl border border-sage-100 bg-white p-8 shadow-soft">
+            <span class="font-serif text-5xl font-bold text-sage-300">01</span>
+            <h3 class="mt-4 font-serif text-xl font-bold text-charcoal">私訊討論</h3>
+            <p class="mt-2 text-ink/75">透過 Instagram 或 LINE 告訴我們取貨日期、尺寸、口味偏好，以及收禮人的小故事。</p>
+          </li>
+          <li class="reveal relative rounded-3xl border border-sage-100 bg-white p-8 shadow-soft">
+            <span class="font-serif text-5xl font-bold text-sage-300">02</span>
+            <h3 class="mt-4 font-serif text-xl font-bold text-charcoal">確認款式、付訂金</h3>
+            <p class="mt-2 text-ink/75">確認內容與報價後支付訂金，即完成預約。如需更改請於取貨 3 天前告知。</p>
+          </li>
+          <li class="reveal relative rounded-3xl border border-sage-100 bg-white p-8 shadow-soft">
+            <span class="font-serif text-5xl font-bold text-sage-300">03</span>
+            <h3 class="mt-4 font-serif text-xl font-bold text-charcoal">約定面交</h3>
+            <p class="mt-2 text-ink/75">於花蓮市林森路一帶約定時間面交。鮮奶油蛋糕請盡快冷藏，當日食用風味最佳。</p>
+          </li>
+        </ol>
+
+        <!-- 聯絡 CTA -->
+        <div class="reveal mt-14 overflow-hidden rounded-[2rem] bg-sage-700 px-6 py-12 text-center text-white sm:px-12">
+          <h3 class="font-serif text-2xl font-bold sm:text-3xl">準備好訂一顆蛋糕了嗎？</h3>
+          <p class="mx-auto mt-3 max-w-xl text-white/85">訂購蛋糕請利用 Instagram 或 LINE 討論，我們會盡快回覆你。</p>
+          <div class="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
+            <a data-track="instagram" data-track-location="order_cta" href="https://www.instagram.com/green_planet_dessert/" target="_blank" rel="noopener"
+               class="inline-flex items-center justify-center gap-3 rounded-full bg-white px-8 py-4 font-medium text-sage-800 transition hover:-translate-y-0.5 hover:bg-cream">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+              Instagram 私訊訂購
+            </a>
+            <!-- TODO: 換成 LINE 官方帳號網址 -->
+            <a data-track="line" data-track-location="order_cta" href="#" target="_blank" rel="noopener"
+               class="inline-flex items-center justify-center gap-3 rounded-full border-2 border-white px-8 py-3.5 font-medium text-white transition hover:-translate-y-0.5 hover:bg-white hover:text-sage-800">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.5 1.1-.5 5.9-3.5 8-6C21.4 14.3 22 12.7 22 11c0-4.4-4.5-8-10-8zM8.3 13.4H6.4a.5.5 0 0 1-.5-.5V9.1a.5.5 0 0 1 1 0v3.3h1.4a.5.5 0 0 1 0 1zm1.9-.5a.5.5 0 0 1-1 0V9.1a.5.5 0 0 1 1 0v3.8zm4.6 0a.5.5 0 0 1-.9.3l-1.9-2.6v2.3a.5.5 0 0 1-1 0V9.1a.5.5 0 0 1 .9-.3l1.9 2.6V9.1a.5.5 0 0 1 1 0v3.8zm3.1-2.4a.5.5 0 0 1 0 1h-1.4v.9h1.4a.5.5 0 0 1 0 1h-1.9a.5.5 0 0 1-.5-.5V9.1c0-.3.2-.5.5-.5h1.9a.5.5 0 0 1 0 1h-1.4v.9h1.4z"/></svg>
+              LINE 官方帳號
+            </a>
+          </div>
+          <p class="mt-8 text-sm text-white/75">面交地點：花蓮市林森路 257 巷一帶　｜　Email：lesrice@gmail.com</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ 7. Footer ============ -->
+  <footer class="border-t border-sage-100 bg-beige/60">
+    <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 px-4 py-10 sm:flex-row sm:px-6">
+      <div class="text-center sm:text-left">
+        <p class="font-serif text-lg font-bold text-sage-800">綠星球手作甜點</p>
+        <p class="mt-1 text-sm text-ink/60">© <span id="year"></span> Green Planet Dessert. All rights reserved.</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <!-- TODO: 換成 Facebook 粉專網址 -->
+        <a data-track="facebook" data-track-location="footer" href="#" target="_blank" rel="noopener" aria-label="Facebook"
+           class="flex h-11 w-11 items-center justify-center rounded-full bg-white text-sage-700 shadow-soft transition hover:bg-sage-700 hover:text-white">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 8h3V4h-3c-2.8 0-4.5 1.8-4.5 4.6V11H7v4h2.5v9h4v-9h3l.5-4h-3.5V8.8c0-.5.3-.8.5-.8z"/></svg>
+        </a>
+        <a data-track="instagram" data-track-location="footer" href="https://www.instagram.com/green_planet_dessert/" target="_blank" rel="noopener" aria-label="Instagram"
+           class="flex h-11 w-11 items-center justify-center rounded-full bg-white text-sage-700 shadow-soft transition hover:bg-sage-700 hover:text-white">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+        </a>
+        <!-- TODO: 換成 LINE 官方帳號網址 -->
+        <a data-track="line" data-track-location="footer" href="#" target="_blank" rel="noopener" aria-label="LINE"
+           class="flex h-11 w-11 items-center justify-center rounded-full bg-white text-sage-700 shadow-soft transition hover:bg-sage-700 hover:text-white">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.5 1.1-.5 5.9-3.5 8-6C21.4 14.3 22 12.7 22 11c0-4.4-4.5-8-10-8z"/></svg>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============ Scripts ============ -->
+  <script>
+    // ---- 作品資料（換成自己的照片時，改 img 即可） ----
+    const IMG = (id) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=800&q=80`;
+    const works = [
+      { title: '朋友的超人老爸', spec: '8″ 草莓摩卡鮮奶油蛋糕', tags: ['原味戚風', '摩卡香緹', '新鮮草莓'], date: '2024.02.16', cat: 'strawberry', img: IMG('photo-1464349095431-e9a21285b5f3') },
+      { title: '小夫妻情人節驚喜', spec: '4″ 草莓鮮奶油蛋糕', tags: ['原味戚風', '原味香緹', '新鮮草莓'], date: '2024.02.14', cat: 'strawberry', img: IMG('photo-1488477181946-6428a0291777') },
+      { title: '給好朋友一家的祝福', spec: '4″ 草莓麻糬鮮奶油蛋糕', tags: ['牛奶麻糬', '原味曲奇', '新鮮草莓'], date: '2024.01.14', cat: 'strawberry', img: IMG('photo-1571115177098-24ec42ed204d') },
+      { title: '愛芋泥的大長輩', spec: '6″ 麝香葡萄芋泥鮮奶油蛋糕', tags: ['原味戚風', '牛奶芋泥', '麝香葡萄'], date: '2024.01.10', cat: 'fruit', img: IMG('photo-1621303837174-89787a7d4729') },
+      { title: '來自遠方的好朋友', spec: '4″ 草莓巧克力鮮奶油蛋糕', tags: ['巧克力戚風', '巧克力香緹', '堅果脆脆'], date: '2024.01.02', cat: 'chocolate', img: IMG('photo-1578985545062-69928b1d9587') },
+      { title: '小朋友的可可 Party', spec: '4″ 焦糖香蕉巧克力脆脆戚風', tags: ['苦甜巧克力', '焦糖香蕉', '堅果脆脆'], date: '2023.12.02', cat: 'chocolate', img: IMG('photo-1606890737304-57a1ca8a5b62') },
+      { title: '給理工先生的驚喜', spec: '6″ 水果茉香鮮奶油蛋糕', tags: ['茉香綠香緹', '黃金奇異果', '綠葡萄'], date: '2023.11.20', cat: 'fruit', img: IMG('photo-1563729784474-d77dbb933a9e') },
+      { title: '我想成為太空人', spec: '8″ 水果鮮奶油蛋糕', tags: ['原味香緹', '麝香葡萄', '黃金奇異果'], date: '2023.09.30', cat: 'fruit', img: IMG('photo-1495147466023-ac5c588e2e94') },
+      { title: '女子妻', spec: '6″ 古早味黑森林蛋糕', tags: ['巧克力戚風', '酒漬櫻桃', '苦甜巧克力'], date: '2023.09.30', cat: 'chocolate', img: IMG('photo-1606313564200-e75d5e30476c') },
+    ];
+
+    const CAT_LABEL = { strawberry: '草莓系', chocolate: '巧克力系', fruit: '水果系' };
+
+    // 圖片載入失敗時的 SVG 佔位
+    const FALLBACK = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="#EDE8D8"/><g fill="none" stroke="#8CB485" stroke-width="6"><rect x="130" y="140" width="140" height="80" rx="10"/><path d="M130 175h140"/><path d="M200 140v-24"/></g><circle cx="200" cy="106" r="8" fill="#A0D26D"/></svg>'
+    );
+    window.imgFallback = (el) => { el.onerror = null; el.src = FALLBACK; };
+
+    const grid = document.getElementById('worksGrid');
+    grid.innerHTML = works.map((w) => `
+      <article class="work-card reveal group overflow-hidden rounded-3xl bg-white shadow-soft hover:-translate-y-1" data-cat="${w.cat}">
+        <div class="relative aspect-square overflow-hidden bg-beige">
+          <img src="${w.img}" alt="${w.spec}" loading="lazy" onerror="imgFallback(this)"
+               class="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+          <span class="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-sage-800 backdrop-blur">${CAT_LABEL[w.cat]}</span>
+        </div>
+        <div class="p-6">
+          <p class="text-xs tracking-widest text-ink/50">— ${w.date} —</p>
+          <h3 class="mt-2 font-serif text-lg font-bold text-charcoal">${w.title}</h3>
+          <p class="mt-1 text-sm font-medium text-sage-700">${w.spec}</p>
+          <ul class="mt-4 flex flex-wrap gap-2">
+            ${w.tags.map((t) => `<li class="rounded-full bg-sage-50 px-3 py-1 text-xs text-ink/75">${t}</li>`).join('')}
+          </ul>
+        </div>
+      </article>`).join('');
+
+    // 其他靜態圖片也套用 fallback
+    document.querySelectorAll('img:not([onerror])').forEach((img) => img.addEventListener('error', () => imgFallback(img), { once: true }));
+
+    // ---- 作品篩選 ----
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const ACTIVE = ['bg-sage-700', 'text-white'];
+    const IDLE = ['bg-white', 'text-ink', 'hover:bg-sage-50', 'border', 'border-sage-100'];
+
+    function setFilter(filter) {
+      filterBtns.forEach((btn) => {
+        const on = btn.dataset.filter === filter;
+        btn.classList.remove(...ACTIVE, ...IDLE);
+        btn.classList.add(...(on ? ACTIVE : IDLE));
+        btn.setAttribute('aria-pressed', on);
+      });
+      grid.querySelectorAll('.work-card').forEach((card) => {
+        card.classList.toggle('is-hidden', filter !== 'all' && card.dataset.cat !== filter);
+      });
+    }
+    filterBtns.forEach((btn) => btn.addEventListener('click', () => setFilter(btn.dataset.filter)));
+    setFilter('all');
+
+    // ---- 手機選單 ----
+    const menuBtn = document.getElementById('menuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    function toggleMenu(force) {
+      const open = typeof force === 'boolean' ? force : mobileMenu.classList.contains('hidden');
+      mobileMenu.classList.toggle('hidden', !open);
+      document.getElementById('iconOpen').classList.toggle('hidden', open);
+      document.getElementById('iconClose').classList.toggle('hidden', !open);
+      menuBtn.setAttribute('aria-expanded', open);
+      menuBtn.setAttribute('aria-label', open ? '關閉選單' : '開啟選單');
+      updateNav();
+    }
+    menuBtn.addEventListener('click', () => toggleMenu());
+    mobileMenu.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => toggleMenu(false)));
+    window.addEventListener('resize', () => { if (window.innerWidth >= 768) toggleMenu(false); });
+
+    // ---- Navbar 捲動後加背景 ----
+    const navbar = document.getElementById('navbar');
+    function updateNav() {
+      const solid = window.scrollY > 20 || !mobileMenu.classList.contains('hidden');
+      navbar.classList.toggle('bg-cream/90', solid);
+      navbar.classList.toggle('backdrop-blur', solid);
+      navbar.classList.toggle('shadow-sm', solid);
+    }
+    window.addEventListener('scroll', updateNav, { passive: true });
+    updateNav();
+
+    // ---- 捲動淡入 ----
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+    // ---- 版權年份 ----
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // ---- 訂購／社群按鈕點擊追蹤（推送到 GTM dataLayer） ----
+    // GTM 端：自訂事件 order_click，參數 platform、click_location、link_url
+    window.dataLayer = window.dataLayer || [];
+    document.addEventListener('click', (e) => {
+      const link = e.target.closest('[data-track]');
+      if (!link) return;
+      window.dataLayer.push({
+        event: 'order_click',
+        platform: link.dataset.track,               // instagram / line / facebook
+        click_location: link.dataset.trackLocation, // navbar / hero / order_cta ...
+        link_url: link.href,
+      });
+    });
+  </script>
+</body>
+</html>
