@@ -4,13 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Google Tag Manager（GA4 請在 GTM 後台以「Google 代碼」設定） -->
-  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-W8F42SPD');</script>
-  <!-- End Google Tag Manager -->
+  <!-- Google tag (gtag.js) - GA4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HPXTX0H5GY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-HPXTX0H5GY');
+  </script>
 
   <title>綠星球手作甜點｜花蓮客製化生日蛋糕</title>
   <meta name="description" content="綠星球手作甜點，花蓮客製化生日蛋糕與節慶糕點。當季鮮果、手寫祝福小卡，歡迎透過 Instagram 預約訂購。" />
@@ -74,10 +75,6 @@
 </head>
 
 <body class="bg-cream font-sans text-ink leading-relaxed">
-  <!-- Google Tag Manager (noscript) -->
-  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W8F42SPD"
-  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-  <!-- End Google Tag Manager (noscript) -->
 
   <!-- ============ 1. Navbar ============ -->
   <header id="navbar" class="fixed inset-x-0 top-0 z-50 transition-all duration-300">
@@ -479,14 +476,11 @@
     // ---- 版權年份 ----
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // ---- 訂購／社群按鈕點擊追蹤（推送到 GTM dataLayer） ----
-    // GTM 端：自訂事件 order_click，參數 platform、click_location、link_url
-    window.dataLayer = window.dataLayer || [];
+    // ---- 訂購／社群按鈕點擊追蹤（直接送 GA4 事件 order_click） ----
     document.addEventListener('click', (e) => {
       const link = e.target.closest('[data-track]');
-      if (!link) return;
-      window.dataLayer.push({
-        event: 'order_click',
+      if (!link || typeof gtag !== 'function') return;
+      gtag('event', 'order_click', {
         platform: link.dataset.track,               // instagram / line / facebook
         click_location: link.dataset.trackLocation, // navbar / hero / order_cta ...
         link_url: link.href,
