@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Google tag (gtag.js) - GA4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HPXTX0H5GY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-HPXTX0H5GY');
+  </script>
+
+  <title>綠星球手作甜點｜喜歡做甜點的玩具人</title>
+  <meta name="description" content="綠星球手作甜點，花蓮客製化生日蛋糕與節慶糕點。手作以職人精神，甜點做自己喜愛的點心。歡迎透過 Instagram 預約訂購。" />
+  <link rel="icon" type="image/png" href="images/brand/logo.png" />
+  <meta property="og:image" content="images/brand/hero.jpg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            page:  '#D6D1BB', // 外圍米色底
+            sage:  '#8CB485', // 導覽列綠
+            ink:   '#333333', // 標題、按鈕
+            body:  '#62686F', // 內文
+            soft:  '#50555C', // 次要文字
+          },
+          fontFamily: {
+            sans: ['"Open Sans"', '"PingFang TC"', '"Microsoft JhengHei"', '微軟正黑體', 'STXihei', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    html { scroll-behavior: smooth; scroll-padding-top: 56px; }
+    body { -webkit-font-smoothing: antialiased; }
+    .reveal { opacity: 0; transform: translateY(20px); transition: opacity .7s ease, transform .7s ease; }
+    .reveal.is-visible { opacity: 1; transform: none; }
+    .work-card.is-hidden { display: none; }
+    .title-bar::after { content: ''; display: block; width: 60px; height: 2px; background: #333; margin: 18px auto 0; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .reveal { transition: none; opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+
+<body class="bg-page font-sans text-body">
+
+  <!-- ===== 白色主框（桌面版寬 1100px 置中，外圍為米色底） ===== -->
+  <div class="mx-auto max-w-[1100px] bg-white shadow-[0_2px_6px_rgba(0,0,0,0.12)] md:mt-[106px]">
+
+    <!-- ============ 1. 頁首橫幅 ============ -->
+    <header id="top" class="relative h-[230px] md:h-[198px]">
+      <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute -inset-3 bg-cover bg-center blur-[2px]" style="background-image:url('images/brand/header.jpg')"></div>
+        <div class="absolute inset-0 bg-black/15"></div>
+      </div>
+      <!-- Logo：桌面版一半凸出橫幅上緣 -->
+      <a href="#top" class="absolute left-1/2 top-4 -translate-x-1/2 md:-top-[65px]" aria-label="綠星球手作甜點 首頁">
+        <img src="images/brand/logo.png" alt="綠星球手作甜點 Logo" class="h-[100px] w-[100px] rounded-full md:h-[130px] md:w-[130px]" />
+      </a>
+      <div class="relative flex h-full flex-col items-center justify-end pb-6 text-center text-white [text-shadow:0_1px_0_rgba(0,0,0,0.3)] md:justify-start md:pb-0 md:pt-[76px]">
+        <h1 class="text-[34px] leading-none md:text-[50px]">綠星球手作甜點</h1>
+        <p class="mt-4 text-[17.6px] leading-none md:mt-6">喜歡做甜點的玩具人</p>
+      </div>
+    </header>
+
+    <!-- ============ 2. 導覽列（捲動時固定在頂端） ============ -->
+    <nav id="navbar" class="sticky top-0 z-50 bg-sage">
+      <div class="flex h-[50px] items-center justify-end px-4 md:justify-center">
+        <ul class="hidden items-center gap-1 md:flex">
+          <li><a href="#about" class="block px-3 py-1 text-ink hover:text-white">關於</a></li>
+          <li><a href="#products" class="block px-3 py-1 text-ink hover:text-white">客製化商品</a></li>
+          <li><a href="#works" class="block px-3 py-1 text-ink hover:text-white">生日蛋糕</a></li>
+          <li><a href="#reviews" class="block px-3 py-1 text-ink hover:text-white">評價</a></li>
+          <li><a href="#order" class="block px-3 py-1 text-ink hover:text-white">面交資訊</a></li>
+          <li><a href="#contact" class="block px-3 py-1 text-ink hover:text-white">與綠星球聯絡</a></li>
+        </ul>
+        <button id="menuBtn" class="p-2 text-ink md:hidden" aria-label="開啟選單" aria-expanded="false" aria-controls="mobileMenu">
+          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
+      <ul id="mobileMenu" class="hidden border-t border-black/10 bg-sage pb-2 md:hidden">
+        <li><a href="#about" class="block px-6 py-3 text-ink">關於</a></li>
+        <li><a href="#products" class="block px-6 py-3 text-ink">客製化商品</a></li>
+        <li><a href="#works" class="block px-6 py-3 text-ink">生日蛋糕</a></li>
+        <li><a href="#reviews" class="block px-6 py-3 text-ink">評價</a></li>
+        <li><a href="#order" class="block px-6 py-3 text-ink">面交資訊</a></li>
+        <li><a href="#contact" class="block px-6 py-3 text-ink">與綠星球聯絡</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <!-- ============ 3. 關於（左文右圖） ============ -->
+      <section id="about" class="px-6 py-12 md:px-20 md:py-[50px]">
+        <div class="grid items-center gap-10 md:grid-cols-[1fr_460px]">
+          <div class="reveal">
+            <p class="text-[24px] leading-9 tracking-[2px] text-ink md:text-[30px]"><strong>手作</strong> 以職人精神.</p>
+            <p class="text-[24px] leading-9 tracking-[2px] text-ink md:text-[30px]"><strong>甜點</strong> 做自己喜愛的點心.</p>
+            <div class="mt-10 space-y-0 leading-[23.2px]">
+              <p>在沒有正職工作的日子裡體驗生活</p>
+              <p>漫步、聆聽、講故事、勇敢嚐試、還有少吃一點飯...</p>
+              <p class="pt-6">目前尚未有店面，歡迎私訊訂購。</p>
+            </div>
+            <div class="mt-10 text-center">
+              <a href="#order" class="inline-block rounded-full bg-ink px-[18px] py-3 font-bold leading-4 text-white hover:bg-black">有空來綠星球坐坐</a>
+            </div>
+          </div>
+          <div class="reveal">
+            <img src="images/brand/hero.jpg" alt="綠星球手作泡芙與可愛公仔" class="aspect-square w-full object-cover" />
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 4. 客製化商品 ============ -->
+      <section id="products" class="px-6 py-12 md:px-20 md:py-[50px]">
+        <div class="reveal text-center">
+          <h2 class="title-bar text-[30px] leading-9 tracking-[2px] text-ink">客製化商品</h2>
+          <p class="mt-5 tracking-[2px]">每一顆都從討論開始，為收禮的人量身訂做。</p>
+        </div>
+        <div class="mt-11 grid gap-8 sm:grid-cols-3 md:gap-4">
+          <figure class="reveal">
+            <img src="images/products/mini-cake.jpg" alt="微造型蛋糕" class="aspect-square w-full object-cover" loading="lazy" />
+            <figcaption class="px-4 pt-3 text-soft">微造型蛋糕</figcaption>
+          </figure>
+          <figure class="reveal">
+            <img src="images/products/old-style.jpg" alt="古早味小蛋糕" class="aspect-square w-full object-cover" loading="lazy" />
+            <figcaption class="px-4 pt-3 text-soft">古早味小蛋糕</figcaption>
+          </figure>
+          <figure class="reveal">
+            <img src="images/products/festival.jpg" alt="節慶糕點：手作蛋黃酥" class="aspect-square w-full object-cover" loading="lazy" />
+            <figcaption class="px-4 pt-3 text-soft">節慶糕點</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- ============ 5. 生日蛋糕作品集 ============ -->
+      <section id="works" class="px-6 py-12 md:px-20 md:py-[50px]">
+        <div class="reveal text-center">
+          <h2 class="title-bar text-[30px] leading-9 tracking-[2px] text-ink">生日蛋糕</h2>
+          <p class="mt-5 italic leading-[23.2px]">Birthday cake portfolio</p>
+        </div>
+
+        <!-- 分類篩選 -->
+        <div class="mt-8 flex flex-wrap justify-center gap-2" role="group" aria-label="作品分類篩選">
+          <button class="filter-btn rounded-full px-5 py-2 text-sm font-bold transition" data-filter="all">全部</button>
+          <button class="filter-btn rounded-full px-5 py-2 text-sm font-bold transition" data-filter="strawberry">草莓系</button>
+          <button class="filter-btn rounded-full px-5 py-2 text-sm font-bold transition" data-filter="chocolate">巧克力系</button>
+          <button class="filter-btn rounded-full px-5 py-2 text-sm font-bold transition" data-filter="fruit">水果系</button>
+        </div>
+
+        <div id="worksGrid" class="mx-auto mt-10 grid max-w-[300px] gap-x-[20px] gap-y-12 sm:max-w-none sm:grid-cols-2 md:grid-cols-3"></div>
+
+        <div class="mt-12 text-center">
+          <button id="moreBtn" type="button" class="hidden rounded-full bg-ink px-8 py-3 font-bold text-white hover:bg-black"></button>
+        </div>
+        <p class="mt-6 text-center">
+          <a data-track="instagram" data-track-location="portfolio" href="https://www.instagram.com/green_planet_dessert/" target="_blank" rel="noopener"
+             class="text-soft underline underline-offset-4 hover:text-ink">到 Instagram 看更多作品</a>
+        </p>
+      </section>
+
+      <!-- ============ 6. Google 評論 ============ -->
+      <section id="reviews" class="px-6 py-12 md:px-20 md:py-[50px]">
+        <div class="reveal text-center">
+          <h2 class="title-bar text-[30px] leading-9 tracking-[2px] text-ink">GOOGLE評論</h2>
+          <p class="mt-5 leading-[23.2px]">聽聽我的客戶怎麼說</p>
+        </div>
+        <div class="mt-11 grid gap-10 text-center md:grid-cols-3 md:gap-8">
+          <blockquote class="reveal">
+            <p class="text-[23px] text-ink">文會</p>
+            <p class="text-soft">醫療管理主管</p>
+            <p class="mt-4 text-sm leading-6">“這是第三次訂購<br />綠星球玩具箱手作蛋糕<br />～焦糖香蕉巧克力脆脆戚風～<br />蛋糕內的巧克力脆脆好好吃，大大增加了口感<br />香蕉出乎意料的香沒有違和感.<br />蛋糕體口感很濕潤<br />超喜歡綠星球給我的小卡.<br />原來以為會是生日快樂之類的....還好沒有<br />有會心一笑..<br />謝謝綠星球..溫暖特別又充滿驚喜”</p>
+          </blockquote>
+          <blockquote class="reveal">
+            <p class="text-[23px] text-ink">越藍</p>
+            <p class="text-soft">進出口貿易板娘</p>
+            <p class="mt-4 text-sm leading-6">“喜歡它的單純簡約，沒有繁雜的外觀，新鮮香甜的草莓、細緻滑順的奶油、鬆軟濕潤的戚風蛋糕體，用料實在，每一口都是幸福與滿足。綠星球主人手寫的祝福語，特別又貼心。😘（吃完了才忘記，沒拍下蛋糕切面⋯⋯）”</p>
+          </blockquote>
+          <blockquote class="reveal">
+            <p class="text-[23px] text-ink">啊省</p>
+            <p class="text-soft">民宿總管</p>
+            <p class="mt-4 text-sm leading-6">“甜點主人特製的布郎尼堅果核桃蛋糕使用85%苦甜巧克力入口不至於太甜膩口，外層酥脆而內層濕潤柔軟且扎實，塔上特製的奶霜藍苺醬別有一番滋味，非常值得推薦近年林森路老屋開始活絡了起來，甜點咖啡廳入續進駐甜點主人長期收集骨董公仔很特別的一家店，期待她們的深夜甜點店開幕屆時晚上將有一個新選擇(但請注意主人不提供咖啡😅)檸檬塔因為太好吃忘了拍照，下次補拍”</p>
+          </blockquote>
+        </div>
+      </section>
+
+      <!-- ============ 7. 面交資訊（含訂購須知） ============ -->
+      <section id="order" class="px-6 py-12 md:px-20 md:py-[50px]">
+        <div class="reveal text-center">
+          <h2 class="title-bar text-[30px] leading-9 tracking-[2px] text-ink">面交資訊</h2>
+          <div class="mt-5 leading-[23.2px]">
+            <p>訂購蛋糕請利用 Instagram 討論喔～</p>
+            <p>綠星球手作甜點 <a data-track="instagram" data-track-location="order_info" href="https://www.instagram.com/green_planet_dessert/" target="_blank" rel="noopener" class="break-all underline underline-offset-2 hover:text-ink">https://www.instagram.com/green_planet_dessert/</a></p>
+            <p>其他問題歡迎來信或透過 LINE 詢問</p>
+          </div>
+        </div>
+
+        <!-- 訂購須知三步驟 -->
+        <ol class="mt-11 grid gap-8 text-center md:grid-cols-3">
+          <li class="reveal">
+            <span class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-ink text-lg font-bold text-white">1</span>
+            <p class="mt-4 text-[20px] text-ink">私訊討論</p>
+            <p class="mt-2 text-sm leading-6">透過 Instagram 或 LINE 告訴我們取貨日期、尺寸、口味偏好，以及收禮人的小故事。</p>
+          </li>
+          <li class="reveal">
+            <span class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-ink text-lg font-bold text-white">2</span>
+            <p class="mt-4 text-[20px] text-ink">確認款式、付訂金</p>
+            <p class="mt-2 text-sm leading-6">確認內容與報價後支付訂金，即完成預約。建議於取貨日 7 天前聯繫。</p>
+          </li>
+          <li class="reveal">
+            <span class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-ink text-lg font-bold text-white">3</span>
+            <p class="mt-4 text-[20px] text-ink">約定面交</p>
+            <p class="mt-2 text-sm leading-6">於花蓮市林森路一帶約定時間面交。鮮奶油蛋糕請盡快冷藏，當日食用風味最佳。</p>
+          </li>
+        </ol>
+
+        <!-- 地圖＋地址 -->
+        <div class="reveal mt-12 grid items-start gap-6 md:grid-cols-[1fr_240px]">
+          <iframe title="綠星球面交地點地圖" class="h-[260px] w-full border-0"
+                  src="https://maps.google.com/maps?q=%E8%8A%B1%E8%93%AE%E5%B8%82%E6%9E%97%E6%A3%AE%E8%B7%AF257%E5%B7%B7&z=16&output=embed"
+                  loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          <ul class="space-y-3 text-sm">
+            <li class="flex items-center gap-3">
+              <svg class="h-4 w-4 shrink-0 text-ink" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+              花蓮市林森路257巷
+            </li>
+            <li class="flex items-center gap-3">
+              <svg class="h-4 w-4 shrink-0 text-ink" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm9 7.2L4.4 7H4v1.3l8 5.5 8-5.5V7h-.4L12 12.2z"/></svg>
+              <a href="mailto:lesrice@gmail.com" class="hover:text-ink">lesrice@gmail.com</a>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ============ 8. 與綠星球聯絡 ============ -->
+      <section id="contact" class="px-6 pb-16 pt-12 md:px-20 md:pt-[50px]">
+        <h2 class="title-bar reveal text-center text-[30px] leading-9 tracking-[2px] text-ink">與綠星球聯絡</h2>
+        <ul class="mt-10 grid grid-cols-2 gap-y-8 text-center md:grid-cols-4">
+          <li class="reveal">
+            <a data-track="facebook" data-track-location="contact" href="https://www.facebook.com/pages/category/Bakery/%E7%B6%A0%E6%98%9F%E7%90%83%E6%89%8B%E4%BD%9C%E7%94%9C%E9%BB%9E-101063994984064/" target="_blank" rel="noopener" class="group inline-flex flex-col items-center">
+              <span class="flex h-[110px] w-[110px] items-center justify-center rounded-full bg-black transition group-hover:scale-105">
+                <svg class="h-12 w-12 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 8h3V4h-3c-2.8 0-4.5 1.8-4.5 4.6V11H7v4h2.5v9h4v-9h3l.5-4h-3.5V8.8c0-.5.3-.8.5-.8z"/></svg>
+              </span>
+              <span class="mt-3 text-ink">臉書</span>
+            </a>
+          </li>
+          <li class="reveal">
+            <a data-track="instagram" data-track-location="contact" href="https://www.instagram.com/green_planet_dessert/" target="_blank" rel="noopener" class="group inline-flex flex-col items-center">
+              <span class="flex h-[110px] w-[110px] items-center justify-center rounded-full bg-black transition group-hover:scale-105">
+                <svg class="h-12 w-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+              </span>
+              <span class="mt-3 text-ink">Instagram</span>
+            </a>
+          </li>
+          <li class="reveal">
+            <a data-track="line" data-track-location="contact" href="https://lin.ee/idjWTnwD" target="_blank" rel="noopener" class="group inline-flex flex-col items-center">
+              <span class="flex h-[110px] w-[110px] items-center justify-center rounded-full bg-black transition group-hover:scale-105">
+                <svg class="h-14 w-14 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.5 1.1-.5 5.9-3.5 8-6C21.4 14.3 22 12.7 22 11c0-4.4-4.5-8-10-8zM8.3 13.4H6.4a.5.5 0 0 1-.5-.5V9.1a.5.5 0 0 1 1 0v3.3h1.4a.5.5 0 0 1 0 1zm1.9-.5a.5.5 0 0 1-1 0V9.1a.5.5 0 0 1 1 0v3.8zm4.6 0a.5.5 0 0 1-.9.3l-1.9-2.6v2.3a.5.5 0 0 1-1 0V9.1a.5.5 0 0 1 .9-.3l1.9 2.6V9.1a.5.5 0 0 1 1 0v3.8zm3.1-2.4a.5.5 0 0 1 0 1h-1.4v.9h1.4a.5.5 0 0 1 0 1h-1.9a.5.5 0 0 1-.5-.5V9.1c0-.3.2-.5.5-.5h1.9a.5.5 0 0 1 0 1h-1.4v.9h1.4z"/></svg>
+              </span>
+              <span class="mt-3 text-ink">LINE@</span>
+            </a>
+          </li>
+          <li class="reveal">
+            <a href="mailto:lesrice@gmail.com" class="group inline-flex flex-col items-center">
+              <span class="flex h-[110px] w-[110px] items-center justify-center rounded-full bg-black transition group-hover:scale-105">
+                <svg class="h-11 w-11 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm9 7.2L4.4 7H4v1.3l8 5.5 8-5.5V7h-.4L12 12.2z"/></svg>
+              </span>
+              <span class="mt-3 text-ink">lesrice@gmail.com</span>
+            </a>
+          </li>
+        </ul>
+      </section>
+    </main>
+  </div>
+
+  <!-- ============ 9. 頁尾 ============ -->
+  <footer class="py-14 text-center text-white [text-shadow:0_1px_1px_rgba(0,0,0,0.25)]">
+    版權 2019
+  </footer>
+
+  <script>
+    // ---- 作品資料（共 30 件，圖片放在 images/works/；新增作品時在最上面加一筆） ----
+    const works = [
+      { title: '朋友的超人老爸', spec: '8″ 草莓摩卡鮮奶油蛋糕', tags: ['原味戚風蛋糕', '內層原味香緹', '外層摩卡香緹', '新鮮草莓'], date: '2024.02.16', cat: 'strawberry', img: 'images/works/01.jpg' },
+      { title: '小夫妻情人節驚喜', spec: '4″ 草莓鮮奶油蛋糕', tags: ['原味戚風蛋糕', '原味香緹', '新鮮草莓'], date: '2024.02.14', cat: 'strawberry', img: 'images/works/02.jpg' },
+      { title: '給好朋友一家的祝福', spec: '4″ 草莓麻糬鮮奶油蛋糕', tags: ['原味戚風蛋糕', '原味香緹', '牛奶麻糬', '原味曲奇餅乾', '新鮮草莓'], date: '2024.01.14', cat: 'strawberry', img: 'images/works/03.jpg' },
+      { title: '愛芋泥的大長輩', spec: '6″ 麝香葡萄芋泥鮮奶油蛋糕', tags: ['原味戚風蛋糕', '原味香緹', '麝香葡萄', '牛奶芋泥'], date: '2024.01.10', cat: 'fruit', img: 'images/works/04.jpg' },
+      { title: '來自遠方的好朋友', spec: '4″ 草莓巧克力鮮奶油蛋糕', tags: ['巧克力戚風蛋糕', '內層原味香緹', '外層巧克力香緹', '新鮮草莓', '巧克力堅果脆脆'], date: '2024.01.02', cat: 'chocolate', img: 'images/works/05.jpg' },
+      { title: '嘴饞想吃蛋糕的朋友', spec: '6″ 草莓鮮奶油蛋糕', tags: ['原味戚風蛋糕', '原味香緹', '新鮮草莓'], date: '2023.12.31', cat: 'strawberry', img: 'images/works/06.jpg' },
+      { title: '媽媽私心愛草莓 I', spec: '6″ 草莓鮮奶油蛋糕', tags: ['原味戚風蛋糕', '原味香緹', '新鮮草莓'], date: '2023.12.28', cat: 'strawberry', img: 'images/works/07.jpg' },
+      { title: '媽媽私心愛草莓 II', spec: '6″ 草莓鮮奶油蛋糕', tags: ['原味戚風蛋糕', '原味香緹', '新鮮草莓'], date: '2023.12.28', cat: 'strawberry', img: 'images/works/08.jpg' },
+      { title: '請繼續長成厲害的大人', spec: '6″ 草莓鮮奶油蛋糕', tags: ['原味戚風蛋糕', '原味香緹', '新鮮草莓'], date: '2023.12.18', cat: 'strawberry', img: 'images/works/09.jpg' },
+      { title: '給12月的最愛', spec: '6″ 草莓麻糬鮮奶油蛋糕', tags: ['原味戚風蛋糕', '茉香綠香緹', '牛奶麻糬', '原味曲奇餅乾', '新鮮草莓'], date: '2023.12.14', cat: 'strawberry', img: 'images/works/10.jpg' },
+      { title: '草莓玫瑰の愛', spec: '4″ 草莓麻糬鮮奶油蛋糕', tags: ['原味戚風蛋糕', '茉香綠香緹', '牛奶麻糬', '原味曲奇餅乾', '新鮮草莓'], date: '2023.12.08', cat: 'strawberry', img: 'images/works/11.jpg' },
+      { title: '會想起媽媽的日子', spec: '4″ 焦糖香蕉巧克力脆脆戚風', tags: ['苦甜巧克力戚風體', '內層濃郁巧克力香緹', '外層原味香緹', '焦糖香蕉', '苦甜巧克力堅果脆脆'], date: '2023.12.08', cat: 'chocolate', img: 'images/works/12.jpg' },
+      { title: '小朋友的可可 Party', spec: '4″ 焦糖香蕉巧克力脆脆戚風', tags: ['苦甜巧克力戚風體', '內層濃郁巧克力香緹', '外層原味香緹', '焦糖香蕉', '苦甜巧克力堅果脆脆'], date: '2023.12.02', cat: 'chocolate', img: 'images/works/13.jpg' },
+      { title: '家族寶貝孕媽咪', spec: '6″ 焦糖香蕉巧克力脆脆戚風', tags: ['苦甜巧克力戚風體', '內層濃郁巧克力香緹', '外層原味香緹', '焦糖香蕉', '苦甜巧克力堅果脆脆'], date: '2023.12.02', cat: 'chocolate', img: 'images/works/14.jpg' },
+      { title: 'FUN PARTY', spec: '6″ 焦糖香蕉巧克力脆脆戚風', tags: ['苦甜巧克力戚風體', '濃郁巧克力香緹', '焦糖香蕉', '苦甜巧克力堅果脆脆'], date: '2023.11.28', cat: 'chocolate', img: 'images/works/15.jpg' },
+      { title: '給理工先生的驚喜', spec: '6″ 水果茉香鮮奶油蛋糕', tags: ['原味戚風蛋糕', '茉香綠香緹', '黃金奇異果', '鮮脆綠葡萄'], date: '2023.11.20', cat: 'fruit', img: 'images/works/16.jpg' },
+      { title: '橙片巧克力相遇', spec: '4″ 焦糖香蕉巧克力脆脆戚風', tags: ['苦甜巧克力戚風體', '濃郁巧克力香緹', '焦糖香蕉', '苦甜巧克力堅果脆脆'], date: '2023.11.18', cat: 'chocolate', img: 'images/works/17.jpg' },
+      { title: '日日是好日，時時是好時', spec: '6″ 茉香奇異果青提', tags: ['原味戚風蛋糕', '茉香綠香緹', '黃金奇異果', '鮮脆綠葡萄'], date: '2023.11.11', cat: 'fruit', img: 'images/works/18.jpg' },
+      { title: '職場貴人。感謝照顧', spec: '6″ 茉香奇異果青提', tags: ['原味戚風蛋糕', '茉香綠香緹', '黃金奇異果', '鮮脆綠葡萄'], date: '2023.11.04', cat: 'fruit', img: 'images/works/19.jpg' },
+      { title: '阿爸親像山', spec: '8″ 水果鮮奶油蛋糕', tags: ['原味戚風蛋糕', '原味香緹', '火龍果', '黃金奇異果'], date: '2023.11.03', cat: 'fruit', img: 'images/works/20.jpg' },
+      { title: '橙獻', spec: '4″ 水果鮮奶油蛋糕', tags: ['原味戚風蛋糕', '原味香緹', '黃金奇異果', '鮮脆綠葡萄'], date: '2023.11.01', cat: 'fruit', img: 'images/works/21.jpg' },
+      { title: '我想成為太空人', spec: '8″ 水果鮮奶油蛋糕', tags: ['原味戚風蛋糕', '原味香緹', '麝香葡萄', '黃金奇異果'], date: '2023.09.30', cat: 'fruit', img: 'images/works/22.jpg' },
+      { title: '女子妻', spec: '6″ 古早味黑森林蛋糕', tags: ['巧克力戚風蛋糕', '原味香緹', '酒漬櫻桃', '苦甜巧克力'], date: '2023.09.30', cat: 'chocolate', img: 'images/works/23.jpg' },
+      { title: '爸爸的節日', spec: '8″ 青檸奶蓋戚風', tags: ['青檸戚風蛋糕', '檸檬奶蓋原味香緹', '水蜜桃芒果', '黑葉荔枝'], date: '2023.08.08', cat: 'fruit', img: 'images/works/24.jpg' },
+      { title: '最好的玩伴是我哥', spec: '6″ 哈蜜瓜鮮奶油蛋糕', tags: ['原味戚風蛋糕', '原味香緹', '網紋哈蜜瓜'], date: '2023.05.22', cat: 'fruit', img: 'images/works/25.jpg' },
+      { title: '女子女子', spec: '6″ 芒果鮮奶油蛋糕', tags: ['原味戚風蛋糕', '原味香緹', '愛文芒果'], date: '2023.05.15', cat: 'fruit', img: 'images/works/26.jpg' },
+      { title: '母親節的心意 I', spec: '6″ 芒果鮮奶油蛋糕', tags: ['原味戚風蛋糕', '原味香緹', '愛文芒果'], date: '2023.05.12', cat: 'fruit', img: 'images/works/27.jpg' },
+      { title: '母親節的心意 II', spec: '6″ 芒果鮮奶油蛋糕', tags: ['原味戚風蛋糕', '原味香緹', '愛文芒果'], date: '2023.05.12', cat: 'fruit', img: 'images/works/28.jpg' },
+      { title: '想念媽媽的心', spec: '6″ 青檸奶蓋戚風', tags: ['青檸戚風蛋糕', '檸檬奶蓋原味香緹'], date: '2023.05.08', cat: 'fruit', img: 'images/works/29.jpg' },
+      { title: '大人味乳酪', spec: '7″ MIX乳酪蛋糕', tags: ['巴斯克乳酪', '提拉米蘇'], date: '2023.04.08', cat: 'other', img: 'images/works/30.jpg' },
+    ];
+
+    const CAT_LABEL = { strawberry: '草莓系', chocolate: '巧克力系', fruit: '水果系', other: '乳酪' };
+    const grid = document.getElementById('worksGrid');
+    grid.innerHTML = works.map((w) => `
+      <article class="work-card reveal text-center" data-cat="${w.cat}">
+        <img src="${w.img}" alt="${w.title}：${w.spec}" loading="lazy"
+             class="aspect-[9/16] w-full rounded-[24px] object-cover" />
+        <h3 class="mt-4 text-[23px] leading-[33px] text-ink">${w.title}</h3>
+        <p class="mt-1 font-bold leading-[23.2px]">${w.spec.replace('″ ', '"')}</p>
+        <div class="mt-2 leading-[23.2px] text-soft">${w.tags.map((t) => `<p>${t}</p>`).join('')}</div>
+        <p class="mt-3 text-[13px] text-soft">- ${w.date.replaceAll('.', '')} -</p>
+      </article>`).join('');
+
+    // ---- 作品篩選＋看更多（一次 9 件） ----
+    const PAGE = 9;
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const moreBtn = document.getElementById('moreBtn');
+    const ACTIVE = ['bg-ink', 'text-white'];
+    const IDLE = ['bg-white', 'text-ink', 'border', 'border-ink/30', 'hover:border-ink'];
+    let currentFilter = 'all';
+    let shown = PAGE;
+
+    function render() {
+      const cards = [...grid.querySelectorAll('.work-card')];
+      const matched = cards.filter((c) => currentFilter === 'all' || c.dataset.cat === currentFilter);
+      cards.forEach((c) => c.classList.add('is-hidden'));
+      matched.slice(0, shown).forEach((c) => c.classList.remove('is-hidden'));
+      const left = matched.length - shown;
+      moreBtn.classList.toggle('hidden', left <= 0);
+      moreBtn.textContent = `看更多作品（還有 ${left} 件）`;
+    }
+    function setFilter(filter) {
+      currentFilter = filter;
+      shown = PAGE;
+      filterBtns.forEach((btn) => {
+        const on = btn.dataset.filter === filter;
+        btn.classList.remove(...ACTIVE, ...IDLE);
+        btn.classList.add(...(on ? ACTIVE : IDLE));
+        btn.setAttribute('aria-pressed', on);
+      });
+      render();
+    }
+    filterBtns.forEach((btn) => btn.addEventListener('click', () => setFilter(btn.dataset.filter)));
+    moreBtn.addEventListener('click', () => { shown += PAGE; render(); });
+    setFilter('all');
+
+    // ---- 手機選單 ----
+    const menuBtn = document.getElementById('menuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    function toggleMenu(force) {
+      const open = typeof force === 'boolean' ? force : mobileMenu.classList.contains('hidden');
+      mobileMenu.classList.toggle('hidden', !open);
+      menuBtn.setAttribute('aria-expanded', open);
+      menuBtn.setAttribute('aria-label', open ? '關閉選單' : '開啟選單');
+    }
+    menuBtn.addEventListener('click', () => toggleMenu());
+    mobileMenu.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => toggleMenu(false)));
+    window.addEventListener('resize', () => { if (window.innerWidth >= 768) toggleMenu(false); });
+
+    // ---- 捲動淡入 ----
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); } });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+    // ---- 訂購／社群按鈕點擊追蹤（GA4 事件 order_click） ----
+    document.addEventListener('click', (e) => {
+      const link = e.target.closest('[data-track]');
+      if (!link || typeof gtag !== 'function') return;
+      gtag('event', 'order_click', {
+        platform: link.dataset.track,
+        click_location: link.dataset.trackLocation,
+        link_url: link.href,
+      });
+    });
+  </script>
+</body>
+</html>
