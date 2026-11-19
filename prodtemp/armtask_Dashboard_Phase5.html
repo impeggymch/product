@@ -31,7 +31,7 @@ td:first-child,th:first-child{text-align:left}
 <div class="card wide"><h2>① 每日任務數與成功數</h2><p class="sub">柱狀＝各機器人當日成功數（每台獨立一柱）；折線＝各機器人當日任務總數（含取消）。失敗＝卡住、設備異常、未完成任務，或非啟動後1分鐘內的取消；1分鐘內取消不計入成功率分母</p><div class="cv"><canvas id="c1"></canvas></div><div class="sc" id="t1"></div></div>
 <div class="card"><h2>② 取消／失敗停在哪個階段</h2><p class="sub">以取消前最後一個正常動作判定</p><div class="cv"><canvas id="c2"></canvas></div></div>
 <div class="card"><h2>③ 啟動後 1 分鐘內取消（每日次數）</h2><p class="sub">取消時間 − 啟動時間 ≤ 60 秒</p><div class="cv"><canvas id="c3"></canvas></div></div>
-<div class="card wide"><h2>任務失敗／取消明細</h2><div class="sc" id="t2"></div></div>
+<div class="card wide"><h2>任務失敗／取消明細</h2><p class="sub">勾選「環境因素」後，該任務不計入成功率分母與失敗次數；說明與排除設定由團隊共用，有編輯權限者的修改會同步給所有人。</p><div class="sc" id="t2"></div></div>
 <div class="card wide"><h2>④ 任務之間：各機器人任務時長與間隔</h2><p class="sub">間隔＝同一天內，上一任務最後動作到下一任務啟動的分鐘數</p><div class="sc" id="t3"></div></div>
 <div class="card"><h2>⑤ 各時段任務數</h2><div class="cv"><canvas id="c4"></canvas></div></div>
 <div class="card"><h2>⑥ 各病房抵達次數</h2><div class="cv"><canvas id="c5"></canvas></div></div>
@@ -44,6 +44,10 @@ const R=["安寶","諾寶","萌寶"],COL=()=>{const s=getComputedStyle(document.
 const STG=["啟動後","裝載後","行駛途中","抵達未取藥","取藥後"];
 let tasks=INIT,charts={};
 try{const s=localStorage.getItem('rb_tasks');if(s)tasks=JSON.parse(s)}catch(e){}
+let ann={};try{const s=localStorage.getItem('rb_ann');if(s)ann=JSON.parse(s)}catch(e){}
+let dbc=null;
+function setAnn(id,k,v){ann[id]=Object.assign({},ann[id]);ann[id][k]=v;if(dbc){dbc.doc("ann/"+id).set(ann[id]).catch(()=>{})}else{try{localStorage.setItem('rb_ann',JSON.stringify(ann))}catch(e){}}render()}
+const esc=s=>String(s||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"),ex=t=>!!(ann[t.id]&&ann[t.id].ex);
 function csv(t){const rows=[];let r=[],c="",q=false;t=t.replace(/^\uFEFF/,"");for(let i=0;i<t.length;i++){const h=t[i];if(q){if(h=='"'){if(t[i+1]=='"'){c+='"';i++}else q=false}else c+=h}else if(h=='"')q=true;else if(h==","){r.push(c);c=""}else if(h=="\n"||h=="\r"){if(h=="\r"&&t[i+1]=="\n")i++;r.push(c);c="";if(r.length>1)rows.push(r);r=[]}else c+=h}if(c||r.length){r.push(c);rows.push(r)}return rows}
 function parse(txt,into){const rs=csv(txt),h=rs.shift(),ix=n=>h.indexOf(n);rs.forEach(r=>{const id=r[ix("任務單ID")];if(!id)return;let t=into[id];if(!t)t=into[id]={id,d:r[ix("任務時間")],r:r[ix("機器人")],s:r[ix("任務結果")],a:[]};t.a.push([r[ix("動作")].trim(),r[ix("動作時間")].slice(0,19)])})}
 document.getElementById('f').onchange=async e=>{const m={};tasks.forEach(t=>m[t.id]=t);for(const f of e.target.files){const x={};parse(await f.text(),x);Object.assign(m,x)}tasks=Object.values(m);try{localStorage.setItem('rb_tasks',JSON.stringify(tasks))}catch(e){}render();e.target.value=""};
@@ -52,7 +56,7 @@ const ts=s=>Date.parse(s+"+08:00")/1000,base=a=>a.split("-")[0];
 function render(){
 tasks.forEach(t=>{t.a.sort((x,y)=>x[1]<y[1]?-1:1)});
 const days=[...new Set(tasks.map(t=>t.d))].sort();const d0=days[0];const D=[];for(let i=0;i<4;i++){const x=new Date(Date.parse(d0+"T00:00:00Z")+i*864e5);D.push(x.toISOString().slice(0,10))}
-const ok=t=>!info(t).fail&&!info(t).quick,vl=t=>!info(t).quick,fl=t=>info(t).fail,tot=tasks.length,sc=tasks.filter(ok).length,vtot=tasks.filter(vl).length,nf=tasks.filter(fl).length;
+const vl=t=>!info(t).quick&&!ex(t),ok=t=>vl(t)&&!info(t).fail,fl=t=>vl(t)&&info(t).fail,tot=tasks.length,sc=tasks.filter(ok).length,vtot=tasks.filter(vl).length,nf=tasks.filter(fl).length;
 document.getElementById('range').textContent=`資料 ${days[0]} ～ ${days[days.length-1]}｜已收 ${days.length}/4 天｜${tot} 筆任務`;
 const cancel=tasks.filter(t=>info(t).fail||info(t).quick);
 
@@ -63,10 +67,10 @@ const cs=COL(),tx=getComputedStyle(document.documentElement).getPropertyValue('-
 const mk=(id,cfg)=>{charts[id]&&charts[id].destroy();cfg.options=Object.assign({responsive:true,maintainAspectRatio:false,scales:{x:{ticks:{color:tx}},y:{beginAtZero:true,ticks:{color:tx,precision:0}}},plugins:{legend:{labels:{color:tx}}}},cfg.options||{});charts[id]=new Chart(document.getElementById(id),cfg)};
 const dayT=(d,r)=>tasks.filter(t=>t.d==d&&(!r||t.r==r));
 mk('c1',{data:{labels:D,datasets:[...R.map((r,i)=>({type:'bar',label:r+' 成功數',data:D.map(d=>dayT(d,r).filter(ok).length),backgroundColor:cs[i]+'88',borderColor:cs[i],borderWidth:1})),...R.map((r,i)=>({type:'line',label:r+' 任務數',data:D.map(d=>dayT(d,r).length),borderColor:cs[i],backgroundColor:cs[i],tension:.3}))]}});
-document.getElementById('t1').innerHTML=tb(["日期","總數","1分鐘內取消(不計)","有效任務","失敗","成功","成功率","是否達 90%"],D.map(d=>{const a=dayT(d),v=a.filter(vl),s=v.filter(ok).length;if(!a.length)return[d,"-","-","-","-","-","尚無資料","-"];const p=v.length?s/v.length*100:0;return[d,a.length,a.length-v.length,v.length,v.length-s,s,p.toFixed(1)+"%",p>=90?'<span class="ok">達標</span>':'<span class="bad">未達標</span>']}));
+document.getElementById('t1').innerHTML=tb(["日期","總數","不計入(1分鐘取消／環境排除)","有效任務","失敗","成功","成功率","是否達 90%"],D.map(d=>{const a=dayT(d),v=a.filter(vl),s=v.filter(ok).length;if(!a.length)return[d,"-","-","-","-","-","尚無資料","-"];const p=v.length?s/v.length*100:0;return[d,a.length,a.length-v.length,v.length,v.length-s,s,p.toFixed(1)+"%",p>=90?'<span class="ok">達標</span>':'<span class="bad">未達標</span>']}));
 mk('c2',{type:'bar',data:{labels:R,datasets:STG.map((s,i)=>({label:s,data:R.map(r=>cancel.filter(t=>t.r==r&&SN[info(t).last]==s).length),backgroundColor:['#94a3b8','#2563eb','#f59e0b','#8b5cf6','#dc2626'][i]}))},options:{scales:{x:{stacked:true,ticks:{color:tx}},y:{stacked:true,beginAtZero:true,ticks:{color:tx,precision:0}}}}});
 mk('c3',{type:'bar',data:{labels:D,datasets:R.map((r,i)=>({label:r,data:D.map(d=>cancel.filter(t=>t.d==d&&t.r==r&&info(t).quick).length),backgroundColor:cs[i]}))}});
-document.getElementById('t2').innerHTML=cancel.length?tb(["日期","機器人","停在階段","失敗原因","啟動→取消（秒）","計入失敗"],cancel.sort((a,b)=>a.a[0][1]<b.a[0][1]?-1:1).map(t=>{const i=info(t);const rs=[i.stuck&&"卡住",i.fault&&"設備異常",i.inc&&"未完成任務",i.cnq&&"非1分鐘內取消",i.quick&&"1分鐘內取消"].filter(Boolean).join("、");return[t.a[0][1].replace("T"," "),t.r,SN[i.last],rs,i.sec??"-",i.fail?'<span class="bad">是</span>':"否"]})):"目前無取消／失敗";
+document.getElementById('t2').innerHTML=cancel.length?tb(["日期","機器人","停在階段","失敗原因","啟動→取消（秒）","計入失敗","環境因素(排除)","說明"],cancel.sort((a,b)=>a.a[0][1]<b.a[0][1]?-1:1).map(t=>{const i=info(t);const rs=[i.stuck&&"卡住",i.fault&&"設備異常",i.inc&&"未完成任務",i.cnq&&"非1分鐘內取消",i.quick&&"1分鐘內取消"].filter(Boolean).join("、");return[t.a[0][1].replace("T"," "),t.r,SN[i.last],rs,i.sec??"-",ex(t)?"已排除":fl(t)?'<span class="bad">是</span>':"否",`<input type=checkbox ${ex(t)?"checked":""} onchange="setAnn('${t.id}','ex',this.checked)">`,`<input value="${esc((ann[t.id]||{}).note)}" placeholder="例如：電梯故障、走道阻塞" style="width:210px;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:3px 6px" onchange="setAnn('${t.id}','note',this.value)">`]})):"目前無取消／失敗";
 const g=r=>{const a=tasks.filter(t=>t.r==r).sort((x,y)=>x.a[0][1]<y.a[0][1]?-1:1);const du=a.filter(ok).map(t=>(ts(t.a[t.a.length-1][1])-ts(t.a[0][1]))/60);const gp=[];for(let i=1;i<a.length;i++){if(a[i].d==a[i-1].d)gp.push((ts(a[i].a[0][1])-ts(a[i-1].a[a[i-1].a.length-1][1]))/60)}const av=x=>x.length?(x.reduce((p,c)=>p+c,0)/x.length).toFixed(1):"-";return[r,a.length,av(du),av(gp),gp.length?Math.max(...gp).toFixed(0):"-"]};
 document.getElementById('t3').innerHTML=tb(["機器人","任務數","平均完成時長(分)","平均任務間隔(分)","最長間隔(分)"],R.map(g));
 const hrs=[...Array(24).keys()];mk('c4',{type:'bar',data:{labels:hrs.map(h=>h+"時"),datasets:[{label:'任務數',data:hrs.map(h=>tasks.filter(t=>+t.a[0][1].slice(11,13)==h).length),backgroundColor:cs[0]}]},options:{plugins:{legend:{display:false}}}});
@@ -78,4 +82,5 @@ const STG_MAP={"啟動":1,"裝載藥品":1,"出發":1,"抵達目的地":1,"取�
 function info(t){const a=t.a.map(x=>base(x[0]));const st=t.a.find(x=>base(x[0])=="啟動"),cn=t.a.find(x=>base(x[0])=="取消");let last="啟動";for(const n of a){if(["卡住","設備異常","取消","未完成任務"].includes(n))break;if(STG_MAP[n])last=n}const quick=!!(st&&cn&&ts(cn[1])-ts(st[1])<=60),stuck=a.includes("卡住"),fault=a.includes("設備異常"),inc=a.includes("未完成任務"),cnq=!!cn&&!quick;return{last,quick,sec:st&&cn?ts(cn[1])-ts(st[1]):null,stuck,fault,inc,cnq,fail:stuck||fault||inc||cnq}}
 function tb(h,rows){return"<table><tr>"+h.map(x=>"<th>"+x+"</th>").join("")+"</tr>"+rows.map(r=>"<tr>"+r.map(x=>"<td>"+x+"</td>").join("")+"</tr>").join("")+"</table>"}
 render();
+(async()=>{try{if(!window.claude)return;const db=await claude.use("db");if(!db)return;dbc=db;db.collection("ann").onSnapshot(s=>{const m={};s.docs.forEach(d=>m[d.id]=d.data());ann=m;const a=document.activeElement;if(!(a&&a.tagName=="INPUT"&&a.type=="text"))render()},()=>{})}catch(e){}})();
 </script></body></html>
