@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="googlebot" content="noindex, nofollow, noarchive">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>送藥機器人門控／梯控關聯分析</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--tx:#1d2330;--mu:#6b7280;--bd:#e3e6eb;--ok:#16a34a;--bad:#dc2626;--c1:#2563eb;--c2:#f59e0b;--c3:#ec4899;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12151b;--card:#1b2029;--tx:#e8eaee;--mu:#9aa3b2;--bd:#2c3340;--ok:#4ade80;--bad:#f87171;--c1:#60a5fa;--c2:#fbbf24;--c3:#f472b6}}
+:root[data-theme="dark"]{--bg:#12151b;--card:#1b2029;--tx:#e8eaee;--mu:#9aa3b2;--bd:#2c3340;--ok:#4ade80;--bad:#f87171;--c1:#60a5fa;--c2:#fbbf24;--c3:#f472b6}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.6 -apple-system,"PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif;padding:16px}
+h1{font-size:20px;margin:0 0 4px}h2{font-size:15px;margin:0 0 4px}.sub{color:var(--mu);font-size:12px;margin:0 0 10px}
+.top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
+button,.btn{background:var(--c1);color:#fff;border:0;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px}
+.btn.g{background:transparent;color:var(--mu);border:1px solid var(--bd)}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr))}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;min-width:0}
+.wide{grid-column:1/-1}
+.kpis{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));margin-bottom:12px}
+.k{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px}.k b{display:block;font-size:24px}.k span{color:var(--mu);font-size:12px}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+.cv{position:relative;height:280px}
+.sc{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:6px 8px;border-bottom:1px solid var(--bd);text-align:center;white-space:nowrap}th{color:var(--mu);font-weight:600}
+td:first-child,th:first-child{text-align:left}
+.tight th{white-space:normal;line-height:1.3;padding:6px 4px;font-size:12px}.tight td{padding:6px 4px;font-size:12px}
+#drop{border:1px dashed var(--bd);border-radius:10px;padding:8px 12px;color:var(--mu);font-size:12px}
+.note{border-left:3px solid var(--c1);background:var(--bg);border-radius:6px;padding:8px 12px;font-size:13px}.note ul{margin:0;padding-left:18px}.note li{margin:2px 0}
+.sel{background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:4px 8px;font-size:13px}
+.two{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))}
+.wrap{white-space:normal;display:inline-block;min-width:240px;max-width:420px;text-align:left}
+tr.hl td{background:color-mix(in srgb,var(--bad) 10%,transparent)}
+.flt{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 12px}.flt b{font-size:13px;color:var(--mu);font-weight:600;margin-right:4px}
+.flt button{background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:999px;padding:6px 16px}.flt button.on{background:var(--c1);border-color:var(--c1);color:#fff}
+.vd{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+.vc{border:1px solid var(--bd);border-radius:10px;padding:10px 12px;background:var(--bg)}.vc h3{font-size:14px;margin:0 0 6px}.vc p{margin:6px 0 0;font-size:12.5px;color:var(--mu);line-height:1.5}.vc p b{color:var(--tx)}
+.bd{display:inline-block;padding:1px 10px;border-radius:999px;font-size:12.5px;font-weight:700;color:var(--tx);white-space:nowrap}
+.bd.yes{background:color-mix(in srgb,var(--bad) 22%,transparent)}.bd.maybe{background:color-mix(in srgb,var(--c2) 28%,transparent)}.bd.no{background:color-mix(in srgb,var(--mu) 18%,transparent)}.bd.na{background:transparent;border:1px dashed var(--bd);color:var(--mu);font-weight:600}
+.vc .bd{font-size:14px;padding:2px 12px}
+details.gl{margin-top:10px;font-size:13px}details.gl summary{cursor:pointer;color:var(--c1)}details.gl ul{margin:6px 0 0;padding-left:18px;color:var(--mu)}
+tr.rk{cursor:pointer}tr.rk:hover td{background:color-mix(in srgb,var(--c1) 8%,transparent)}tr.rk.on td{background:color-mix(in srgb,var(--c1) 14%,transparent)}
+</style></head><body>
+<div class="top"><div><h1 id="ttl">送藥機器人門控／梯控關聯分析</h1><p class="sub" id="range"></p></div>
+<div><label class="btn">手動上傳 CSV（臨時查看）<input id="f" type="file" accept=".csv" multiple hidden></label> <button class="btn g" id="rs">重新載入最新資料</button> <a class="btn g" href="index.html" style="text-decoration:none">回任務統計儀表板</a></div></div>
+<div class="flt" id="rbf"></div>
+<div class="kpis" id="kpis"></div>
+<div class="grid">
+<div class="card wide"><h2>① 重點結論</h2><p class="sub" id="cs"></p><div class="vd" id="vd"></div><div class="note" id="dec" style="margin-top:12px"></div>
+<details class="gl"><summary>名詞說明</summary><ul>
+<li><b>門控異常</b>：機器人過門禁時出問題，包含「開門失敗」「開門失敗、等待人工」「行進受阻重開門」（通過門口時被擋住，門重新打開）。</li>
+<li><b>梯控異常</b>：搭電梯時出問題，包含「候梯逾時」與「暫不出梯」。</li>
+<li><b>候梯逾時</b>：等電梯時，電梯中控沒有在時間內回應（報表記為「梯控中控狀態逾時」）。</li>
+<li><b>暫不出梯</b>：電梯到樓層了，但機器人暫時沒有出電梯（例如門口有人或東西擋住）。</li>
+<li><b>判斷方式</b>：比較「有這個狀況」和「沒有這個狀況」的任務，問題發生的比例差多少。明顯比較多＝<span class="bd yes">有關</span>；比較多但次數還少＝<span class="bd maybe">可能有關</span>；沒有比較多＝<span class="bd no">看不出關係</span>。</li>
+<li><b>分析範圍</b>：已出發、且報表有門控／梯控欄位的任務（1 分鐘內取消、未出發的任務不算）。</li></ul></details></div>
+<div class="card wide"><h2>② 各機器人比較</h2><p class="sub">每台機器人分開看：卡住、候梯逾時是不是跟門控或梯控有關。滑鼠移到標籤上可看實際次數；點一列就會切換到那台機器人。</p><div class="sc" id="t12"></div></div>
+<div class="card wide"><h2>③ 細看：哪些狀況跟問題一起出現</h2><p class="sub">比較「有這個狀況」和「沒有這個狀況」的任務，問題發生的比例。兩條長條差越多，越可能有關。</p><div style="margin:4px 0 8px"><label class="sub">要看的問題：<select class="sel" id="od" onchange="oDE=this.value;render()"><option>卡住</option><option>候梯逾時</option><option>任務失敗</option><option>人工介入</option></select></label> <span class="sub" id="odn"></span></div><div class="two"><div class="sc" id="t7"></div><div class="cv"><canvas id="c7"></canvas></div></div><details class="gl"><summary>統計細節（需要時再看）</summary><div class="sc tight" id="t7d" style="margin-top:6px"></div><p class="sub" style="margin-top:6px">倍數＝有此狀況的發生率 ÷ 沒有此狀況的發生率；p 值＜0.05 代表差異不太可能是巧合（Fisher 精確檢定）。樣本少時 p 值容易偏大。</p></details></div>
+<div class="card wide"><h2>④ 門控／梯控出問題時，任務會怎樣</h2><p class="sub">把任務分成四組，比較花多少時間、卡住幾趟、失敗幾趟、要人幫忙幾趟。右圖每一點是一趟任務：越往右＝門禁問題越多，越往上＝電梯問題越多；紅色三角形＝有卡住。</p><div class="two"><div class="sc tight" id="t8"></div><div class="cv"><canvas id="c8"></canvas></div></div></div>
+<div class="card wide"><h2>⑤ 問題最常發生在哪裡</h2><p class="sub">door1、3A、5A、7A 是門禁；MAIN 1F、MAIN 6F 等是電梯所在樓層。長條越長＝發生次數越多（同一趟重試多次會分別計算）。</p><div class="two"><div class="cv"><canvas id="c9"></canvas></div><div class="sc tight" id="t9"></div></div></div>
+<div class="card wide"><h2>⑥ 每天的狀況與各機器人次數</h2><p class="sub">圖表：每天有發生各狀況的任務趟數，紅線是卡住趟數。表格：開門失敗、重開門會一直重試，所以看「每趟平均幾次」；候梯逾時率＝搭 100 次電梯有幾次逾時。</p><div class="sc"><div class="cv" id="c10w"><canvas id="c10"></canvas></div></div><div class="sc tight" id="t10" style="margin-top:10px"></div></div>
+<div class="card wide"><h2>⑦ 有問題的任務明細</h2><p class="sub">紅底＝該趟有卡住。門控欄依序為：觸發／開門失敗／等待人工／重開門；梯控欄依序為：搭梯／候梯逾時／暫不出梯。</p><div style="margin:6px 0 8px"><label class="sub">篩選：<select class="sel" id="fd" onchange="fDE=this.value;render()"><option>全部異常</option><option>只看卡住</option><option>只看候梯逾時</option><option>只看門控異常</option><option>只看梯控異常</option></select></label></div><div class="sc" id="t11" style="max-height:480px;overflow:auto"></div></div>
+</div>
+<p class="sub" style="margin-top:12px" id="drop">需使用含「門控」「梯控」「異常位置」欄位的報表（例如 task_report_2026-11-16_2026-11-20.csv）；上傳後會依「任務單ID」去重合併。</p>
+<script>
+const INIT=[];
+const R=["安寶","諾寶","萌寶"],COL=()=>{const s=getComputedStyle(document.documentElement);return[s.getPropertyValue('--c1'),s.getPropertyValue('--c2'),s.getPropertyValue('--c3')].map(x=>x.trim())};
+const STG=["啟動後","裝載後","前往病房途中","抵達未取藥","返回藥局途中"];
+let tasks=INIT,charts={};
+
+let ann={};try{const s=localStorage.getItem('rb_ann');if(s)ann=JSON.parse(s)}catch(e){}
+let dbc=null,fR="全部";
+function stat(m,bad){const e=document.getElementById('st');if(e){e.textContent=m;e.style.color=bad?'var(--bad)':'var(--mu)'}}
+function setAnn(id,k,v){const prev=ann[id];ann[id]=Object.assign({},prev);ann[id][k]=v;if(dbc){stat("儲存中…");dbc.doc("ann/"+id).set(ann[id]).then(()=>stat("已儲存，所有檢視者都會看到"),e=>{if(prev===undefined)delete ann[id];else ann[id]=prev;stat("儲存失敗（可能沒有寫入權限）："+((e&&e.message)||""),1);render()})}else{try{localStorage.setItem('rb_ann',JSON.stringify(ann))}catch(e){}stat("尚未連線共用資料庫（請登入）：修改只存在此瀏覽器",1)}render()}
+const esc=s=>String(s||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"),ex=t=>info(t).quick;
+function csv(t){const rows=[];let r=[],c="",q=false;t=t.replace(/^\uFEFF/,"");for(let i=0;i<t.length;i++){const h=t[i];if(q){if(h=='"'){if(t[i+1]=='"'){c+='"';i++}else q=false}else c+=h}else if(h=='"')q=true;else if(h==","){r.push(c);c=""}else if(h=="\n"||h=="\r"){if(h=="\r"&&t[i+1]=="\n")i++;r.push(c);c="";if(r.length>1)rows.push(r);r=[]}else c+=h}if(c||r.length){r.push(c);rows.push(r)}return rows}
+function parse(txt,into){const rs=csv(txt),h=rs.shift(),ix=n=>h.indexOf(n);rs.forEach(r=>{const id=r[ix("任務單ID")];if(!id)return;let t=into[id];if(!t)t=into[id]={id,d:r[ix("任務時間")],r:r[ix("機器人")],s:r[ix("任務結果")],a:[]};t.a.push([r[ix("動作")].trim(),r[ix("動作時間")].slice(0,19)]);if(ix("病房代碼")>=0&&r[ix("動作")].trim().startsWith("裝載藥品")){const w=(r[ix("病房代碼")]||"").trim();if(w)(t.p=t.p||[]).push(w)}
+const G=h.findIndex(x=>x.startsWith("門控")),E=h.findIndex(x=>x.startsWith("梯控"));if(G>=0&&E>=0&&!t.g){const n=(s,k)=>{const a=String(s||"").split("/").map(Number);return[...Array(k)].map((_,i)=>a[i]||0)};t.g=n(r[G],4);t.e=n(r[E],3);t.loc=ix("異常位置")>=0?r[ix("異常位置")]:"";t.m=ix("完成方式")>=0?r[ix("完成方式")]:"";t.h=ix("人工介入")>=0?r[ix("人工介入")]:""}})}
+function mergeT(m,x){for(const id in x){const o=m[id],n=x[id];if(o&&o.g&&!n.g)["g","e","loc","m","h"].forEach(k=>n[k]=o[k]);m[id]=n}}
+document.getElementById('f').onchange=async e=>{const m={};tasks.forEach(t=>m[t.id]=t);for(const f of e.target.files){const x={};parse(await f.text(),x);mergeT(m,x)}tasks=Object.values(m);render();e.target.value=""};
+document.getElementById('rs').onclick=()=>load();
+const ts=s=>Date.parse(s+"+08:00")/1000,base=a=>a.replace(/[-(（].*/,"").trim();
+let rR="全部";
+function setR(r){rR=r;render()}
+function render(){
+tasks.forEach(t=>{t.a.sort((x,y)=>x[1]<y[1]?-1:1)});
+const days=[...new Set(tasks.map(t=>t.d))].sort(),f=x=>x.slice(5).replace("-","/");{const a=days.length?f(days[0]):"",b=days.length?f(days[days.length-1]):"",T="送藥機器人"+(!a?"":a==b?a:a+"～"+b)+"門控／梯控關聯分析";document.getElementById("ttl").textContent=T;document.title=T}
+document.getElementById('range').textContent=(days.length?`資料 ${days[0]} ～ ${days[days.length-1]}｜${tasks.length} 筆任務`:"尚無資料");
+document.getElementById('rbf').innerHTML="<b>查看機器人：</b>"+["全部"].concat(R).map(r=>`<button class="${r==rR?'on':''}" onclick="setR('${r}')">${r}</button>`).join("");
+const vl=t=>!info(t).quick&&!ex(t),fl=t=>vl(t)&&info(t).fail;
+const P=popDE(),cnt=g=>P.filter(t=>g(dv(t))).length;
+document.getElementById('kpis').innerHTML=P.length?`<div class="k"><span>分析的任務（${nm(rR)}）</span><b>${P.length} 趟</b></div><div class="k"><span>卡住</span><b class="${cnt(d=>d.stuck)?'bad':'ok'}">${cnt(d=>d.stuck)} 趟</b></div><div class="k"><span>候梯逾時</span><b>${cnt(d=>d.eto>0)} 趟</b></div><div class="k"><span>有門禁問題的任務</span><b>${cnt(d=>d.door)} 趟</b></div><div class="k"><span>有電梯問題的任務</span><b>${cnt(d=>d.lift)} 趟</b></div>`:"";
+const tx=getComputedStyle(document.documentElement).getPropertyValue('--mu').trim();
+const mk=(id,cfg)=>{charts[id]&&charts[id].destroy();cfg.options=Object.assign({responsive:true,maintainAspectRatio:false,scales:{x:{ticks:{color:tx}},y:{beginAtZero:true,ticks:{color:tx,precision:0}}},plugins:{legend:{labels:{color:tx}}}},cfg.options||{});charts[id]=new Chart(document.getElementById(id),cfg)};
+DE(mk,tx,fl);
+}
+/* ===== 門控／梯控關聯分析 ===== */
+const DT=[["行進受阻重開門","重開門"],["開門失敗，等待人工","等待人工"],["開門失敗","開門失敗"],["關門失敗","關門失敗"],["梯控中控狀態逾時","候梯逾時"],["暫不出梯","暫不出梯"]];
+const ET=["重開門","開門失敗","等待人工","關門失敗","候梯逾時","暫不出梯"];
+const isDk=()=>{const t=document.documentElement.dataset.theme;return t=="dark"||(t!="light"&&matchMedia('(prefers-color-scheme: dark)').matches)};
+const ECOL=()=>isDk()?["#3987e5","#d95926","#199e70","#c98500","#d55181","#0ca30c"]:["#2a78d6","#eb6834","#1baf7a","#eda100","#e87ba4","#008300"];
+let fDE="全部異常",oDE="卡住";
+const pct=(a,b)=>b?(a/b*100).toFixed(1)+"%":"-",dur=t=>(ts(t.a[t.a.length-1][1])-ts(t.a[0][1]))/60,nm=r=>r=="全部"?"所有機器人":r;
+function locEv(t){return String(t.loc||"").split("、").map(s=>s.trim()).filter(Boolean).map(s=>{const m=s.match(/^(.*?)\s*×\s*(\d+)$/),x=m?m[1].trim():s,n=m?+m[2]:1,d=DT.find(y=>x.endsWith(y[0]));if(!d)return{loc:"告警",type:x.replace(/^告警：/,""),n,alert:1};return{loc:x.slice(0,x.length-d[0].length).trim()||"未標示",type:d[1],n}})}
+function dv(t){if(!t.g)return null;if(t._d)return t._d;const[gt,gf,gw,gr]=t.g,[er,eto,eh]=t.e,i=info(t);return t._d={gt,gf,gw,gr,er,eto,eh,stuck:i.stuck,stuckN:t.a.filter(x=>base(x[0])=="卡住").length,door:gf+gw+gr>0,lift:eto+eh>0,dep:t.a.some(x=>base(x[0])=="出發")}}
+const popDE=(r=rR)=>tasks.filter(t=>{const d=dv(t);return d&&d.dep&&(r=="全部"||t.r==r)});
+function lfa(n){let s=0;for(let i=2;i<=n;i++)s+=Math.log(i);return s}
+function fisher(a,b,c,d){const n=a+b+c+d,r1=a+b,c1=a+c;if(!n)return 1;const lp=x=>lfa(r1)+lfa(n-r1)+lfa(c1)+lfa(n-c1)-lfa(n)-lfa(x)-lfa(r1-x)-lfa(c1-x)-lfa(n-r1-c1+x),p0=lp(a);let p=0;for(let x=Math.max(0,r1+c1-n);x<=Math.min(r1,c1);x++){const q=lp(x);if(q<=p0+1e-7)p+=Math.exp(q)}return Math.min(1,p)}
+function cmp(P,fac,out){const A=P.filter(t=>fac(dv(t))),B=P.filter(t=>!fac(dv(t))),a=A.filter(out).length,b=B.filter(out).length;return{n1:A.length,a,n0:B.length,b,r1:A.length?a/A.length:0,r0:B.length?b/B.length:0,p:fisher(a,A.length-a,b,B.length-b)}}
+const fp=p=>p<0.001?"<0.001":p.toFixed(3);
+function topLoc(T,type){const m={};T.forEach(t=>locEv(t).filter(e=>e.type==type).forEach(e=>{m[e.loc]=(m[e.loc]||0)+e.n}));return Object.entries(m).sort((a,b)=>b[1]-a[1])}
+/* 判斷：有關／可能有關／看不出關係／資料不足 */
+function vdc(c){
+ if(c.a+c.b==0)return{k:"na",t:"沒有發生",w:"期間內沒有發生這個問題。"};
+ if(!c.n1)return{k:"na",t:"沒有這種狀況",w:"期間內沒有出現這種狀況，無法比較。"};
+ if(!c.n0)return{k:"na",t:"無法比較",w:"每一趟都有這種狀況，沒有可對照的任務。"};
+ if(c.r1<=c.r0)return{k:"no",t:"看不出關係",w:"有這個狀況時，問題並沒有比較多。"};
+ if(c.p<0.05)return{k:"yes",t:"有關",w:"有這個狀況時，問題明顯比較多。"};
+ if(c.a>=2)return{k:"maybe",t:"可能有關",w:"有這個狀況時問題比較多，但次數還少，需要持續觀察。"};
+ return{k:"na",t:"次數太少",w:"只發生 1 次，還無法判斷。"};
+}
+const RK={yes:3,maybe:2,na:1,no:0},hit=v=>RK[v.k]>=2;
+const every=(a,n)=>a?`（約每 ${Math.max(1,Math.round(n/a))} 趟 1 次）`:"";
+const sent=(c,fn,on)=>`有${fn}：${c.n1} 趟中 <b>${c.a}</b> 趟${on}${every(c.a,c.n1)}<br>沒有${fn}：${c.n0} 趟中 <b>${c.b}</b> 趟${on}${every(c.b,c.n0)}`;
+const bdg=(v,tip)=>`<span class="bd ${v.k}"${tip?` title="${esc(String(tip).replace(/<br>/g,"\n").replace(/<[^>]+>/g,""))}"`:""}>${v.t}</span>`;
+function QS(P){
+ const door=P.filter(t=>dv(t).gt>0),ride=P.filter(t=>dv(t).er>0),st=t=>dv(t).stuck,et=t=>dv(t).eto>0;
+ return[{q:"卡住跟「門控」有關嗎？",c:cmp(door,d=>d.door,st),fn:"門禁問題",on:"卡住",pop:"有經過門禁的任務"},
+  {q:"卡住跟「梯控」有關嗎？",c:cmp(ride,d=>d.lift,st),fn:"電梯問題",on:"卡住",pop:"有搭電梯的任務"},
+  {q:"候梯逾時跟「門控」有關嗎？",c:cmp(ride,d=>d.door,et),fn:"門禁問題",on:"候梯逾時",pop:"有搭電梯的任務"}].map(x=>{const v=vdc(x.c);if(x.c.a+x.c.b>0){if(!x.c.n1)v.t="沒有"+x.fn;else if(!x.c.n0)v.t="每趟都有"+x.fn}return Object.assign(x,{v})});
+}
+function oneLine(P,Q){
+ const S=P.filter(t=>dv(t).stuck).length,E=P.filter(t=>dv(t).eto>0),o=[];
+ o.push(!S?"沒有卡住":S==1?"卡住只有 1 趟，還無法判斷":hit(Q[0].v)&&RK[Q[0].v.k]>=RK[Q[1].v.k]?"卡住多和門控有關":hit(Q[1].v)?"卡住多和梯控有關":"卡住原因跟門梯看不出關係");
+ if(E.length){const L=topLoc(E,"候梯逾時");o.push(hit(Q[2].v)?"候梯逾時可能和門控有關":"候梯逾時"+(Q[2].v.k=="na"?"較像":"是")+"電梯"+(L.length?" "+L[0][0]+" ":"")+"的問題")}else o.push("沒有候梯逾時");
+ return o.join("；");
+}
+function deText(r=rR){
+ const P=popDE(r);if(!P.length)return[r=="全部"?"目前載入的資料沒有門控／梯控欄位（需使用含「門控」「梯控」欄位的報表，例如 task_report_2026-11-16_2026-11-20.csv）。":`${r} 在這段期間沒有可分析的任務。`];
+ const Q=QS(P),o=[],S=P.filter(t=>dv(t).stuck),E=P.filter(t=>dv(t).eto>0),cnt=(a,f)=>a.filter(t=>f(dv(t))).length,who=r=="全部"?"":r+" ";
+ if(S.length){const dr=cnt(S,d=>d.door),lf=cnt(S,d=>d.lift),nn=S.length-cnt(S,d=>d.door||d.lift),L=topLoc(S,"重開門").concat(topLoc(S,"開門失敗"));
+  o.push(`${who}<b>卡住 ${S.length} 趟</b>：`+[dr&&`${dr} 趟同一趟也有門禁問題${L.length?"（主要在 "+L[0][0]+"）":""}`,lf&&`${lf} 趟也有電梯問題`,nn&&`${nn} 趟門禁、電梯都沒問題`].filter(Boolean).join("、")+"（同一趟可能兩者都有）。");
+  const v1=Q[0].v,v2=Q[1].v,cg=cmp(P,d=>d.gr>0,t=>dv(t).stuck),vg=vdc(cg);
+  if(S.length==1){const d=dv(S[0]);o.push(`→ 只有 1 趟卡住，次數太少還無法判斷；這一趟${d.door&&d.lift?"同時有門禁和電梯問題":d.door?"同時有門禁問題":d.lift?"同時有電梯問題（"+(d.eh?"暫不出梯":"候梯逾時")+"）":"沒有門禁或電梯問題"}。`)}
+  else o.push("→ "+(hit(v1)&&RK[v1.k]>=RK[v2.k]?`卡住主要跟<b>門控</b>有關${v1.k=="maybe"?"（可能，次數還少）":""}${hit(v2)?"，跟梯控也可能有關":"，跟梯控關係不大"}。`:hit(v2)?`卡住主要跟<b>梯控</b>有關${v2.k=="maybe"?"（可能，次數還少）":""}，跟門控關係不大。`:"卡住跟門控、梯控都看不出明顯關係，可能是走道障礙或其他原因。"));
+  if(S.length>1&&vg.k=="yes")o.push(`→ 其中最明顯的是<b>「通過門口受阻、門重新打開」</b>：有這情形的 ${cg.n1} 趟中 ${cg.a} 趟卡住${every(cg.a,cg.n1)}，沒有的 ${cg.n0} 趟${cg.b?"只有 "+cg.b+" 趟":"都沒有卡住"}。`);
+ }else o.push(`${who}<b>沒有卡住</b>。`);
+ if(E.length){const L=topLoc(E,"候梯逾時"),Lt=L.reduce((s,x)=>s+x[1],0),dn=E.filter(t=>t.s=="完成").length,wd=cnt(E,d=>d.door),cc=L.length&&L[0][1]/Lt>=0.8;
+  o.push(`${who}<b>候梯逾時 ${E.length} 趟</b>：${cc?(L[0][1]==Lt?"全部":"大多")+"發生在 "+L[0][0]:"發生在 "+L.map(x=>x[0]).join("、")}，其中 ${dn} 趟最後仍完成任務；${!wd?"沒有任何一趟同時有門禁問題":wd==E.length?(E.length>1?"這 "+E.length+" 趟都":"這一趟也")+"同時有門禁問題":"只有 "+wd+" 趟同時有門禁問題"}。`);
+  const el=`電梯${cc?" "+L[0][0]+" ":""}中控`;
+  o.push("→ "+(hit(Q[2].v)?"候梯逾時跟<b>門控</b>可能有關，建議一起檢查。":Q[2].v.k=="na"?`這台的資料沒辦法比較候梯逾時跟門控的關係（${Q[2].v.t}）；${cc?"但都發生在 "+L[0][0]+"，":""}較像是<b>${el}</b>的問題。`:`候梯逾時是<b>${el}</b>本身的問題，跟門控無關。`));
+ }else o.push(`${who}<b>沒有候梯逾時</b>。`);
+ const sg=[];
+ if(S.length&&hit(Q[0].v)){const L=topLoc(S,"重開門");sg.push(`檢查 ${L.length?L[0][0]:"門禁"} 門口：開門時間是否太短、門口是否常有人或推車擋住。`)}
+ if(S.length&&hit(Q[1].v))sg.push("檢查電梯出入口是否常被擋住，導致機器人暫不出梯。");
+ if(E.length){const L=topLoc(E,"候梯逾時");sg.push(`請電梯廠商查 ${L.length?L[0][0]:"電梯"} 的中控為什麼常沒在時間內回應。`)}
+ if(sg.length)o.push("<b>建議</b>："+sg.join(""));
+ if(S.length&&S.length<10)o.push(`<span class="sub">卡住只有 ${S.length} 趟，次數還少，結論先當作方向參考。</span>`);
+ return o;
+}
+function DE(mk,tx,fl){
+ const P=popDE(),ec=ECOL(),bad=getComputedStyle(document.documentElement).getPropertyValue('--bad').trim(),gray='#94a3b8',sv=(id,v)=>{const e=document.getElementById(id);if(e.value!=v)e.value=v};sv('od',oDE);sv('fd',fDE);
+ document.getElementById('cs').textContent=`目前查看：${nm(rR)}｜分析 ${P.length} 趟任務`;
+ document.getElementById('dec').innerHTML="<ul>"+deText().map(x=>"<li>"+x+"</li>").join("")+"</ul>";
+ /* ② 各機器人比較（永遠顯示全部） */
+ const MR=["全部"].concat(R).map(r=>{const p=popDE(r);if(!p.length)return"";const Q=QS(p),S=p.filter(t=>dv(t).stuck).length,E=p.filter(t=>dv(t).eto>0).length,m={};p.forEach(t=>locEv(t).filter(e=>!e.alert).forEach(e=>{m[e.loc]=(m[e.loc]||0)+e.n}));const L=Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,2).map(x=>x[0]+" "+x[1]+" 次").join("、")||"—";
+  return`<tr class="rk${r==rR?" on":""}" onclick="setR('${r}')">`+[r=="全部"?"<b>全部</b>":"<b>"+r+"</b>",p.length,S?`<b class="bad">${S}</b>`:0,bdg(Q[0].v,sent(Q[0].c,Q[0].fn,Q[0].on)),bdg(Q[1].v,sent(Q[1].c,Q[1].fn,Q[1].on)),E,bdg(Q[2].v,sent(Q[2].c,Q[2].fn,Q[2].on)),L,`<span class="wrap" style="min-width:200px">${oneLine(p,Q)}</span>`].map(x=>"<td>"+x+"</td>").join("")+"</tr>"}).join("");
+ document.getElementById('t12').innerHTML="<table><tr>"+["機器人","分析趟數","卡住","卡住↔門控","卡住↔梯控","候梯逾時","候梯逾時↔門控","最常出問題的地方","一句話結論"].map(x=>"<th>"+x+"</th>").join("")+"</tr>"+MR+"</table>";
+ const ids=["vd","t7","t7d","t8","t9","t10","t11"];
+ if(!P.length){ids.forEach(i=>document.getElementById(i).innerHTML="");document.getElementById('odn').textContent="";["c7","c8","c9","c10"].forEach(c=>{charts[c]&&charts[c].destroy();delete charts[c]});return}
+ /* ① 判斷卡片 */
+ const Q=QS(P),E=P.filter(t=>dv(t).eto>0),L4=topLoc(E,"候梯逾時"),L4t=L4.reduce((s,x)=>s+x[1],0);
+ const q4=`<div class="vc"><h3>候梯逾時發生在哪裡？</h3>${E.length?`<span class="bd maybe">${L4.length&&L4[0][1]/L4t>=0.8?"集中在 "+L4[0][0]:"分散多處"}</span><p>${L4.map(x=>x[0]+" <b>"+x[1]+"</b> 次").join("、")}</p><p>${E.length} 趟中 <b>${E.filter(t=>t.s=="完成").length}</b> 趟仍完成任務、<b>${E.filter(t=>dv(t).stuck).length}</b> 趟卡住</p>`:`<span class="bd na">沒有發生</span><p>期間內沒有候梯逾時。</p>`}</div>`;
+ document.getElementById('vd').innerHTML=Q.map(x=>`<div class="vc"><h3>${x.q}</h3>${bdg(x.v)}<p>${x.v.w}</p><p>${sent(x.c,x.fn,x.on)}</p><p>比較範圍：${x.pop}</p></div>`).join("")+q4;
+ /* ③ */
+ const OUT={"卡住":[t=>dv(t).stuck,t=>true,[]],"候梯逾時":[t=>dv(t).eto>0,t=>dv(t).er>0,["lr","le","la"]],"任務失敗":[t=>fl(t),t=>true,[]],"人工介入":[t=>t.h=="有",t=>true,[]]};
+ const FAC=[["gr","門禁：通過時受阻重開門",d=>d.gr>0],["gf","門禁：開門失敗",d=>d.gf>0],["gw","門禁：等待人工開門",d=>d.gw>0],["ga","門禁：任一問題",d=>d.door],["lr","電梯：有搭電梯",d=>d.er>0],["le","電梯：候梯逾時",d=>d.eto>0],["lh","電梯：暫不出梯",d=>d.eh>0],["la","電梯：任一問題",d=>d.lift]];
+ const [of,op,sk]=OUT[oDE],PP=P.filter(op),FF=FAC.filter(f=>!sk.includes(f[0])),RS=FF.map(f=>({f,...cmp(PP,f[2],of)}));
+ document.getElementById('odn').textContent=`（${nm(rR)}，${oDE=="候梯逾時"?"有搭電梯的 ":""}${PP.length} 趟中有 ${PP.filter(of).length} 趟${oDE}）`;
+ const cell=(a,n)=>n?`${a}/${n} 趟（${pct(a,n)}）`:"—";
+ document.getElementById('t7').innerHTML=tb(["狀況","有這個狀況時<br>"+oDE+"的比例","沒有這個狀況時<br>"+oDE+"的比例","判斷"],RS.map(x=>[x.f[1],cell(x.a,x.n1),cell(x.b,x.n0),bdg(vdc(x),vdc(x).w)]));
+ document.getElementById('t7d').innerHTML=tb(["狀況","有：趟數","有：發生","有：發生率","沒有：趟數","沒有：發生","沒有：發生率","倍數","p 值"],RS.map(x=>[x.f[1],x.n1,x.a,pct(x.a,x.n1),x.n0,x.b,pct(x.b,x.n0),x.r0?(x.r1/x.r0).toFixed(1)+"×":x.a?"僅此狀況發生":"-",fp(x.p)]));
+ mk('c7',{type:'bar',data:{labels:RS.map(x=>x.f[1].replace(/^(門禁|電梯)：/,"$1\n")),datasets:[{label:"有這個狀況",data:RS.map(x=>+(x.r1*100).toFixed(1)),backgroundColor:ec[1],borderRadius:4},{label:"沒有這個狀況",data:RS.map(x=>+(x.r0*100).toFixed(1)),backgroundColor:gray,borderRadius:4}]},options:{scales:{x:{ticks:{color:tx,autoSkip:false,callback:function(v){return this.getLabelForValue(v).split("\n")}}},y:{beginAtZero:true,title:{display:true,text:oDE+"的比例",color:tx},ticks:{color:tx,callback:v=>v+"%"}}},plugins:{legend:{labels:{color:tx}},tooltip:{callbacks:{label:c=>{const x=RS[c.dataIndex],w=c.datasetIndex==0;return`${c.dataset.label}：${c.raw}%（${w?x.a:x.b}/${w?x.n1:x.n0} 趟）`},title:c=>RS[c[0].dataIndex].f[1]}}}}});
+ /* ④ */
+ const GR=[["門禁、電梯都沒問題",d=>!d.door&&!d.lift],["只有門禁問題",d=>d.door&&!d.lift],["只有電梯問題",d=>!d.door&&d.lift],["門禁、電梯都有問題",d=>d.door&&d.lift],["合計",d=>true]];
+ document.getElementById('t8').innerHTML=tb(["分組","趟數","平均花費(分)","卡住","失敗","要人幫忙","有完成的比例"],GR.map(([n,f])=>{const a=P.filter(t=>f(dv(t)));return[n,a.length,a.length?(a.reduce((s,t)=>s+dur(t),0)/a.length).toFixed(1):"-",a.filter(t=>dv(t).stuck).length,a.filter(fl).length,a.filter(t=>t.h=="有").length,pct(a.filter(t=>t.s=="完成").length,a.length)]}));
+ const pt=t=>{const d=dv(t);return{x:d.gf+d.gr,y:d.eto+d.eh,t}},cat=[["卡住",t=>dv(t).stuck,bad,'triangle'],["候梯逾時（沒卡住）",t=>!dv(t).stuck&&dv(t).eto>0,ec[4],'rectRot'],["其他",t=>!dv(t).stuck&&!(dv(t).eto>0),gray,'circle']];
+ mk('c8',{type:'scatter',data:{datasets:cat.map(([l,f,c,ps])=>({label:l,data:P.filter(f).map(pt),backgroundColor:c+"cc",borderColor:c,pointStyle:ps,pointRadius:l=="其他"?5:8,pointHoverRadius:10}))},options:{scales:{x:{beginAtZero:true,title:{display:true,text:"門禁問題次數（開門失敗＋重開門）",color:tx},ticks:{color:tx,precision:0}},y:{beginAtZero:true,title:{display:true,text:"電梯問題次數",color:tx},ticks:{color:tx,precision:0}}},plugins:{legend:{labels:{color:tx,usePointStyle:true}},tooltip:{callbacks:{label:c=>{const t=c.raw.t,d=dv(t);return[`${t.a[0][1].slice(5,16).replace("T"," ")} ${t.r}（${t.s}）`,`門控 ${t.g.join("/")}｜梯控 ${t.e.join("/")}${d.stuck?"｜卡住 "+d.stuckN+" 次":""}`]}}}}}});
+ /* ⑤ */
+ const LM={};P.forEach(t=>{const seen=new Set();locEv(t).filter(e=>!e.alert).forEach(e=>{const o=LM[e.loc]=LM[e.loc]||{n:0,ty:{},T:new Set(),S:0,R:new Set()};o.n+=e.n;o.ty[e.type]=(o.ty[e.type]||0)+e.n;o.T.add(t.id);o.R.add(t.r);if(!seen.has(e.loc)&&dv(t).stuck)o.S++;seen.add(e.loc)})});
+ const LK=Object.keys(LM).sort((a,b)=>LM[b].n-LM[a].n),UT=ET.filter(y=>LK.some(k=>LM[k].ty[y]));
+ setH('c9',LK.length);
+ mk('c9',{type:'bar',data:{labels:LK,datasets:UT.map(y=>({label:y,data:LK.map(k=>LM[k].ty[y]||0),backgroundColor:ec[ET.indexOf(y)],borderColor:getComputedStyle(document.documentElement).getPropertyValue('--card').trim(),borderWidth:{left:1,right:1},borderRadius:3}))},options:{indexAxis:'y',scales:{x:{stacked:true,beginAtZero:true,ticks:{color:tx,precision:0}},y:{stacked:true,ticks:{color:tx}}},plugins:{legend:{labels:{color:tx}},tooltip:{callbacks:{footer:c=>{const o=LM[c[0].label];return`涉及 ${o.T.size} 趟，其中卡住 ${o.S} 趟`}}}}}});
+ document.getElementById('t9').innerHTML=LK.length?tb(["地點","發生次數","涉及趟數","其中卡住","主要問題","機器人"],LK.map(k=>{const o=LM[k],ty=Object.entries(o.ty).sort((a,b)=>b[1]-a[1]);return[k,o.n,o.T.size,o.S?`<span class="bad">${o.S}</span>`:0,ty.map(x=>x[0]+" "+x[1]).join("、"),[...o.R].join("、")]})):"沒有記錄到異常位置";
+ /* ⑥ */
+ const sm=(a,i,k)=>a.reduce((s,t)=>s+t[k][i],0),RW=rR=="全部"?R.concat(["合計"]):[rR];
+ document.getElementById('t10').innerHTML=tb(["機器人","任務趟數","開門失敗","每趟平均","通過受阻重開門","每趟平均","等待人工開門","搭電梯","候梯逾時","候梯逾時率","暫不出梯","暫不出梯率","卡住"],RW.map(r=>{const a=P.filter(t=>r=="合計"||t.r==r),gf=sm(a,1,"g"),gr=sm(a,3,"g"),er=sm(a,0,"e"),eto=sm(a,1,"e"),eh=sm(a,2,"e"),av=x=>a.length?(x/a.length).toFixed(1):"-";return[r,a.length,gf,av(gf),gr,av(gr),sm(a,2,"g"),er,eto,pct(eto,er),eh,pct(eh,er),a.filter(t=>dv(t).stuck).length]}));
+ const DD=[...new Set(P.map(t=>t.d))].sort(),DS=[["有重開門",d=>d.gr>0,ec[0]],["有開門失敗",d=>d.gf>0,ec[1]],["有候梯逾時",d=>d.eto>0,ec[4]],["有暫不出梯",d=>d.eh>0,ec[5]]];
+ setW("c10w",DD.length,90);
+ mk('c10',{data:{labels:DD,datasets:DS.map(([l,f,c])=>({type:'bar',label:l,data:DD.map(d=>P.filter(t=>t.d==d&&f(dv(t))).length),backgroundColor:c,borderRadius:4})).concat([{type:'line',label:'卡住趟數',data:DD.map(d=>P.filter(t=>t.d==d&&dv(t).stuck).length),borderColor:bad,backgroundColor:bad,borderWidth:2,pointRadius:5,pointStyle:'triangle'}])},options:{scales:{x:{ticks:{color:tx}},y:{beginAtZero:true,title:{display:true,text:"任務趟數",color:tx},ticks:{color:tx,precision:0}}},plugins:{legend:{labels:{color:tx}},tooltip:{mode:'index',intersect:false,callbacks:{footer:c=>`當日分析任務 ${P.filter(t=>t.d==c[0].label).length} 趟`}}}}});
+ /* ⑦ */
+ const FD={"全部異常":d=>d.door||d.lift||d.stuck,"只看卡住":d=>d.stuck,"只看候梯逾時":d=>d.eto>0,"只看門控異常":d=>d.door,"只看梯控異常":d=>d.lift}[fDE];
+ const LS=P.filter(t=>FD(dv(t))).sort((a,b)=>a.a[0][1]<b.a[0][1]?-1:1);
+ document.getElementById('t11').innerHTML=LS.length?"<table><tr>"+["啟動時間","機器人","結果","完成方式","人工介入","卡住","門控","梯控","花費(分)","異常位置"].map(x=>"<th>"+x+"</th>").join("")+"</tr>"+LS.map(t=>{const d=dv(t);return`<tr${d.stuck?' class="hl"':''}>`+[t.a[0][1].replace("T"," ").slice(0,16),t.r,t.s,esc(t.m),esc(t.h),d.stuck?`<b class="bad">${d.stuckN} 次</b>`:"",t.g.join("/"),t.e.join("/"),dur(t).toFixed(1),`<span class="wrap">${esc(t.loc)}</span>`].map(x=>"<td>"+x+"</td>").join("")+"</tr>"}).join("")+"</table>":"沒有符合條件的任務";
+}
+function setH(id,n){const e=document.getElementById(id);if(e)e.parentElement.style.height=Math.max(220,n*34+80)+"px"}
+const STG_MAP={"啟動":1,"裝載藥品":1,"出發":1,"抵達目的地":1,"取藥":1},SN={"啟動":"啟動後","裝載藥品":"裝載後","出發":"前往病房途中","抵達目的地":"抵達未取藥","取藥":"返回藥局途中"};
+function info(t){if(t._i)return t._i;const a=t.a.map(x=>base(x[0]));const st=t.a.find(x=>base(x[0])=="啟動"),cn=t.a.find(x=>base(x[0])=="取消");let last="啟動";for(const n of a){if(["卡住","設備異常","取消","未完成任務"].includes(n))break;if(STG_MAP[n])last=n}const quick=!!(st&&cn&&ts(cn[1])-ts(st[1])<=60),stuck=a.includes("卡住"),fault=a.includes("設備異常"),inc=a.includes("未完成任務"),cnq=!!cn&&!quick,rf=t.s=="失敗";return t._i={last,quick,sec:st&&cn?ts(cn[1])-ts(st[1]):null,stuck,fault,inc,cnq,rf,fail:stuck||fault||inc||cnq||rf}}
+function setW(id,n,px){const e=document.getElementById(id);if(!e)return;const w=e.parentElement.clientWidth;e.style.width=n*px>w?n*px+"px":"100%"}
+function evLine(t){const K=["卡住","設備異常","未完成任務","取消"];const m=t.a.find(x=>K.includes(base(x[0])))||t.a[t.a.length-1];const rs=[...new Set(t.a.map(x=>base(x[0])).filter(n=>K.includes(n)))];return m[1].slice(5,10)+" "+m[1].slice(11,19)+" "+(rs.length?rs.join("＋"):"結果為失敗")}
+function tb(h,rows){return"<table><tr>"+h.map(x=>"<th>"+x+"</th>").join("")+"</tr>"+rows.map(r=>"<tr>"+r.map(x=>"<td>"+x+"</td>").join("")+"</tr>").join("")+"</table>"}
+async function load(){
+ const days=[];for(let i=0;i<5;i++)days.push(new Date(Date.parse("2026-11-16T00:00:00Z")+i*864e5).toISOString().slice(0,10));
+ const jobs=[];for(let i=0;i<5;i++)for(let j=i;j<5;j++)jobs.push(`task_report_${days[i]}_${days[j]}.csv`);
+ const m={};let n=0;
+ await Promise.all(jobs.map(async f=>{try{const r=await fetch(f+"?v="+Date.now());if(!r.ok)return;const x={};parse(await r.text(),x);mergeT(m,x);n++}catch(e){}}));
+ tasks=n?Object.values(m):INIT;render();
+ document.getElementById('range').textContent+=n?`｜已自動讀取 ${n} 個資料檔`:"｜未讀到 CSV 資料檔";
+}
+render();load();
+</script></body></html>

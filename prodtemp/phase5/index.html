@@ -57,8 +57,10 @@ function stat(m,bad){const e=document.getElementById('st');if(e){e.textContent=m
 function setAnn(id,k,v){const prev=ann[id];ann[id]=Object.assign({},prev);ann[id][k]=v;if(dbc){stat("儲存中…");dbc.doc("ann/"+id).set(ann[id]).then(()=>stat("已儲存，所有檢視者都會看到"),e=>{if(prev===undefined)delete ann[id];else ann[id]=prev;stat("儲存失敗（可能沒有寫入權限）："+((e&&e.message)||""),1);render()})}else{try{localStorage.setItem('rb_ann',JSON.stringify(ann))}catch(e){}stat("尚未連線共用資料庫（請登入）：修改只存在此瀏覽器",1)}render()}
 const esc=s=>String(s||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"),ex=t=>info(t).quick;
 function csv(t){const rows=[];let r=[],c="",q=false;t=t.replace(/^\uFEFF/,"");for(let i=0;i<t.length;i++){const h=t[i];if(q){if(h=='"'){if(t[i+1]=='"'){c+='"';i++}else q=false}else c+=h}else if(h=='"')q=true;else if(h==","){r.push(c);c=""}else if(h=="\n"||h=="\r"){if(h=="\r"&&t[i+1]=="\n")i++;r.push(c);c="";if(r.length>1)rows.push(r);r=[]}else c+=h}if(c||r.length){r.push(c);rows.push(r)}return rows}
-function parse(txt,into){const rs=csv(txt),h=rs.shift(),ix=n=>h.indexOf(n);rs.forEach(r=>{const id=r[ix("任務單ID")];if(!id)return;let t=into[id];if(!t)t=into[id]={id,d:r[ix("任務時間")],r:r[ix("機器人")],s:r[ix("任務結果")],a:[]};t.a.push([r[ix("動作")].trim(),r[ix("動作時間")].slice(0,19)]);if(ix("病房代碼")>=0&&r[ix("動作")].trim().startsWith("裝載藥品")){const w=(r[ix("病房代碼")]||"").trim();if(w)(t.p=t.p||[]).push(w)}})}
-document.getElementById('f').onchange=async e=>{const m={};tasks.forEach(t=>m[t.id]=t);for(const f of e.target.files){const x={};parse(await f.text(),x);Object.assign(m,x)}tasks=Object.values(m);render();e.target.value=""};
+function parse(txt,into){const rs=csv(txt),h=rs.shift(),ix=n=>h.indexOf(n);rs.forEach(r=>{const id=r[ix("任務單ID")];if(!id)return;let t=into[id];if(!t)t=into[id]={id,d:r[ix("任務時間")],r:r[ix("機器人")],s:r[ix("任務結果")],a:[]};t.a.push([r[ix("動作")].trim(),r[ix("動作時間")].slice(0,19)]);if(ix("病房代碼")>=0&&r[ix("動作")].trim().startsWith("裝載藥品")){const w=(r[ix("病房代碼")]||"").trim();if(w)(t.p=t.p||[]).push(w)}
+const G=h.findIndex(x=>x.startsWith("門控")),E=h.findIndex(x=>x.startsWith("梯控"));if(G>=0&&E>=0&&!t.g){const n=(s,k)=>{const a=String(s||"").split("/").map(Number);return[...Array(k)].map((_,i)=>a[i]||0)};t.g=n(r[G],4);t.e=n(r[E],3);t.loc=ix("異常位置")>=0?r[ix("異常位置")]:"";t.m=ix("完成方式")>=0?r[ix("完成方式")]:"";t.h=ix("人工介入")>=0?r[ix("人工介入")]:""}})}
+function mergeT(m,x){for(const id in x){const o=m[id],n=x[id];if(o&&o.g&&!n.g)["g","e","loc","m","h"].forEach(k=>n[k]=o[k]);m[id]=n}}
+document.getElementById('f').onchange=async e=>{const m={};tasks.forEach(t=>m[t.id]=t);for(const f of e.target.files){const x={};parse(await f.text(),x);mergeT(m,x)}tasks=Object.values(m);render();e.target.value=""};
 document.getElementById('rs').onclick=()=>load();
 const ts=s=>Date.parse(s+"+08:00")/1000,base=a=>a.replace(/[-(（].*/,"").trim();
 function render(){
@@ -132,10 +134,10 @@ function showSum(){
  document.getElementById('smb').innerHTML=o;const m=document.getElementById('sm');m.style.display='block';m.scrollTop=0;
 }
 async function load(){
- const days=[];for(let i=0;i<4;i++)days.push(new Date(Date.parse("2026-11-17T00:00:00Z")+i*864e5).toISOString().slice(0,10));
- const jobs=[];for(let i=0;i<4;i++)for(let j=i;j<4;j++)jobs.push(`task_report_${days[i]}_${days[j]}.csv`);
+ const days=[];for(let i=0;i<5;i++)days.push(new Date(Date.parse("2026-11-16T00:00:00Z")+i*864e5).toISOString().slice(0,10));
+ const jobs=[];for(let i=0;i<5;i++)for(let j=i;j<5;j++)jobs.push(`task_report_${days[i]}_${days[j]}.csv`);
  const m={};let n=0;
- await Promise.all(jobs.map(async f=>{try{const r=await fetch(f+"?v="+Date.now());if(!r.ok)return;const x={};parse(await r.text(),x);Object.assign(m,x);n++}catch(e){}}));
+ await Promise.all(jobs.map(async f=>{try{const r=await fetch(f+"?v="+Date.now());if(!r.ok)return;const x={};parse(await r.text(),x);mergeT(m,x);n++}catch(e){}}));
  tasks=n?Object.values(m):INIT;render();
  document.getElementById('range').textContent+=n?`｜已自動讀取 ${n} 個資料檔`:"｜未讀到 CSV 資料檔";
 }
