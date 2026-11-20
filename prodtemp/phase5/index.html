@@ -24,7 +24,7 @@ button,.btn{background:var(--c1);color:#fff;border:0;border-radius:8px;padding:7
 td:first-child,th:first-child{text-align:left}
 #drop{border:1px dashed var(--bd);border-radius:10px;padding:8px 12px;color:var(--mu);font-size:12px}
 </style></head><body>
-<div class="top"><div><h1>送藥機器人11/17～11/20任務統計儀表板</h1><p class="sub" id="range"></p></div>
+<div class="top"><div><h1 id="ttl">送藥機器人任務統計儀表板</h1><p class="sub" id="range"></p></div>
 <div><label class="btn">手動上傳 CSV（臨時查看）<input id="f" type="file" accept=".csv" multiple hidden></label> <button class="btn g" id="rs">重新載入最新資料</button></div></div>
 <div class="kpis" id="kpis"></div>
 <div class="grid">
@@ -57,7 +57,7 @@ document.getElementById('rs').onclick=()=>load();
 const ts=s=>Date.parse(s+"+08:00")/1000,base=a=>a.split("-")[0];
 function render(){
 tasks.forEach(t=>{t.a.sort((x,y)=>x[1]<y[1]?-1:1)});
-const days=[...new Set(tasks.map(t=>t.d))].sort();const d0=days[0];const D=[];for(let i=0;i<4;i++){const x=new Date(Date.parse(d0+"T00:00:00Z")+i*864e5);D.push(x.toISOString().slice(0,10))}
+const days=[...new Set(tasks.map(t=>t.d))].sort();{const f=x=>x.slice(5).replace("-","/"),a=f(days[0]),b=f(days[days.length-1]),T="送藥機器人"+(a==b?a:a+"～"+b)+"任務統計儀表板";document.getElementById("ttl").textContent=T;document.title=T}const d0=days[0];const D=[];for(let i=0;i<4;i++){const x=new Date(Date.parse(d0+"T00:00:00Z")+i*864e5);D.push(x.toISOString().slice(0,10))}
 const vl=t=>!info(t).quick&&!ex(t),ok=t=>vl(t)&&!info(t).fail,fl=t=>vl(t)&&info(t).fail,tot=tasks.length,sc=tasks.filter(ok).length,vtot=tasks.filter(vl).length,nf=tasks.filter(fl).length;
 document.getElementById('range').textContent=`資料 ${days[0]} ～ ${days[days.length-1]}｜已收 ${days.length}/4 天｜${tot} 筆任務`;
 const cancel=tasks.filter(t=>info(t).fail||info(t).quick);
