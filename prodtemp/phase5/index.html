@@ -31,10 +31,10 @@ td:first-child,th:first-child{text-align:left}
 <div><label class="btn">手動上傳 CSV（臨時查看）<input id="f" type="file" accept=".csv" multiple hidden></label> <button class="btn g" id="rs">重新載入最新資料</button> <button class="btn" id="sb" style="background:var(--ok);display:none" onclick="showSum()">查看資料總結</button></div></div>
 <div class="kpis" id="kpis"></div>
 <div class="grid">
-<div class="card wide"><h2>① 每日任務數與成功數</h2><p class="sub">柱狀＝各機器人當日成功數（每台獨立一柱）；折線＝各機器人當日任務總數（含取消）。失敗＝卡住、設備異常、未完成任務，或非啟動後1分鐘內的取消；1分鐘內取消不計入成功率分母</p><div class="cv"><canvas id="c1"></canvas></div><div class="sc" id="t1"></div></div>
+<div class="card wide"><h2>① 每日任務數與成功數</h2><p class="sub">柱狀＝各機器人當日成功數（每台獨立一柱）；折線＝各機器人當日任務總數（含取消）。失敗＝卡住、設備異常、未完成任務，或非啟動後1分鐘內的取消；1分鐘內取消不計入成功率分母</p><div class="sc"><div class="cv" id="c1w"><canvas id="c1"></canvas></div></div><div class="sc" id="t1" style="max-height:360px;overflow:auto"></div></div>
 <div class="card wide"><h2>任務失敗／取消明細</h2><p class="sub">含啟動後 1 分鐘內取消的項目（環境因素已標示，說明為「藥師查詢資料」）；其他失敗項目的環境因素與說明欄位留白。1 分鐘內取消不計入成功率分母與失敗次數。</p><div style="margin:6px 0 8px"><label class="sub">機器人篩選：<select id="fr" onchange="fR=this.value;render()" style="background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:4px 8px;font-size:13px"><option>全部</option><option>安寶</option><option>諾寶</option><option>萌寶</option></select></label></div><div class="sc" id="t2"></div></div>
 <div class="card"><h2>② 取消／失敗停在哪個階段</h2><p class="sub">以取消／失敗前最後一個正常動作判定；「返回藥局途中」＝取藥後、完成前</p><div class="cv"><canvas id="c2"></canvas></div></div>
-<div class="card"><h2>③ 啟動後 1 分鐘內取消（每日次數）</h2><p class="sub">取消時間 − 啟動時間 ≤ 60 秒</p><div class="cv"><canvas id="c3"></canvas></div></div>
+<div class="card"><h2>③ 啟動後 1 分鐘內取消（每日次數）</h2><p class="sub">取消時間 − 啟動時間 ≤ 60 秒</p><div class="sc"><div class="cv" id="c3w"><canvas id="c3"></canvas></div></div></div>
 
 <div class="card"><h2>④ 任務之間：各機器人任務時長與間隔</h2><p class="sub">間隔＝同一天內，上一任務最後動作到下一任務啟動的分鐘數</p><div class="sc tight" id="t3"></div></div>
 <div class="card"><h2>⑤ 各時段任務數</h2><div class="cv"><canvas id="c4"></canvas></div></div>
@@ -61,9 +61,10 @@ document.getElementById('rs').onclick=()=>load();
 const ts=s=>Date.parse(s+"+08:00")/1000,base=a=>a.split("-")[0];
 function render(){
 tasks.forEach(t=>{t.a.sort((x,y)=>x[1]<y[1]?-1:1)});
-const days=[...new Set(tasks.map(t=>t.d))].sort();{const f=x=>x.slice(5).replace("-","/"),a=days.length?f(days[0]):"",b=days.length?f(days[days.length-1]):"",T="送藥機器人"+(!a?"":a==b?a:a+"～"+b)+"任務統計儀表板";document.getElementById("ttl").textContent=T;document.title=T}const D=[];if(days.length){const d0=days[0];for(let i=0;i<4;i++){const x=new Date(Date.parse(d0+"T00:00:00Z")+i*864e5);D.push(x.toISOString().slice(0,10))}}else D.push("第1天","第2天","第3天","第4天");
+const days=[...new Set(tasks.map(t=>t.d))].sort();{const f=x=>x.slice(5).replace("-","/"),a=days.length?f(days[0]):"",b=days.length?f(days[days.length-1]):"",T="送藥機器人"+(!a?"":a==b?a:a+"～"+b)+"任務統計儀表板";document.getElementById("ttl").textContent=T;document.title=T}const D=[];if(days.length>4){days.forEach(x=>D.push(x))}else if(days.length){const d0=days[0];for(let i=0;i<4;i++){const x=new Date(Date.parse(d0+"T00:00:00Z")+i*864e5);D.push(x.toISOString().slice(0,10))}}else D.push("第1天","第2天","第3天","第4天");
+setW("c1w",D.length,60);setW("c3w",D.length,40);
 const vl=t=>!info(t).quick&&!ex(t),ok=t=>vl(t)&&!info(t).fail,fl=t=>vl(t)&&info(t).fail,tot=tasks.length,sc=tasks.filter(ok).length,vtot=tasks.filter(vl).length,nf=tasks.filter(fl).length;
-document.getElementById('range').textContent=(days.length?`資料 ${days[0]} ～ ${days[days.length-1]}｜已收 ${days.length}/4 天｜${tot} 筆任務`:"尚無資料");
+document.getElementById('range').textContent=(days.length?`資料 ${days[0]} ～ ${days[days.length-1]}｜已收 ${days.length}${days.length<=4?"/4":""} 天｜${tot} 筆任務`:"尚無資料");
 const cancel=tasks.filter(t=>info(t).fail||info(t).quick);
 
 const q=cancel.filter(t=>info(t).quick).length,stuck=tasks.reduce((n,t)=>n+t.a.filter(x=>base(x[0])=="卡住").length,0);
@@ -85,7 +86,8 @@ mk('c5',{type:'bar',data:{labels:wk,datasets:[{label:'次數',data:wk.map(k=>w[k
 document.getElementById('t4').innerHTML=tb(["機器人","有效任務","失敗次數","成功率","卡住次數","設備異常","1分鐘內取消"],R.map(r=>{const a=tasks.filter(t=>t.r==r),v=a.filter(vl);return[r,v.length,a.filter(fl).length,v.length?(v.filter(ok).length/v.length*100).toFixed(1)+"%":"-",a.reduce((n,t)=>n+t.a.filter(x=>base(x[0])=="卡住").length,0),a.filter(t=>info(t).fault).length,a.filter(t=>info(t).quick).length]}));
 }
 const STG_MAP={"啟動":1,"裝載藥品":1,"出發":1,"抵達目的地":1,"取藥":1},SN={"啟動":"啟動後","裝載藥品":"裝載後","出發":"前往病房途中","抵達目的地":"抵達未取藥","取藥":"返回藥局途中"};
-function info(t){const a=t.a.map(x=>base(x[0]));const st=t.a.find(x=>base(x[0])=="啟動"),cn=t.a.find(x=>base(x[0])=="取消");let last="啟動";for(const n of a){if(["卡住","設備異常","取消","未完成任務"].includes(n))break;if(STG_MAP[n])last=n}const quick=!!(st&&cn&&ts(cn[1])-ts(st[1])<=60),stuck=a.includes("卡住"),fault=a.includes("設備異常"),inc=a.includes("未完成任務"),cnq=!!cn&&!quick;return{last,quick,sec:st&&cn?ts(cn[1])-ts(st[1]):null,stuck,fault,inc,cnq,fail:stuck||fault||inc||cnq}}
+function info(t){if(t._i)return t._i;const a=t.a.map(x=>base(x[0]));const st=t.a.find(x=>base(x[0])=="啟動"),cn=t.a.find(x=>base(x[0])=="取消");let last="啟動";for(const n of a){if(["卡住","設備異常","取消","未完成任務"].includes(n))break;if(STG_MAP[n])last=n}const quick=!!(st&&cn&&ts(cn[1])-ts(st[1])<=60),stuck=a.includes("卡住"),fault=a.includes("設備異常"),inc=a.includes("未完成任務"),cnq=!!cn&&!quick;return t._i={last,quick,sec:st&&cn?ts(cn[1])-ts(st[1]):null,stuck,fault,inc,cnq,fail:stuck||fault||inc||cnq}}
+function setW(id,n,px){const e=document.getElementById(id);if(!e)return;const w=e.parentElement.clientWidth;e.style.width=n*px>w?n*px+"px":"100%"}
 function evLine(t){const K=["卡住","設備異常","未完成任務","取消"];const m=t.a.find(x=>K.includes(base(x[0])));return m[1].slice(5,10)+" "+m[1].slice(11,19)+" "+[...new Set(t.a.map(x=>base(x[0])).filter(n=>K.includes(n)))].join("＋")}
 function tb(h,rows){return"<table><tr>"+h.map(x=>"<th>"+x+"</th>").join("")+"</tr>"+rows.map(r=>"<tr>"+r.map(x=>"<td>"+x+"</td>").join("")+"</tr>").join("")+"</table>"}
 function showSum(){
@@ -99,8 +101,8 @@ function showSum(){
  const rs=[["卡住",F.filter(t=>info(t).stuck).length],["設備異常",F.filter(t=>info(t).fault).length],["未完成任務",F.filter(t=>info(t).inc).length],["非1分鐘內取消",F.filter(t=>info(t).cnq).length]].filter(x=>x[1]).sort((a,b)=>b[1]-a[1]);
  const st=cnt(F,t=>SN[info(t).last]),rb=["安寶","諾寶","萌寶"].map(r=>{const v=V.filter(t=>t.r==r),fl=v.filter(t=>info(t).fail).length;return{r,n:v.length,fl,p:v.length?(v.length-fl)/v.length*100:0}}).filter(x=>x.n);
  const li=a=>"<ul>"+a.map(x=>"<li>"+x+"</li>").join("")+"</ul>",H=x=>`<h3 style="margin:14px 0 4px;font-size:15px">${x}</h3>`;
- let o=`<div style="display:flex;justify-content:space-between;align-items:center"><h2 style="font-size:17px">資料總結</h2><button class="btn g" onclick="document.getElementById('sm').style.display='none'">關閉</button></div><p class="sub">依目前載入的資料與判定規則自動產生（${f(days[0])}～${f(days[days.length-1])}，已收 ${days.length}/4 天）；資料更新後重新開啟會自動重算。</p>`;
- o+=H("結論")+li([`累計有效任務 ${V.length} 筆，成功 ${S.length} 筆，成功率 <b class="${rate>=90?"ok":"bad"}">${P(S.length,V.length)}</b>（標準 ≥90%）。`,`逐日來看，${dr.length} 天中有 ${pass} 天達標${pass<dr.length?"，未達標："+dr.filter(x=>x.p<90).map(x=>f(x.d)+"（"+x.p.toFixed(1)+"%）").join("、"):""}。`].concat(rate<90&&V.length?[`若要把累計成功率拉到 90%，在不再出現失敗的情況下，還需要再連續成功約 ${Math.ceil((0.9*V.length-S.length)/0.1)} 筆任務。`]:[]).concat(days.length<4?[`目前只收集 ${days.length}/4 天，結論僅供參考。`]:[]));
+ let o=`<div style="display:flex;justify-content:space-between;align-items:center"><h2 style="font-size:17px">資料總結</h2><button class="btn g" onclick="document.getElementById('sm').style.display='none'">關閉</button></div><p class="sub">依目前載入的資料與判定規則自動產生（${f(days[0])}～${f(days[days.length-1])}，已收 ${days.length}${days.length<=4?"/4":""} 天）；資料更新後重新開啟會自動重算。</p>`;
+ o+=H("結論")+li([`累計有效任務 ${V.length} 筆，成功 ${S.length} 筆，成功率 <b class="${rate>=90?"ok":"bad"}">${P(S.length,V.length)}</b>（標準 ≥90%）。`,`逐日來看，${dr.length} 天中有 ${pass} 天達標${pass<dr.length?"，未達標："+dr.filter(x=>x.p<90).map(x=>f(x.d)+"（"+x.p.toFixed(1)+"%）").join("、"):""}。`].concat(rate<90&&V.length?[`若要把累計成功率拉到 90%，在不再出現失敗的情況下，還需要再連續成功約 ${Math.ceil((0.9*V.length-S.length)/0.1)} 筆任務。`]:[]).concat(days.length<4?[`目前只收集 ${days.length}${days.length<=4?"/4":""} 天，結論僅供參考。`]:[]));
  o+=H("每日狀況")+li(dr.map(x=>`${f(x.d)}：有效 ${x.n} 筆，成功 ${x.s} 筆，成功率 ${x.p.toFixed(1)}%，${x.p>=90?"達標":"未達標"}`));
  o+=H("失敗原因")+(F.length?li([`共 ${F.length} 筆失敗任務。`,"原因（同一任務可能有多項）："+rs.map(x=>x[0]+" "+x[1]+" 筆").join("、")+"。","停點："+st.map(x=>x[0]+" "+x[1]+" 筆").join("、")+"。"]):"<p>目前沒有失敗任務。</p>");
  o+=H("各機器人")+li(rb.map(x=>`${x.r}：有效 ${x.n} 筆，失敗 ${x.fl} 筆，成功率 ${x.p.toFixed(1)}%`));
