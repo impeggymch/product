@@ -26,14 +26,16 @@ button,.btn{background:var(--c1);color:#fff;border:0;border-radius:8px;padding:7
 td:first-child,th:first-child{text-align:left}
 .tight th{white-space:normal;line-height:1.3;padding:6px 4px;font-size:12px}.tight td{padding:6px 4px;font-size:12px}
 #drop{border:1px dashed var(--bd);border-radius:10px;padding:8px 12px;color:var(--mu);font-size:12px}
-#t2{overflow:auto}#t2 th{position:sticky;top:0;background:var(--card);z-index:1}
+#t2{overflow:auto;border:1px solid var(--bd);border-radius:8px}@supports (-moz-appearance:none){#t2{scrollbar-width:thin;scrollbar-color:var(--mu) var(--bg)}}#t2 th{position:sticky;top:0;background:var(--card);z-index:1}
+#t2::-webkit-scrollbar{width:10px;height:10px}#t2::-webkit-scrollbar-thumb{background:var(--mu);border-radius:5px;border:2px solid var(--card)}#t2::-webkit-scrollbar-track{background:var(--bg)}
+#t2n{margin:0 0 6px}
 </style></head><body>
 <div class="top"><div><h1 id="ttl">送藥機器人任務統計儀表板</h1><p class="sub" id="range"></p></div>
 <div><label class="btn">手動上傳 CSV（臨時查看）<input id="f" type="file" accept=".csv" multiple hidden></label> <button class="btn g" id="rs">重新載入最新資料</button> <button class="btn" id="sb" style="background:var(--ok);display:none" onclick="showSum()">查看資料總結</button></div></div>
 <div class="kpis" id="kpis"></div>
 <div class="grid">
 <div class="card wide"><h2>① 每日任務數與成功數</h2><p class="sub">柱狀＝各機器人當日成功數（每台獨立一柱）；折線＝各機器人當日任務總數（含取消）。失敗＝卡住、設備異常、未完成任務，或非啟動後1分鐘內的取消；1分鐘內取消不計入成功率分母</p><div class="sc"><div class="cv" id="c1w"><canvas id="c1"></canvas></div></div><div class="sc" id="t1" style="max-height:360px;overflow:auto"></div></div>
-<div class="card wide"><h2>任務失敗／取消明細</h2><p class="sub">含啟動後 1 分鐘內取消的項目（環境因素已標示，說明為「藥師查詢資料」）；其他失敗項目的環境因素與說明欄位留白。1 分鐘內取消不計入成功率分母與失敗次數。</p><div style="margin:6px 0 8px"><label class="sub">機器人篩選：<select id="fr" onchange="fR=this.value;render()" style="background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:4px 8px;font-size:13px"><option>全部</option><option>安寶</option><option>諾寶</option><option>萌寶</option></select></label></div><div class="sc" id="t2"></div></div>
+<div class="card wide"><h2>任務失敗／取消明細</h2><p class="sub">含啟動後 1 分鐘內取消的項目（環境因素已標示，說明為「藥師查詢資料」）；其他失敗項目的環境因素與說明欄位留白。1 分鐘內取消不計入成功率分母與失敗次數。</p><div style="margin:6px 0 8px"><label class="sub">機器人篩選：<select id="fr" onchange="fR=this.value;render()" style="background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:4px 8px;font-size:13px"><option>全部</option><option>安寶</option><option>諾寶</option><option>萌寶</option></select></label></div><p class="sub" id="t2n"></p><div class="sc" id="t2"></div></div>
 <div class="card"><h2>② 取消／失敗停在哪個階段</h2><p class="sub">以取消／失敗前最後一個正常動作判定；「返回藥局途中」＝取藥後、完成前</p><div class="cv"><canvas id="c2"></canvas></div></div>
 <div class="card"><h2>③ 啟動後 1 分鐘內取消（每日次數）</h2><p class="sub">取消時間 − 啟動時間 ≤ 60 秒</p><div class="sc"><div class="cv" id="c3w"><canvas id="c3"></canvas></div></div></div>
 
@@ -107,7 +109,7 @@ document.getElementById('t6').innerHTML=tb(["類型","次數","占未裝藥比�
 const STG_MAP={"啟動":1,"裝載藥品":1,"出發":1,"抵達目的地":1,"取藥":1},SN={"啟動":"啟動後","裝載藥品":"裝載後","出發":"前往病房途中","抵達目的地":"抵達未取藥","取藥":"返回藥局途中"};
 function info(t){if(t._i)return t._i;const a=t.a.map(x=>base(x[0]));const st=t.a.find(x=>base(x[0])=="啟動"),cn=t.a.find(x=>base(x[0])=="取消");let last="啟動";for(const n of a){if(["卡住","設備異常","取消","未完成任務"].includes(n))break;if(STG_MAP[n])last=n}const quick=!!(st&&cn&&ts(cn[1])-ts(st[1])<=60),stuck=a.includes("卡住"),fault=a.includes("設備異常"),inc=a.includes("未完成任務"),cnq=!!cn&&!quick,rf=t.s=="失敗";return t._i={last,quick,sec:st&&cn?ts(cn[1])-ts(st[1]):null,stuck,fault,inc,cnq,rf,fail:stuck||fault||inc||cnq||rf}}
 /* 表格可視範圍只顯示 n 筆資料，超過的用捲軸瀏覽（表頭固定） */
-function fitRows(id,n){const e=document.getElementById(id);if(!e||!e.querySelectorAll)return;const rs=e.querySelectorAll("tr");if(rs.length<=n+1){e.style.maxHeight="";return}e.style.maxHeight=Math.ceil(rs[n].getBoundingClientRect().bottom-rs[0].getBoundingClientRect().top+1)+"px"}
+function fitRows(id,n){const e=document.getElementById(id),h=document.getElementById(id+"n");if(!e||!e.querySelectorAll)return;const rs=e.querySelectorAll("tr"),tot=Math.max(0,rs.length-1);if(rs.length<=n+1){e.style.maxHeight="";if(h)h.textContent=tot?`共 ${tot} 筆`:"";return}const H=Math.ceil(rs[n].getBoundingClientRect().bottom-rs[0].getBoundingClientRect().top+1);e.style.maxHeight=H+"px";const cs=getComputedStyle(e),hs=e.offsetHeight-e.clientHeight-(parseFloat(cs.borderTopWidth)||0)-(parseFloat(cs.borderBottomWidth)||0);if(hs>0)e.style.maxHeight=H+hs+"px";if(h)h.textContent=`共 ${tot} 筆，先顯示 ${n} 筆；另外 ${tot-n} 筆請在表格內往下捲動 ↓`}
 window.addEventListener('resize',()=>fitRows('t2',15));
 function setW(id,n,px){const e=document.getElementById(id);if(!e)return;const w=e.parentElement.clientWidth;e.style.width=n*px>w?n*px+"px":"100%"}
 function evLine(t){const K=["卡住","設備異常","未完成任務","取消"];const m=t.a.find(x=>K.includes(base(x[0])))||t.a[t.a.length-1];const rs=[...new Set(t.a.map(x=>base(x[0])).filter(n=>K.includes(n)))];return m[1].slice(5,10)+" "+m[1].slice(11,19)+" "+(rs.length?rs.join("＋"):"結果為失敗")}
