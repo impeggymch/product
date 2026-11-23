@@ -209,13 +209,21 @@ function info(t){if(t._i)return t._i;const a=t.a.map(x=>base(x[0]));const st=t.a
 function setW(id,n,px){const e=document.getElementById(id);if(!e)return;const w=e.parentElement.clientWidth;e.style.width=n*px>w?n*px+"px":"100%"}
 function evLine(t){const K=["卡住","設備異常","未完成任務","取消"];const m=t.a.find(x=>K.includes(base(x[0])))||t.a[t.a.length-1];const rs=[...new Set(t.a.map(x=>base(x[0])).filter(n=>K.includes(n)))];return m[1].slice(5,10)+" "+m[1].slice(11,19)+" "+(rs.length?rs.join("＋"):"結果為失敗")}
 function tb(h,rows){return"<table><tr>"+h.map(x=>"<th>"+x+"</th>").join("")+"</tr>"+rows.map(r=>"<tr>"+r.map(x=>"<td>"+x+"</td>").join("")+"</tr>").join("")+"</table>"}
+/* 自動找出同一資料夾內所有 task_report_*.csv，依序嘗試：
+   1) 本機伺服器的資料夾清單；2) GitHub Pages：用 GitHub API 讀資料夾清單；
+   3) 都讀不到清單時，從 START 起逐日試到今天（含最長 7 天的合併檔） */
+const START="2026-11-16",CSV_RE=/^task_report_\d{4}-\d{2}-\d{2}_\d{4}-\d{2}-\d{2}\.csv$/;
+async function listCSV(){
+ try{const r=await fetch("./?v="+Date.now());if(r.ok&&/text\/html/.test(r.headers.get("content-type")||"")){const t=await r.text(),a=[...t.matchAll(/href="([^"?#]+)"/g)].map(x=>decodeURIComponent(x[1].split("/").pop())).filter(n=>CSV_RE.test(n));if(a.length)return{files:[...new Set(a)],src:"資料夾清單"}}}catch(e){}
+ try{const h=location.hostname;if(h.endsWith(".github.io")){const own=h.split(".")[0],seg=location.pathname.split("/").filter(Boolean);if(seg.length&&/\.[a-z0-9]+$/i.test(seg[seg.length-1]))seg.pop();const repo=seg.shift(),dir=seg.join("/");if(repo){const r=await fetch(`https://api.github.com/repos/${own}/${repo}/contents/${dir}`);if(r.ok){const a=(await r.json()).map(x=>x.name).filter(n=>CSV_RE.test(n));if(a.length)return{files:a,src:"GitHub 資料夾清單"}}}}}catch(e){}
+ const D=[],today=new Date(Date.now()+8*36e5).toISOString().slice(0,10);for(let t=Date.parse(START+"T00:00:00Z");;t+=864e5){const d=new Date(t).toISOString().slice(0,10);if(d>today)break;D.push(d)}
+ const f=[];D.forEach((a,i)=>{for(let j=i;j<Math.min(D.length,i+7);j++)f.push(`task_report_${a}_${D[j]}.csv`)});return{files:f,src:"依日期搜尋"}
+}
 async function load(){
- const days=[];for(let i=0;i<5;i++)days.push(new Date(Date.parse("2026-11-16T00:00:00Z")+i*864e5).toISOString().slice(0,10));
- const jobs=[];for(let i=0;i<5;i++)for(let j=i;j<5;j++)jobs.push(`task_report_${days[i]}_${days[j]}.csv`);
- const m={};let n=0;
- await Promise.all(jobs.map(async f=>{try{const r=await fetch(f+"?v="+Date.now());if(!r.ok)return;const x={};parse(await r.text(),x);mergeT(m,x);n++}catch(e){}}));
+ const L=await listCSV(),m={};let n=0;
+ await Promise.all(L.files.map(async f=>{try{const r=await fetch(f+"?v="+Date.now());if(!r.ok)return;const x={};parse(await r.text(),x);mergeT(m,x);n++}catch(e){}}));
  tasks=n?Object.values(m):INIT;render();
- document.getElementById('range').textContent+=n?`｜已自動讀取 ${n} 個資料檔`:"｜未讀到 CSV 資料檔";
+ document.getElementById('range').textContent+=n?`｜已自動讀取 ${n} 個資料檔（${L.src}）`:"｜未讀到 CSV 資料檔";
 }
 render();load();
 </script></body></html>
