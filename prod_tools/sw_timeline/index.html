@@ -83,6 +83,11 @@ main{flex:1;min-height:0;overflow:auto;position:relative}
 .s-done{--st:var(--done)} .s-doing{--st:var(--doing)} .s-review{--st:var(--review)} .s-todo{--st:var(--todo)} .s-overdue{--st:var(--overdue)} .s-blocked{--st:var(--blocked)} .s-unsched{--st:var(--unsched)} .s-none{--st:var(--line)}
 .sd{background:var(--st)}
 .pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;padding:1px 8px;border-radius:999px;background:color-mix(in srgb,var(--st) 14%,transparent);color:color-mix(in srgb,var(--st) 80%,var(--text));white-space:nowrap}
+.phchips{display:flex;flex-wrap:wrap;gap:6px}
+.phchips .phc{border:0;font-size:12.5px;padding:5px 12px;border-radius:6px;cursor:pointer;opacity:.45}
+.phchips .phc:hover{opacity:.8}.phchips .phc.on{opacity:1;box-shadow:0 0 0 2px var(--panel),0 0 0 3.5px var(--role)}
+.noname{color:var(--faint);font-weight:400}.tx.noname{font-style:italic}
+.gname input.inl{flex:1;min-width:0;font-size:12.5px;padding:2px 6px;height:22px}
 .rtag{display:inline-block;font-size:11px;padding:0 6px;border-radius:4px;background:var(--role-soft);color:var(--role);font-weight:600;white-space:nowrap}
 /* ---------- gantt ---------- */
 .gw{position:relative;min-width:100%}
@@ -459,11 +464,16 @@ const doneRatio=ts=>ts.length?ts.filter(t=>t.status==='done').length/ts.length:0
 function currentPhase(ts){for(const ph of PHASES){const p=ts.filter(t=>t.phase===ph.key);if(p.length&&aggStatus(p)!=='done')return ph.key}return null}
 function depOf(t){return t.dep?taskById(t.dep):null}
 function depConflict(t){const d=depOf(t);if(!d||!d.end||!t.start)return false;return toNum(t.start)<=toNum(d.end)}
-function taskLabel(t){const f=featById(t.featureId);return (f?f.name+' › ':'')+t.name}
+// 任務名稱 = 自行輸入的內容說明；跟階段同名（如「Programming」「SIT」）視為未填，階段由色塊標籤表示
+function isPhaseName(name,ph){const n=String(name||'').trim().toLowerCase(),x=PH[ph];return !!(n&&x&&(n===x.label.toLowerCase()||n===x.short.toLowerCase()))}
+const tName=t=>t?(t.name||PH[t.phase]?.short||''):'';           // 沒有標籤可看的地方（總覽、提示）用
+const tNameHtml=t=>t.name?esc(tName(t)):'<span class="noname">（未填內容）</span>'; // 旁邊已有色塊標籤的地方用
+function normNames(){let c=0;for(const p of S.projects)for(const t of p.tasks)if(isPhaseName(t.name,t.phase)){t.name='';c++}return c}
+function taskLabel(t){const f=featById(t.featureId);return (f?f.name+' › ':'')+tName(t)}
 
 /* ================= persistence & history ================= */
 const undoStack=[],redoStack=[];
-function persist(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('儲存失敗：'+e.message)}if(CLOUD)cloudSchedule()}
+function persist(){normNames();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('儲存失敗：'+e.message)}if(CLOUD)cloudSchedule()}
 function saveUI(){try{const u={...UI};delete u.q;localStorage.setItem(UIKEY,JSON.stringify(u))}catch(e){}}
 function commit(fn,msg){
   if(CLOUD&&!Cloud.loaded){toast(/^(NO_URL|BAD_URL)$/.test(Cloud.err)?'尚未連接 Google 試算表，請先完成畫面上的設定步驟':'正在連線 Google 試算表，請稍候再試');return}
@@ -597,6 +607,7 @@ function cloudApply(d){
   st.settings.lastExport=S?.settings?.lastExport||null;
   if(!st.projects.length){const bp=blankProject('我的專案');bp.id='p_default';st.projects.push(bp)} // 固定 ID：多人同時開啟空白試算表不會產生重複專案
   S=st;normSettings();if(!S.projects.find(p=>p.id===S.current))S.current=S.projects[0].id;
+  const cleared=normNames();if(cleared)setTimeout(()=>toast(`已清空 ${cleared} 個與階段同名的任務名稱；在甘特圖點兩下任務名稱即可輸入內容`),600);
   Cloud.base=base;Cloud.rev=d.rev;Cloud.people=(d.tables.people||[]).filter(r=>r.id);
   Cloud.loaded=true;Cloud.syncedAt=new Date();
   undoStack.length=0;redoStack.length=0; // 別人的更新進來後，舊的復原紀錄可能會蓋掉別人的修改，所以清空
@@ -846,18 +857,18 @@ function renderGantt(){
       if(fc)continue;
       for(const t of (F?vt:ts)){
         const s=toNum(t.start),e=toNum(t.end);const r=roleOf(t);const d=dstat(t);
-        const warn=depConflict(t)?`<span class="warn" title="開始日早於前置任務「${esc(depOf(t).name)}」的結束日">⚠</span>`:'';
+        const warn=depConflict(t)?`<span class="warn" title="開始日早於前置任務「${esc(tName(depOf(t)))}」的結束日">⚠</span>`:'';
         let bar='';const segs=taskSegs(t);
         if(segs.length){
           const cls=`bar r-${r} s-${d}${t.tentative?' tent':''}`;
           if(segs.length>1)bar+=`<div class="segline r-${r}" style="left:${x(segs[0][1]+1)}px;width:${(segs[segs.length-1][0]-segs[0][1]-1)*dw}px"></div>`;
           segs.forEach(([a,b],i)=>{
             let om='';if(UI.zoom!=='month')for(let n=a;n<=b;n++)if(isOff(n))om+=`<i class="om${holidays().has(n)?' hol':''}" style="left:${(n-a)*dw}px;width:${dw}px"></i>`;
-            bar+=`<div class="${cls}" data-id="${t.id}" data-si="${i}" style="left:${x(a)}px;width:${(b-a+1)*dw}px">${segs.length===1?`<span class="pg" style="width:${t.progress||0}%"></span>`:''}${om}${d==='done'&&i===0?'<em>✓</em>':''}${i===segs.length-1?`<span class="bl">${esc(t.name)}${t.owner?' · '+esc(t.owner):''}</span>`:''}</div>`;
+            bar+=`<div class="${cls}" data-id="${t.id}" data-si="${i}" style="left:${x(a)}px;width:${(b-a+1)*dw}px">${segs.length===1?`<span class="pg" style="width:${t.progress||0}%"></span>`:''}${om}${d==='done'&&i===0?'<em>✓</em>':''}${i===segs.length-1?`<span class="bl">${esc(tName(t))}${t.owner?' · '+esc(t.owner):''}</span>`:''}</div>`;
           });
         }
         if(UI.baseline&&p.baselineAt&&t.bStart&&t.bEnd){const bs=toNum(t.bStart),be=toNum(t.bEnd);bar=`<div class="base" style="left:${x(bs)}px;width:${(be-bs+1)*dw}px" title="基準：${mdS(t.bStart)}–${mdS(t.bEnd)}"></div>`+bar}
-        rows+=`<div class="gr task" data-kind="task" data-id="${t.id}" data-mid="${m.id}" data-fid="${f.id}"><div class="gl"><span class="grip" draggable="true" data-grip="task" data-id="${t.id}" title="拖曳調整任務順序（可拖到其他功能）">⠿</span><div class="gname" data-open-task="${t.id}"><span class="rtag r-${r}">${PH[t.phase]?.short||t.phase}</span><span class="tx" title="${esc(t.name)}">${esc(t.name)}</span>${segs.length>1?`<span class="segtag" title="${esc(segText(t))}">${segs.length}段</span>`:''}${warn}</div>${leftCols(esc(t.owner||ROLES[r].label),s!=null?md(s):'—',e!=null?md(e):'—',segs.length?taskWd(t):'')}</div>
+        rows+=`<div class="gr task" data-kind="task" data-id="${t.id}" data-mid="${m.id}" data-fid="${f.id}"><div class="gl"><span class="grip" draggable="true" data-grip="task" data-id="${t.id}" title="拖曳調整任務順序（可拖到其他功能）">⠿</span><div class="gname" data-open-task="${t.id}"><span class="rtag r-${r}">${PH[t.phase]?.short||t.phase}</span>${t.name?`<span class="tx" title="${esc(tName(t))}（點兩下可修改）">${esc(tName(t))}</span>`:'<span class="tx noname" title="點兩下輸入這個任務的內容">點兩下輸入內容</span>'}${segs.length>1?`<span class="segtag" title="${esc(segText(t))}">${segs.length}段</span>`:''}${warn}</div>${leftCols(esc(t.owner||ROLES[r].label),s!=null?md(s):'—',e!=null?md(e):'—',segs.length?taskWd(t):'')}</div>
           <div class="gt${s==null?' empty':''}" data-tid="${t.id}" style="width:${W}px">${bar}</div></div>`;
       }
     }
@@ -904,7 +915,7 @@ main.addEventListener('dragover',e=>{
 main.addEventListener('drop',e=>{
   if(!rdnd||!rdnd.tg)return;e.preventDefault();const {type,id,tg}=rdnd;clearDrop();
   if(type==='task'){const t=taskById(id);const from=t.featureId;
-    commit(()=>moveTask(id,tg.fid,tg.ref,tg.after),from!==tg.fid?`已將「${t.name}」移到「${featById(tg.fid).name}」`:'');
+    commit(()=>moveTask(id,tg.fid,tg.ref,tg.after),from!==tg.fid?`已將「${tName(t)}」移到「${featById(tg.fid).name}」`:'');
     if(tg.cls==='drop-in'&&UI.collapsed[tg.fid]){UI.collapsed[tg.fid]=false;saveUI();render()}}
   else if(type==='feat'){const f=featById(id);const from=f.moduleId;
     commit(()=>moveFeat(id,tg.mid,tg.ref,tg.after),from!==tg.mid?`已將「${f.name}」移到「${modLabel(modById(tg.mid))}」`:'')}
@@ -912,6 +923,22 @@ main.addEventListener('drop',e=>{
   refreshDrawer();
 });
 main.addEventListener('dragend',()=>{clearDrop();rdnd?.row?.classList.remove('drg-src');document.body.classList.remove('dnd-on');rdnd=null});
+
+/* 甘特圖左側：點兩下任務名稱，直接輸入內容 */
+main.addEventListener('dblclick',e=>{
+  const g=e.target.closest('.gr.task .gname[data-open-task]');if(!g||g.querySelector('input.inl'))return;
+  const t=taskById(g.dataset.openTask);if(!t)return;
+  if(drawerRef&&drawerRef[1]===t.id&&!drawer.dataset.dirty)closeDrawer(); // 第一下點擊打開的編輯面板先關掉，避免兩邊同時編輯
+  const tx=g.querySelector('.tx');const inp=document.createElement('input');
+  inp.className='inl';inp.value=t.name||'';inp.placeholder=`輸入「${PH[t.phase]?.short||''}」的內容，Enter 儲存`;
+  tx.replaceWith(inp);inp.focus();inp.select();
+  let done=false;
+  const fin=save=>{if(done)return;done=true;const v=inp.value.trim();
+    if(save&&v!==(t.name||''))commit(()=>{const x=taskById(t.id);if(x)x.name=v},v&&!isPhaseName(v,t.phase)?'已更新任務內容':'已清空任務內容');else render()};
+  inp.onkeydown=ev=>{if(ev.key==='Enter'){ev.preventDefault();fin(true)}else if(ev.key==='Escape'){ev.preventDefault();ev.stopPropagation();fin(false)}};
+  inp.onblur=()=>fin(true);
+  inp.onclick=ev=>ev.stopPropagation(); // 點輸入框不要打開編輯面板
+});
 
 /* drag & drop on gantt */
 let drag=null;
@@ -1024,7 +1051,7 @@ function renderList(){
   let h=`<div class="pad"><div class="card" style="overflow:auto"><table class="lt"><thead><tr>${LCOLS.map(([c,l])=>`<th data-sort="${c}">${l}${k===c?(dir>0?' ▲':' ▼'):''}</th>`).join('')}</tr></thead><tbody>`;
   for(const r of rows){const t=r.t;const d=dstat(t);
     h+=`<tr data-row="${t.id}"><td>${esc(r.mod)}</td><td class="nm" data-open-feature="${t.featureId}">${esc(r.feat)}</td><td>${PH[t.phase]?.label||''}</td>
-      <td class="nm" data-open-task="${t.id}" title="${esc(t.name)}">${esc(t.name)}${t.tentative?' <span class="hint">暫定</span>':''}${depConflict(t)?' <span class="warn">⚠</span>':''}</td>
+      <td class="nm" data-open-task="${t.id}" title="${esc(tName(t))}">${tNameHtml(t)}${t.tentative?' <span class="hint">暫定</span>':''}${depConflict(t)?' <span class="warn">⚠</span>':''}</td>
       <td><span class="rtag r-${r.role}">${ROLES[r.role].label}</span></td>
       <td><input class="own" data-f="owner" value="${esc(t.owner||'')}" list="ownerList"></td>
       ${t.segs?`<td colspan="2" class="nm" data-open-task="${t.id}" title="多段日期請在任務編輯中修改">${esc(segText(t))} <span class="segtag">${taskSegs(t).length}段</span></td>`:`<td><input type="date" data-f="start" value="${t.start||''}"></td><td><input type="date" data-f="end" value="${t.end||''}"></td>`}
@@ -1086,7 +1113,7 @@ function renderDash(){
   const up={pm:[],eng:[],user:[]};
   for(const t of ts){const d=dstat(t);if(d==='done'||d==='unsched')continue;const s=toNum(t.start),e=toNum(t.end);
     if(e<TODAY||s>TODAY+horizon)continue;up[roleOf(t)].push(t)}
-  const item=t=>{const e=toNum(t.end);const d=dstat(t);return `<div class="it" data-open-task="${t.id}"><div class="dt">${md(e)}<div class="hint" style="font-weight:400">週${WD[dowOf(e)]}</div></div><div style="min-width:0"><div class="t1">${esc(t.name)} <span class="pill s-${d}">${DSTAT[d]}</span></div><div class="t2">${esc(featById(t.featureId)?.name||'')}${t.owner?'・'+esc(t.owner):''}</div></div></div>`};
+  const item=t=>{const e=toNum(t.end);const d=dstat(t);return `<div class="it" data-open-task="${t.id}"><div class="dt">${md(e)}<div class="hint" style="font-weight:400">週${WD[dowOf(e)]}</div></div><div style="min-width:0"><div class="t1">${esc(tName(t))} <span class="pill s-${d}">${DSTAT[d]}</span></div><div class="t2">${esc(featById(t.featureId)?.name||'')}${t.owner?'・'+esc(t.owner):''}</div></div></div>`};
   const risk=ts.filter(t=>['overdue','blocked'].includes(dstat(t))).sort((a,b)=>(a.end||'').localeCompare(b.end||''));
   const conflicts=ts.filter(depConflict);
   let mods='';
@@ -1100,7 +1127,7 @@ function renderDash(){
       <div class="cols3">${['pm','eng','user'].map(r=>`<div class="r-${r}"><h4><span class="rdot"></span>${ROLES[r].label}<span class="hint">${up[r].length} 項</span></h4>${up[r].sort((a,b)=>a.end.localeCompare(b.end)).map(item).join('')||'<div class="empty-note">近兩週沒有交付項目</div>'}</div>`).join('')}</div></div>
     <div class="card span8"><h3>模組進度</h3>${mods}<div class="legend">${['done','review','doing','todo','overdue','blocked','unsched'].map(k=>`<span class="s-${k}"><i class="sd"></i>${DSTAT[k]}</span>`).join('')}</div></div>
     <div class="card span4"><h3>風險項目 <small>逾期・卡關・相依衝突</small></h3><div style="padding:4px 16px 10px">
-      ${risk.map(item).join('')}${conflicts.map(t=>`<div class="it" data-open-task="${t.id}"><div class="dt warn">⚠</div><div><div class="t1">${esc(t.name)}</div><div class="t2">開始日早於前置「${esc(depOf(t).name)}」結束日</div></div></div>`).join('')}
+      ${risk.map(item).join('')}${conflicts.map(t=>`<div class="it" data-open-task="${t.id}"><div class="dt warn">⚠</div><div><div class="t1">${esc(tName(t))}</div><div class="t2">開始日早於前置「${esc(tName(depOf(t)))}」結束日</div></div></div>`).join('')}
       ${risk.length||conflicts.length?'':'<div class="empty-note">目前沒有風險項目 🎉</div>'}</div></div>
   </div>`;
 }
@@ -1115,11 +1142,11 @@ function openTask(id){
   const t=taskById(id);if(!t)return;drawerRef=['task',id];
   const r=roleOf(t);const s=toNum(t.start),e=toNum(t.end);
   const deps=P().tasks.filter(x=>x.id!==t.id);
-  drawer.innerHTML=`<div class="dh"><span class="rtag r-${r}">${ROLES[r].label}</span><h2>${esc(t.name)}</h2><button class="ghost" data-close>✕</button></div>
+  drawer.innerHTML=`<div class="dh"><span class="rtag r-${r}">${ROLES[r].label}</span><h2>${esc(tName(t))}</h2><button class="ghost" data-close>✕</button></div>
   <form class="db" id="tf" autocomplete="off">
-    <label class="fld"><span>任務名稱</span><input name="name" value="${esc(t.name)}" required></label>
-    <div class="row2"><label class="fld"><span>所屬功能</span><select name="featureId">${featOptions(t.featureId)}</select></label>
-      <label class="fld"><span>階段</span><select name="phase">${PHASES.map(p=>`<option value="${p.key}"${p.key===t.phase?' selected':''}>${p.label}</option>`).join('')}</select></label></div>
+    <label class="fld"><span>任務內容</span><input name="name" value="${esc(t.name)}" placeholder="例：門診待排名單 API、院內第一輪測試（可留空）"></label>
+    <div class="fld"><span>階段</span>${phaseChips(t.phase,'name="phase"')}</div>
+    <label class="fld"><span>所屬功能</span><select name="featureId">${featOptions(t.featureId)}</select></label>
     <div class="row2"><label class="fld"><span>角色</span><select name="role"><option value="">依階段預設（${ROLES[S.settings.phaseRole[t.phase]]?.label}）</option>${Object.entries(ROLES).map(([k,v])=>`<option value="${k}"${t.role===k?' selected':''}>${v.label}</option>`).join('')}</select></label>
       <label class="fld"><span>負責人</span><input name="owner" value="${esc(t.owner||'')}" list="ownerList2" placeholder="姓名"></label></div>
     <div class="fld"><span>執行日期 <b id="segTotal"></b></span>
@@ -1131,7 +1158,7 @@ function openTask(id){
     <div class="row2"><label class="fld"><span>狀態</span><select name="status">${Object.entries(STATUS).map(([k,v])=>`<option value="${k}"${(t.status||'todo')===k?' selected':''}>${v}</option>`).join('')}</select></label>
       <label class="fld"><span>進度 <b id="pgv">${t.progress||0}%</b></span><input type="range" name="progress" min="0" max="100" step="10" value="${t.progress||0}"></label></div>
     <label class="ck"><input type="checkbox" name="tentative"${t.tentative?' checked':''}> 日期為暫定（甘特圖以斜紋顯示）</label>
-    <label class="fld"><span>前置任務（完成後才能開始）</span><select name="dep"><option value="">無</option>${P().modules.map(m=>featsOf(m.id).map(f=>{const xs=tasksOf(f.id).filter(x=>x.id!==t.id);return xs.length?`<optgroup label="${esc(f.name)}">${xs.map(x=>`<option value="${x.id}"${t.dep===x.id?' selected':''}>${esc(x.name)}${x.end?'（'+mdS(x.end)+'）':''}</option>`).join('')}</optgroup>`:''}).join('')).join('')}</select></label>
+    <label class="fld"><span>前置任務（完成後才能開始）</span><select name="dep"><option value="">無</option>${P().modules.map(m=>featsOf(m.id).map(f=>{const xs=tasksOf(f.id).filter(x=>x.id!==t.id);return xs.length?`<optgroup label="${esc(f.name)}">${xs.map(x=>`<option value="${x.id}"${t.dep===x.id?' selected':''}>${esc(tName(x))}${x.end?'（'+mdS(x.end)+'）':''}</option>`).join('')}</optgroup>`:''}).join('')).join('')}</select></label>
     ${depConflict(t)?`<div class="warn">⚠ 開始日早於前置任務結束日（${mdS(depOf(t).end)}）<button type="button" data-fixdep style="margin-left:6px">順延到前置任務之後</button></div>`:''}
     <label class="fld"><span>交付物連結 / 備註</span><textarea name="note" rows="4" placeholder="例如 Figma、GitHub、測試報告連結，或驗收意見">${esc(t.note||'')}</textarea></label>
     ${t.doneAt?`<div class="hint">完成日：${esc(t.doneAt)}</div>`:''}
@@ -1190,7 +1217,7 @@ function openFeature(id){
     <label class="fld"><span>所屬模組</span><select name="moduleId">${P().modules.map(m=>`<option value="${m.id}"${m.id===f.moduleId?' selected':''}>${esc(modLabel(m))}</option>`).join('')}</select></label>
     <div class="hint">${sp?`期間 ${md(sp[0])} – ${md(sp[1])}・共 ${workdays(sp[0],sp[1])} 工作天・`:''}完成 ${Math.round(doneRatio(ts)*100)}%</div>
     <div class="fld"><span>階段任務（點擊編輯，↑↓ 調整順序）</span>
-      ${ts.map((t,i)=>{const d=dstat(t);return `<div class="ftask t4" data-open-task="${t.id}"><span class="rtag r-${roleOf(t)}">${PH[t.phase]?.short}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.name)}<span class="hint">${t.owner?'・'+esc(t.owner):''}</span></span><span style="text-align:right"><span class="pill s-${d}">${t.start?mdS(t.start)+'–'+mdS(t.end):DSTAT[d]}</span></span><span class="mv"><button type="button" class="ghost" data-move-task="${t.id}" data-dir="-1" title="上移"${i===0?' disabled':''}>↑</button><button type="button" class="ghost" data-move-task="${t.id}" data-dir="1" title="下移"${i===ts.length-1?' disabled':''}>↓</button></span></div>`}).join('')||'<div class="empty-note">尚無任務</div>'}
+      ${ts.map((t,i)=>{const d=dstat(t);return `<div class="ftask t4" data-open-task="${t.id}"><span class="rtag r-${roleOf(t)}">${PH[t.phase]?.short}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${tNameHtml(t)}<span class="hint">${t.owner?'・'+esc(t.owner):''}</span></span><span style="text-align:right"><span class="pill s-${d}">${t.start?mdS(t.start)+'–'+mdS(t.end):DSTAT[d]}</span></span><span class="mv"><button type="button" class="ghost" data-move-task="${t.id}" data-dir="-1" title="上移"${i===0?' disabled':''}>↑</button><button type="button" class="ghost" data-move-task="${t.id}" data-dir="1" title="下移"${i===ts.length-1?' disabled':''}>↓</button></span></div>`}).join('')||'<div class="empty-note">尚無任務</div>'}
     </div>
     <div class="btnrow"><button type="button" data-add-task="${f.id}">＋ 新增任務（可自訂名稱）</button><button type="button" data-fill="${f.id}" title="依「設定」中的預設任務範本補上缺少的任務">補齊預設任務</button></div>
     <div class="card" style="padding:10px 12px">
@@ -1220,7 +1247,7 @@ function saveModule(id){const f=$('#mf');if(!f.reportValidity())return;commit(()
 /* create helpers */
 function makeTask(fid,phase,name,extra={}){
   const p=P();const order=p.tasks.filter(t=>t.featureId===fid&&t.phase===phase).length;
-  const t={id:uid('t'),featureId:fid,phase,name:name||PH[phase].label,owner:'',start:'',end:'',status:'todo',progress:0,order,...extra};
+  const t={id:uid('t'),featureId:fid,phase,name:name||'',owner:'',start:'',end:'',status:'todo',progress:0,order,...extra};
   p.tasks.push(t);placeTask(t);return t;
 }
 /* ordering helpers */
@@ -1251,23 +1278,33 @@ function moveMod(id,refId,after){
   const ms=P().modules;const m=modById(id);ms.splice(ms.indexOf(m),1);
   ms.splice(ms.findIndex(x=>x.id===refId)+(after?1:0),0,m);
 }
+// 階段選擇器：一排跟甘特圖相同的色塊標籤
+const phaseChips=(sel,inputAttr)=>`<div class="phchips">${PHASES.map(p=>`<button type="button" class="rtag phc r-${S.settings.phaseRole[p.key]||'pm'}${p.key===sel?' on':''}" data-ph="${p.key}" title="${esc(p.label)}">${esc(p.short)}</button>`).join('')}<input type="hidden" ${inputAttr} value="${sel}"></div>`;
+document.addEventListener('click',e=>{
+  const b=e.target.closest('.phchips [data-ph]');if(!b)return;
+  const box=b.closest('.phchips');$$('[data-ph]',box).forEach(x=>x.classList.toggle('on',x===b));
+  $('input[type=hidden]',box).value=b.dataset.ph;
+  const rs=box.closest('form,dialog')?.querySelector('select[name=role] option[value=""],#ntRole option[value=""]');
+  if(rs)rs.textContent=`依階段預設（${ROLES[S.settings.phaseRole[b.dataset.ph]]?.label||''}）`;
+  if(drawer.contains(b))drawer.dataset.dirty='1';
+});
 const tplPhases=()=>PHASES.filter(p=>p.key!=='other'&&S.settings.template[p.key]);
 function fillPhases(fid,specName){
   const ts=tasksOf(fid);
-  for(const ph of tplPhases()){if(!ts.some(t=>t.phase===ph.key))makeTask(fid,ph.key,ph.key==='spec'?(specName||'規格文件'):ph.label)}
+  for(const ph of tplPhases()){if(!ts.some(t=>t.phase===ph.key))makeTask(fid,ph.key,ph.key==='spec'?(specName||''):'')}
 }
 function newTaskDialog(fid,phase){
   phase=phase||'other';
   openDialog('新增任務',`
     <label class="fld"><span>所屬功能</span><select id="ntF">${featOptions(fid)}</select></label>
-    <label class="fld"><span>任務名稱</span><input id="ntName" placeholder="例：教育訓練、資安弱掃、上線部署、需求訪談"></label>
-    <div class="row2"><label class="fld"><span>類別（決定預設排序與矩陣欄位）</span><select id="ntPh">${PHASES.map(p=>`<option value="${p.key}"${p.key===phase?' selected':''}>${p.label}</option>`).join('')}</select></label>
-      <label class="fld"><span>角色</span><select id="ntRole"><option value="">依類別預設</option>${Object.entries(ROLES).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('')}</select></label></div>
+    <label class="fld"><span>任務內容</span><input id="ntName" placeholder="例：教育訓練、資安弱掃、上線部署（可留空）"></label>
+    <div class="fld"><span>階段</span>${phaseChips(phase,'id="ntPh"')}</div>
+    <label class="fld"><span>角色</span><select id="ntRole"><option value="">依階段預設（${ROLES[S.settings.phaseRole[phase]]?.label||''}）</option>${Object.entries(ROLES).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('')}</select></label>
     <label class="fld"><span>負責人（可留空）</span><input id="ntOwner" list="ownerList4"><datalist id="ownerList4">${owners().map(o=>`<option value="${esc(o)}">`).join('')}</datalist></label>
     <div class="hint">建立後會開啟任務編輯，接著設定日期即可。</div>`,
     `<span class="sp"></span><button data-dclose>取消</button><button class="primary" id="ntOk">建立</button>`);
-  const ok=()=>{const ph=$('#ntPh').value;const name=$('#ntName').value.trim()||PH[ph].label;const role=$('#ntRole').value;let t;
-    commit(()=>{t=makeTask($('#ntF').value,ph,name,{owner:$('#ntOwner').value.trim(),...(role?{role}:{})})},`已新增任務「${name}」`);
+  const ok=()=>{const ph=$('#ntPh').value;const name=$('#ntName').value.trim();const role=$('#ntRole').value;let t;
+    commit(()=>{t=makeTask($('#ntF').value,ph,name,{owner:$('#ntOwner').value.trim(),...(role?{role}:{})})},`已新增任務「${name||PH[ph].short}」`);
     dlg.close();openTask(t.id)};
   $('#ntOk').onclick=ok;$('#ntName').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();ok()}};
   setTimeout(()=>$('#ntName')?.focus(),30);
@@ -1342,7 +1379,7 @@ function applyOutline(p,mods,withTpl,eng){
     for(const fn of feats){
       if(p.features.some(f=>f.moduleId===m.id&&f.name===fn))continue;
       const f={id:uid('f'),moduleId:m.id,name:fn};p.features.push(f);nf++;
-      if(withTpl){for(const ph of tplPhases())p.tasks.push({id:uid('t'),featureId:f.id,phase:ph.key,name:ph.key==='spec'?fn:ph.label,
+      if(withTpl){for(const ph of tplPhases())p.tasks.push({id:uid('t'),featureId:f.id,phase:ph.key,name:ph.key==='spec'?fn:'',
         owner:(eng&&(S.settings.phaseRole[ph.key]==='eng'))?eng:'',start:'',end:'',status:'todo',progress:0,order:0})}
     }
   }
@@ -1362,7 +1399,7 @@ function outlineDialog(prefill){
   02-1 任務總覽
 05 系統設定">${esc(prefill||'')}</textarea></label>
     <div class="hint">沒有縮排的行＝模組，縮排或「-」開頭＝功能。模組底下沒有功能時，會以模組名稱建立一個功能。</div>
-    <label class="ck"><input type="checkbox" id="olTpl" checked> 每個功能自動建立預設任務：${tplPhases().map(p=>p.label).join('、')||'（設定中未勾選任何類別）'}</label>
+    <label class="ck"><input type="checkbox" id="olTpl" checked> 每個功能自動建立預設任務：${tplPhases().map(p=>p.short).join('、')||'（設定中未勾選任何類別）'}</label>
     <label class="fld"><span>工程師（開發 / DEMO 負責人，可留空）</span><input id="olEng" list="ownerList5"><datalist id="ownerList5">${owners().map(o=>`<option value="${esc(o)}">`).join('')}</datalist></label>
     <div class="card" style="padding:8px 12px"><b id="olPrev">尚未輸入</b></div>`,
     `<button id="olTplCsv">下載 CSV 範本</button><span class="sp"></span><button data-dclose>取消</button><button class="primary" id="olOk">建立</button>`);
@@ -1390,7 +1427,7 @@ function settingsDialog(){
     <label class="fld"><span>專案名稱</span><input id="stName" value="${esc(P().name)}"></label>
     <div class="fld"><span>任務類別：預設角色、預設工作天，以及新功能是否自動建立（預設任務範本）</span>
       <div class="row3 hint" style="grid-template-columns:110px 1fr 80px 90px"><span>類別</span><span>預設角色</span><span>預設工作天</span><span>自動建立</span></div>
-      ${PHASES.map(p=>`<div class="row3" style="grid-template-columns:110px 1fr 80px 90px;align-items:center"><b>${p.label}</b><select data-pr="${p.key}">${Object.entries(ROLES).map(([k,v])=>`<option value="${k}"${st.phaseRole[p.key]===k?' selected':''}>${v.label}</option>`).join('')}</select><input type="number" min="1" data-dd="${p.key}" value="${st.defDur[p.key]}" title="預設工作天">${p.key==='other'?'<span class="hint">自訂任務用</span>':`<label class="ck"><input type="checkbox" data-tpl="${p.key}"${st.template[p.key]?' checked':''}> 建立</label>`}</div>`).join('')}
+      ${PHASES.map(p=>`<div class="row3" style="grid-template-columns:110px 1fr 80px 90px;align-items:center"><span><span class="rtag r-${st.phaseRole[p.key]}">${p.short}</span></span><select data-pr="${p.key}">${Object.entries(ROLES).map(([k,v])=>`<option value="${k}"${st.phaseRole[p.key]===k?' selected':''}>${v.label}</option>`).join('')}</select><input type="number" min="1" data-dd="${p.key}" value="${st.defDur[p.key]}" title="預設工作天">${p.key==='other'?'<span class="hint">自訂任務用</span>':`<label class="ck"><input type="checkbox" data-tpl="${p.key}"${st.template[p.key]?' checked':''}> 建立</label>`}</div>`).join('')}
     </div>
     <label class="fld"><span>國定假日 / 公司休假（一行一筆：日期 名稱）</span><textarea id="stHol" rows="7">${esc(st.holidays)}</textarea></label>
     <div class="hint">預設已填入 2026 年 9–12 月台灣國定假日，請依人事行政總處公告確認或增補。</div>
@@ -1449,7 +1486,7 @@ function exportList(){
   for(const m of p.modules)for(const f of featsOf(m.id))for(const t of tasksOf(f.id)){
     const d=depOf(t);
     rows.push([modLabel(m),f.name,PH[t.phase]?.label,t.name,ROLES[roleOf(t)].label,t.owner||'',t.start?ymd(toNum(t.start)):'',t.end?ymd(toNum(t.end)):'',
-      t.start?taskWd(t):'',STATUS[t.status||'todo'],t.progress||0,t.tentative?'Y':'',d?d.name:'',t.bStart||'',t.bEnd||'',t.doneAt||'',t.note||'',segsToText(t)])}
+      t.start?taskWd(t):'',STATUS[t.status||'todo'],t.progress||0,t.tentative?'Y':'',d?tName(d):'',t.bStart||'',t.bEnd||'',t.doneAt||'',t.note||'',segsToText(t)])}
   return rows;
 }
 function exportGantt(){
@@ -1460,10 +1497,10 @@ function exportGantt(){
   for(const m of p.modules){let first=true;
     for(const f of featsOf(m.id)){const ts=tasksOf(f.id);
       rows.push(line(first?modLabel(m):'','規格文件'));first=false;
-      ts.filter(t=>t.phase==='spec').forEach(t=>rows.push(line('',t.name,t)));
+      ts.filter(t=>t.phase==='spec').forEach(t=>rows.push(line('',t.name||PH.spec.label,t)));
       const engs=[...new Set(ts.filter(t=>roleOf(t)==='eng'&&t.owner).map(t=>t.owner))];
       rows.push(line('',`系統開發${engs.length?'('+engs.join('、')+')':''}`));
-      ts.filter(t=>t.phase!=='spec').forEach(t=>rows.push(line('',t.name,t)));
+      ts.filter(t=>t.phase!=='spec').forEach(t=>rows.push(line('',t.name||PH[t.phase]?.label||'',t)));
     }
     if(first)rows.push(line(modLabel(m),''));
   }
@@ -1520,7 +1557,7 @@ function importList(rows,name){
     if(!mods.has(ml)){const m=ml.match(/^(\d+)\s+(.*)$/);const o={id:uid('m'),code:m?m[1]:'',name:m?m[2]:ml||'未分類'};mods.set(ml,o);p.modules.push(o)}
     const fk=ml+'|'+fl;if(!feats.has(fk)){const o={id:uid('f'),moduleId:mods.get(ml).id,name:fl||'未命名功能'};feats.set(fk,o);p.features.push(o)}
     const ph=phaseKey((r[ix('階段')]||'').trim());const rk=roleKey((r[ix('角色')]||'').trim());
-    const t={id:uid('t'),featureId:feats.get(fk).id,phase:ph,name:(r[ix('任務')]||'').trim()||PH[ph].label,owner:(r[ix('負責人')]||'').trim(),
+    const t={id:uid('t'),featureId:feats.get(fk).id,phase:ph,name:(r[ix('任務')]||'').trim(),owner:(r[ix('負責人')]||'').trim(),
       start:normDate(r[ix('開始')]),end:normDate(r[ix('結束')]),status:statKey((r[ix('狀態')]||'').trim()),progress:+(r[ix('進度')]||0)||0,
       tentative:(r[ix('暫定')]||'').trim().toUpperCase()==='Y',bStart:normDate(r[ix('基準開始')]),bEnd:normDate(r[ix('基準結束')]),doneAt:normDate(r[ix('完成日')])||undefined,note:r[ix('備註')]||'',order:p.tasks.filter(x=>x.featureId===feats.get(fk).id&&x.phase===ph).length,seq:(p.tasks.filter(x=>x.featureId===feats.get(fk).id).length+1)*10};
     if(rk&&rk!==S.settings.phaseRole[ph])t.role=rk;
@@ -1528,7 +1565,7 @@ function importList(rows,name){
     if(t.bStart)p.baselineAt=p.baselineAt||Date.now();
     p.tasks.push(t);byName.push([t,(r[ix('前置任務')]||'').trim()]);
   }
-  for(const [t,dn] of byName)if(dn){const d=p.tasks.find(x=>x.name===dn&&x.featureId===t.featureId)||p.tasks.find(x=>x.name===dn);if(d&&d!==t)t.dep=d.id}
+  for(const [t,dn] of byName)if(dn){const d=p.tasks.find(x=>tName(x)===dn&&x.featureId===t.featureId)||p.tasks.find(x=>tName(x)===dn);if(d&&d!==t)t.dep=d.id}
   return p;
 }
 function importFile(file){
@@ -1595,8 +1632,8 @@ document.addEventListener('click',e=>{
   if(d.addTask){newTaskDialog(d.addTask);return}
   if(d.addPhase){let t;commit(()=>{t=makeTask(d.fid,d.addPhase)});openTask(t.id);return}
   if(d.saveTask){saveTask(d.saveTask);return}
-  if(d.delTask){const t=taskById(d.delTask);commit(()=>{P().tasks=P().tasks.filter(x=>x.id!==t.id);P().tasks.forEach(x=>{if(x.dep===t.id)delete x.dep})},`已刪除「${t.name}」（⌘Z 可復原）`);openFeature(t.featureId);return}
-  if(d.dupTask){const t=taskById(d.dupTask);let n;commit(()=>{n={...structuredClone(t),id:uid('t'),name:t.name+'（複製）',order:(t.order||0)+.5};if(n.seq!=null)n.seq+=5;P().tasks.push(n)});openTask(n.id);return}
+  if(d.delTask){const t=taskById(d.delTask);commit(()=>{P().tasks=P().tasks.filter(x=>x.id!==t.id);P().tasks.forEach(x=>{if(x.dep===t.id)delete x.dep})},`已刪除「${tName(t)}」（⌘Z 可復原）`);openFeature(t.featureId);return}
+  if(d.dupTask){const t=taskById(d.dupTask);let n;commit(()=>{n={...structuredClone(t),id:uid('t'),name:t.name?t.name+'（複製）':'',order:(t.order||0)+.5};if(n.seq!=null)n.seq+=5;P().tasks.push(n)});openTask(n.id);return}
   if(d.saveFeature){saveFeature(d.saveFeature);return}
   if(d.delFeature){const f=featById(d.delFeature);if(!confirm(`刪除功能「${f.name}」及其 ${tasksOf(f.id).length} 項任務？（⌘Z 可復原）`))return;
     commit(()=>{const ids=new Set(tasksOf(f.id).map(t=>t.id));P().tasks=P().tasks.filter(t=>t.featureId!==f.id);P().tasks.forEach(x=>{if(ids.has(x.dep))delete x.dep});P().features=P().features.filter(x=>x.id!==f.id)},'已刪除功能');closeDrawer();return}
