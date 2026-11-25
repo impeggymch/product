@@ -1,0 +1,1640 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- 不讓搜尋引擎收錄這個頁面：不建索引、不跟隨連結、不保存快取、不顯示摘要與圖片 -->
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="bingbot" content="noindex, nofollow, noarchive, nosnippet">
+<!-- 點備註裡的外部連結時，不把這個工具的網址告訴對方網站 -->
+<meta name="referrer" content="no-referrer">
+<title>專案時程管理</title>
+<style>
+:root{
+  --bg:#f7f8fa; --panel:#fff; --panel2:#f1f3f6; --line:#e3e6eb; --line2:#eef0f3;
+  --text:#1d2330; --muted:#6b7385; --faint:#9aa1b0;
+  --accent:#2f6fed; --accent-soft:#e8effd;
+  --pm:#3b7cf0; --eng:#14a37f; --user:#e88a12;
+  --pm-soft:#e6efff; --eng-soft:#e0f5ee; --user-soft:#fdf0dd;
+  --done:#16a34a; --doing:#2f6fed; --review:#8b5cf6; --todo:#9aa1b0; --overdue:#e5484d; --blocked:#c2410c; --unsched:#c4c9d3;
+  --off:#eef0f4; --hol:#fde9e9; --today:#e5484d;
+  --shadow:0 8px 30px rgba(20,30,50,.14);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#14171c; --panel:#1b1f26; --panel2:#222731; --line:#2d333e; --line2:#252a33;
+  --text:#e6e9ef; --muted:#9aa3b2; --faint:#6c7483;
+  --accent:#5b8ef7; --accent-soft:#1e2a44;
+  --pm:#5b8ef7; --eng:#2bbf94; --user:#f0a03a;
+  --pm-soft:#1e2a44; --eng-soft:#173329; --user-soft:#3a2b16;
+  --off:#1f232b; --hol:#3a2024; --shadow:0 8px 30px rgba(0,0,0,.5);
+}}
+:root[data-theme="dark"]{
+  --bg:#14171c; --panel:#1b1f26; --panel2:#222731; --line:#2d333e; --line2:#252a33;
+  --text:#e6e9ef; --muted:#9aa3b2; --faint:#6c7483;
+  --accent:#5b8ef7; --accent-soft:#1e2a44;
+  --pm:#5b8ef7; --eng:#2bbf94; --user:#f0a03a;
+  --pm-soft:#1e2a44; --eng-soft:#173329; --user-soft:#3a2b16;
+  --off:#1f232b; --hol:#3a2024; --shadow:0 8px 30px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--text);font:13px/1.45 -apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;display:flex;flex-direction:column;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:1px solid var(--line);background:var(--panel);border-radius:7px;padding:5px 10px}
+button:hover{background:var(--panel2)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.primary:hover{filter:brightness(1.08)}
+button.danger{color:var(--overdue)}
+button.ghost{border-color:transparent;background:transparent}
+input,select,textarea{border:1px solid var(--line);background:var(--panel);border-radius:7px;padding:5px 8px;min-width:0}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent-soft);border-color:var(--accent)}
+/* top bar */
+.top{display:flex;align-items:center;gap:14px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:8px;font-weight:600}
+.brand .logo{width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,var(--pm),var(--eng) 60%,var(--user));flex:none}
+#projSel{font-weight:600;border-color:transparent;background:transparent;font-size:15px;max-width:280px}
+.tabs{display:flex;gap:2px;background:var(--panel2);padding:3px;border-radius:9px;max-width:100%;overflow-x:auto}
+.tabs button{border:0;background:transparent;padding:5px 12px;border-radius:7px;color:var(--muted);white-space:nowrap}
+.top button{white-space:nowrap}
+.tabs button.on{background:var(--panel);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.08);font-weight:600}
+.actions{margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.badge-dot{position:relative}
+.badge-dot::after{content:"";position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;background:var(--overdue)}
+/* filters */
+.filters{display:flex;gap:8px;align-items:center;padding:8px 16px;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;cursor:pointer;user-select:none;background:var(--panel)}
+.chip.off{opacity:.45}
+.chip i,.rdot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+.r-pm{--role:var(--pm);--role-soft:var(--pm-soft)} .r-eng{--role:var(--eng);--role-soft:var(--eng-soft)} .r-user{--role:var(--user);--role-soft:var(--user-soft)}
+.chip i,.rdot{background:var(--role)}
+.sep{width:1px;height:20px;background:var(--line)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.seg button{border:0;border-radius:0;padding:4px 10px}
+.seg button.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+#q{width:180px}
+.fl-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+label.ck{display:inline-flex;gap:5px;align-items:center;cursor:pointer;color:var(--muted)}
+main{flex:1;min-height:0;overflow:auto;position:relative}
+.fnote{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 16px;background:color-mix(in srgb,var(--accent) 10%,var(--panel));border-bottom:1px solid var(--line);font-size:12.5px}
+.fnote[hidden]{display:none}.fnote button{padding:2px 10px}
+/* status */
+.sd{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+.s-done{--st:var(--done)} .s-doing{--st:var(--doing)} .s-review{--st:var(--review)} .s-todo{--st:var(--todo)} .s-overdue{--st:var(--overdue)} .s-blocked{--st:var(--blocked)} .s-unsched{--st:var(--unsched)} .s-none{--st:var(--line)}
+.sd{background:var(--st)}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;padding:1px 8px;border-radius:999px;background:color-mix(in srgb,var(--st) 14%,transparent);color:color-mix(in srgb,var(--st) 80%,var(--text));white-space:nowrap}
+.rtag{display:inline-block;font-size:11px;padding:0 6px;border-radius:4px;background:var(--role-soft);color:var(--role);font-weight:600;white-space:nowrap}
+/* ---------- gantt ---------- */
+.gw{position:relative;min-width:100%}
+.ghead{position:sticky;top:0;z-index:5;display:flex;background:var(--panel);border-bottom:1px solid var(--line)}
+.gl{position:sticky;left:0;z-index:3;flex:none;width:var(--lw);background:var(--panel);border-right:1px solid var(--line)}
+.ghead .gl{z-index:6;display:grid;grid-template-columns:1fr 62px 46px 46px 30px;align-items:end;padding:0 8px 6px;color:var(--muted);font-size:11.5px;height:52px}
+.ghead .gl span:not(:first-child){text-align:center}
+.gtime{position:relative;flex:none;height:52px}
+.hm{position:absolute;top:0;height:24px;line-height:24px;padding-left:6px;font-weight:600;border-left:1px solid var(--line);white-space:nowrap;overflow:hidden;font-size:12px}
+.hd,.hw{position:absolute;top:24px;height:28px;text-align:center;border-left:1px solid var(--line2);font-size:11px;line-height:13px;padding-top:2px;color:var(--muted)}
+.hd b{display:block;font-weight:600;color:var(--text)} .hd i{font-style:normal;font-size:10px}
+.hd.off{background:var(--off)} .hd.off b{color:var(--muted)}
+.hd.today{background:var(--today);color:#fff;border-radius:5px} .hd.today b{color:#fff}
+.hw{text-align:left;padding-left:4px;line-height:26px}
+.gbody{position:relative}
+.gbg{position:absolute;top:0;bottom:0;pointer-events:none;z-index:0}
+.gbg .off{position:absolute;top:0;bottom:0;background:var(--off)}
+.gbg .off.hol{background:var(--hol)}
+.gbg .wl{position:absolute;top:0;bottom:0;width:1px;background:var(--line2)}
+.gbg .todayline{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--today);opacity:.75}
+.gr{display:flex;height:30px;border-bottom:1px solid var(--line2);position:relative}
+.gr:hover .gl{background:var(--panel2)}
+.gr .gl{display:grid;grid-template-columns:1fr 62px 46px 46px 30px;align-items:center;padding:0 8px;font-size:12.5px}
+.gr .gl > span:not(:first-child){text-align:center;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gname{display:flex;align-items:center;gap:6px;min-width:0;cursor:pointer}
+.gname .tx{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gname:hover .tx{text-decoration:underline;text-decoration-color:var(--faint)}
+.caret{width:16px;flex:none;text-align:center;color:var(--muted);cursor:pointer;font-size:10px;transition:transform .15s}
+.caret.closed{transform:rotate(-90deg)}
+.gr.mod{background:var(--panel2);font-weight:700}
+.gr.mod .gl{background:var(--panel2)}
+.gr.feat{font-weight:600}
+.gr.task .gname{padding-left:30px;font-weight:400}
+.addbtn{opacity:0;border:0;background:transparent;padding:0 4px;color:var(--accent);font-size:15px;line-height:1}
+.gr:hover .addbtn{opacity:1}
+.cloud.c-ok{color:var(--done)}.cloud.c-error{color:var(--overdue);font-weight:600}.cloud.c-saving,.cloud.c-loading{color:var(--muted)}
+.whos{display:flex;flex-wrap:wrap;gap:6px}.whos button{display:inline-flex;gap:6px;align-items:baseline}.whos button.primary .hint{color:#fff}
+.grip{position:absolute;left:0;top:0;bottom:0;width:12px;display:flex;align-items:center;justify-content:center;color:var(--faint);cursor:grab;opacity:0;font-size:11px;user-select:none;z-index:2}
+.gr.feat .grip{left:8px}.gr.task .grip{left:18px}
+.gr:hover .grip{opacity:1}.grip:hover{color:var(--accent)}
+body.dnd-on .gr:hover .gl{background:inherit}
+.gr.drg-src{opacity:.35}
+.gr.drop-before::before,.gr.drop-after::after{content:"";position:absolute;left:0;right:0;height:2px;background:var(--accent);z-index:8;pointer-events:none}
+.gr.drop-before::before{top:-1px}.gr.drop-after::after{bottom:-1px}
+.gr.drop-in .gl{background:var(--accent-soft)!important;box-shadow:inset 0 0 0 2px var(--accent)}
+.ftask.t4{grid-template-columns:70px 1fr 90px 46px}
+.mv{display:flex;gap:2px;justify-content:flex-end}.mv button{padding:0 5px;font-size:11px;line-height:18px}
+.warn{color:var(--overdue);font-size:12px}
+.gt{position:relative;flex:none;z-index:1}
+.gt.empty{cursor:crosshair}
+.gt.empty:hover::after{content:"在此拖曳即可排程";position:absolute;left:var(--hx,8px);top:8px;font-size:11px;color:var(--faint);pointer-events:none;white-space:nowrap}
+.bar{position:absolute;top:7px;height:16px;border-radius:5px;background:var(--role);cursor:grab;touch-action:none;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.bar:active{cursor:grabbing}
+.bar::before,.bar::after{content:"";position:absolute;top:0;bottom:0;width:7px;cursor:ew-resize}
+.bar::before{left:0} .bar::after{right:0}
+.bar .pg{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:rgba(0,0,0,.22);pointer-events:none}
+.bar.s-done{opacity:.5}
+.bar.s-done .pg{background:transparent}
+.bar em{position:absolute;left:4px;top:0;font-style:normal;color:#fff;font-size:11px;line-height:16px;pointer-events:none}
+.bar.s-overdue{box-shadow:0 0 0 2px var(--overdue)}
+.bar.s-blocked{box-shadow:0 0 0 2px var(--blocked);background-image:repeating-linear-gradient(-45deg,rgba(0,0,0,.25) 0 3px,transparent 3px 7px)}
+.bar.tent{background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.45) 0 4px,transparent 4px 8px);border:1px dashed rgba(0,0,0,.25)}
+.bar .bl{position:absolute;left:calc(100% + 6px);top:0;line-height:16px;white-space:nowrap;font-size:11.5px;color:var(--muted);pointer-events:none}
+.bar .om{position:absolute;top:0;bottom:0;background:var(--off);opacity:.82;pointer-events:none}
+.bar .om.hol{background:var(--hol)}
+.bar.dragging .om{display:none}
+.segline{position:absolute;top:14px;height:0;border-top:2px dotted var(--role);opacity:.6;pointer-events:none}
+.segtag{flex:none;font-size:10.5px;padding:0 5px;border-radius:4px;background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+.gt.adding{cursor:copy}
+.base{position:absolute;bottom:2px;height:3px;border-radius:2px;background:var(--faint);opacity:.6;pointer-events:none}
+.sum{position:absolute;top:11px;height:8px;border-radius:2px;background:color-mix(in srgb,var(--text) 22%,transparent);pointer-events:none}
+.sum span{position:absolute;left:0;top:0;bottom:0;background:color-mix(in srgb,var(--done) 80%,transparent);border-radius:2px}
+.sum::before,.sum::after{content:"";position:absolute;bottom:-4px;border:4px solid transparent;border-top-color:color-mix(in srgb,var(--text) 40%,transparent)}
+.sum::before{left:-4px}.sum::after{right:-4px}
+.sum .bl{position:absolute;left:calc(100% + 8px);top:-4px;font-size:11.5px;color:var(--muted);white-space:nowrap;font-weight:500}
+.msum{position:absolute;top:13px;height:4px;border-radius:2px;background:color-mix(in srgb,var(--text) 30%,transparent);pointer-events:none}
+/* ---------- matrix ---------- */
+.pad{padding:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%}
+.mx th{position:sticky;top:0;background:var(--panel);z-index:2;text-align:left;font-weight:600;padding:10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.mx th small{display:block;color:var(--muted);font-weight:400;font-size:11px;margin-left:15px}
+.mx th .rdot{margin-right:6px}
+.mx td{border-bottom:1px solid var(--line2);padding:6px;vertical-align:top}
+.mx td.fn{padding:10px;font-weight:600;min-width:200px;cursor:pointer}
+.mx td.fn:hover{color:var(--accent)}
+.mx tr.mxm td{background:var(--panel2);font-weight:700;padding:7px 10px}
+.mxc{cursor:pointer;min-width:120px}
+.mxc > div.box{border-radius:8px;padding:6px 8px;background:color-mix(in srgb,var(--st) 10%,transparent);border:1px solid color-mix(in srgb,var(--st) 30%,transparent);height:100%}
+.mxc:hover > div.box{border-color:var(--st)}
+.mxc.cur > div.box{box-shadow:0 0 0 2px var(--accent)}
+.mxs{display:flex;align-items:center;gap:6px;font-weight:600;font-size:12px}
+.mxd{color:var(--muted);font-size:11.5px;margin-top:2px}
+.mxc.empty{color:var(--faint);text-align:center;vertical-align:middle}
+.mxc.empty:hover{color:var(--accent)}
+.prog{height:6px;background:var(--line2);border-radius:3px;overflow:hidden;min-width:80px}
+.prog span{display:block;height:100%;background:var(--done)}
+/* ---------- list ---------- */
+.lt th{position:sticky;top:0;background:var(--panel);z-index:2;text-align:left;padding:8px;border-bottom:1px solid var(--line);font-weight:600;white-space:nowrap;cursor:pointer;user-select:none}
+.lt th:hover{color:var(--accent)}
+.lt td{padding:4px 8px;border-bottom:1px solid var(--line2);white-space:nowrap}
+.lt tr:hover td{background:var(--panel2)}
+.lt input,.lt select{padding:2px 5px;font-size:12px}
+.lt input[type=date]{width:124px}
+.lt input.own{width:80px}
+.lt .nm{cursor:pointer;max-width:260px;overflow:hidden;text-overflow:ellipsis}
+.lt .nm:hover{color:var(--accent)}
+.slip{color:var(--overdue);font-weight:600} .slip.neg{color:var(--done)}
+/* ---------- workload ---------- */
+.wl td,.wl th{padding:0;border-bottom:1px solid var(--line2);text-align:center;font-size:12px}
+.wl th{position:sticky;top:0;background:var(--panel);z-index:2;padding:8px 4px;font-weight:600;color:var(--muted);white-space:nowrap}
+.wl th.now{color:var(--accent)}
+.wl td.who{text-align:left;padding:6px 10px;white-space:nowrap;position:sticky;left:0;background:var(--panel);z-index:1;min-width:150px}
+.wl td.c{width:44px;height:32px}
+.wl td.c div{margin:3px;border-radius:5px;height:26px;line-height:26px;font-weight:600}
+.wl .l1 div{background:color-mix(in srgb,var(--role) 18%,transparent)}
+.wl .l2 div{background:color-mix(in srgb,var(--role) 45%,transparent)}
+.wl .l3 div{background:var(--overdue);color:#fff}
+.wl tr.rh td{background:var(--panel2);font-weight:700;text-align:left;padding:6px 10px}
+/* ---------- dashboard ---------- */
+.dash{display:grid;gap:16px;padding:16px;grid-template-columns:repeat(12,1fr);max-width:1400px;margin:0 auto}
+.kpi{grid-column:span 2;padding:14px 16px}
+.kpi .v{font-size:26px;font-weight:700;letter-spacing:-.5px}
+.kpi .k{color:var(--muted);font-size:12px}
+.kpi.red .v{color:var(--overdue)}
+.span12{grid-column:span 12}.span8{grid-column:span 8}.span4{grid-column:span 4}.span6{grid-column:span 6}
+.card h3{margin:0;padding:12px 16px;font-size:13.5px;border-bottom:1px solid var(--line2);display:flex;align-items:center;gap:8px}
+.card h3 small{color:var(--muted);font-weight:400}
+.cols3{display:grid;grid-template-columns:repeat(3,1fr)}
+.cols3 > div{padding:10px 14px;border-right:1px solid var(--line2);min-width:0}
+.cols3 > div:last-child{border-right:0}
+.cols3 h4{margin:2px 0 8px;font-size:12.5px;display:flex;align-items:center;gap:6px}
+.it{display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px dashed var(--line2);cursor:pointer}
+.it:last-child{border-bottom:0}
+.it:hover .t1{color:var(--accent)}
+.it .dt{flex:none;width:46px;font-weight:700;font-size:12px}
+.it .t1{font-size:12.5px} .it .t2{color:var(--muted);font-size:11.5px}
+.empty-note{color:var(--faint);font-size:12px;padding:6px 0}
+.mrow{display:grid;grid-template-columns:200px 1fr 60px 70px;gap:12px;align-items:center;padding:8px 16px;border-bottom:1px solid var(--line2)}
+.mrow:last-child{border-bottom:0}
+.stack{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--line2)}
+.stack span{display:block;height:100%;background:var(--st)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:11.5px;padding:8px 16px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+/* ---------- drawer / dialog ---------- */
+.drawer{position:fixed;top:0;right:0;bottom:0;width:420px;max-width:100vw;background:var(--panel);border-left:1px solid var(--line);box-shadow:var(--shadow);transform:translateX(105%);transition:transform .2s;z-index:30;display:flex;flex-direction:column}
+.drawer.open{transform:none}
+.dh{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.dh h2{margin:0;font-size:15px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.db{flex:1;overflow:auto;padding:14px 16px;display:grid;gap:12px;align-content:start}
+.df{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line)}
+.df .sp{flex:1}
+.fld{display:grid;gap:4px}
+.fld > span{color:var(--muted);font-size:12px}
+.fld input,.fld select,.fld textarea{width:100%}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 90px;gap:10px}
+.segrow,.seghead{display:grid;grid-template-columns:1fr 14px 1fr 64px 26px;gap:6px;align-items:center;margin-bottom:6px}
+.seghead{margin-bottom:2px;color:var(--muted);font-size:11.5px}
+.segdel{padding:2px 4px;color:var(--muted)}
+.hint{color:var(--muted);font-size:11.5px}
+.ftask{display:grid;grid-template-columns:70px 1fr 90px;gap:8px;align-items:center;padding:7px 8px;border:1px solid var(--line2);border-radius:8px;cursor:pointer}
+.ftask:hover{border-color:var(--accent)}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--text);box-shadow:var(--shadow);padding:0;width:min(560px,94vw)}
+dialog::backdrop{background:rgba(10,15,25,.35)}
+dialog .dh{border-bottom:1px solid var(--line)}
+dialog .db{max-height:70vh}
+.tip{position:fixed;z-index:50;pointer-events:none;background:#1d2330;color:#fff;font-size:12px;padding:6px 9px;border-radius:7px;display:none;max-width:320px;line-height:1.5;box-shadow:var(--shadow)}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1d2330;color:#fff;padding:8px 16px;border-radius:9px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:60}
+#toast.on{opacity:1}
+.emptystate{max-width:560px;margin:60px auto;text-align:center;padding:30px}
+.emptystate h2{margin:0 0 8px}
+.emptystate p{color:var(--muted)}
+.drop{outline:3px dashed var(--accent);outline-offset:-10px}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+.datagrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.datagrid button{text-align:left;padding:10px 12px}
+.datagrid button b{display:block}
+.datagrid button small{color:var(--muted)}
+@media (max-width:900px){.kpi{grid-column:span 4}.span8,.span4,.span6{grid-column:span 12}.cols3{grid-template-columns:1fr}.cols3>div{border-right:0;border-bottom:1px solid var(--line2)}.mrow{grid-template-columns:1fr 1fr}#q{width:120px}}
+@media print{.top .actions,.filters,.drawer,.tabs{display:none!important}body{overflow:visible;height:auto}main{overflow:visible}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="logo"></span><select id="projSel" title="切換專案"></select></div>
+  <nav class="tabs" id="tabs">
+    <button data-view="dash">總覽</button>
+    <button data-view="gantt">甘特時程</button>
+    <button data-view="matrix">階段矩陣</button>
+    <button data-view="list">任務清單</button>
+    <button data-view="load">工作負載</button>
+  </nav>
+  <div class="actions">
+    <button id="cloudBtn" class="ghost cloud" hidden></button>
+    <button id="whoBtn" class="ghost" hidden title="切換身分"></button>
+    <button id="undo" class="ghost" title="復原 (⌘Z)">↶ 復原</button>
+    <button id="redo" class="ghost" title="重做 (⌘⇧Z)">↷</button>
+    <button id="btnAdd" class="primary">＋ 新增功能</button>
+    <button id="btnData">資料</button>
+    <button id="btnSettings">設定</button>
+    <button id="btnTheme" class="ghost" title="切換深淺色">◐</button>
+  </div>
+</header>
+<div class="filters">
+  <span class="chip r-pm" data-role="pm"><i></i>PM</span>
+  <span class="chip r-eng" data-role="eng"><i></i>工程師</span>
+  <span class="chip r-user" data-role="user"><i></i>使用者</span>
+  <span class="sep"></span>
+  <select id="fOwner"><option value="">全部負責人</option></select>
+  <select id="fStatus">
+    <option value="">全部狀態</option><option value="todo">未開始</option><option value="doing">進行中</option><option value="review">待驗收</option>
+    <option value="done">已完成</option><option value="overdue">逾期</option><option value="blocked">卡關</option><option value="unsched">未排程</option>
+  </select>
+  <input id="q" type="search" placeholder="搜尋功能 / 任務 / 備註">
+  <label class="ck"><input type="checkbox" id="fHide"> 隱藏已完成</label>
+  <div class="fl-right" id="ganttCtl">
+    <label class="ck"><input type="checkbox" id="fBase"> 基準線</label>
+    <div class="seg" id="zoom"><button data-z="day">日</button><button data-z="week">週</button><button data-z="month">月</button></div>
+    <button id="btnToday">今天</button>
+  </div>
+</div>
+<div id="fnote" class="fnote" hidden></div>
+<main id="main"></main>
+<aside id="drawer" class="drawer"></aside>
+<dialog id="dlg"></dialog>
+<div id="tip" class="tip"></div>
+<div id="toast"></div>
+<input type="file" id="fileIn" accept=".csv,.json,text/csv,application/json" hidden>
+
+<script>
+'use strict';
+// ★ 資料一律存在 Google 試算表。請把 Google Apps Script 部署後得到的網址（…/exec）貼在下面兩個引號中間。
+//   （直接開 Apps Script 網址使用時，這裡可以留空。）
+const API_URL = "https://script.google.com/macros/s/AKfycbz7om4erTbsXBUV40eNv7xh9YngC56FkGoEwUKvJrZo43tLstSwii18T_GaGTTXnzpigQ/exec";
+/* ================= utilities ================= */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const DAY=86400000;
+const toNum=s=>{if(!s)return null;const m=String(s).match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);if(!m)return null;return Math.round(Date.UTC(+m[1],+m[2]-1,+m[3])/DAY)};
+const toStr=n=>new Date(n*DAY).toISOString().slice(0,10);
+const dowOf=n=>new Date(n*DAY).getUTCDay();
+const _now=new Date();
+const TODAY=Math.round(Date.UTC(_now.getFullYear(),_now.getMonth(),_now.getDate())/DAY);
+const WD='日一二三四五六';
+const md=n=>{if(n==null)return '';const d=new Date(n*DAY);return (d.getUTCMonth()+1)+'/'+d.getUTCDate()};
+const mdS=s=>md(toNum(s));
+const ymd=n=>{const d=new Date(n*DAY);return d.getUTCFullYear()+'/'+(d.getUTCMonth()+1)+'/'+d.getUTCDate()};
+const uid=p=>p+Math.random().toString(36).slice(2,10);
+function normDate(v){
+  if(!v)return '';v=String(v).trim();
+  const m=v.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})/);
+  if(!m)return '';
+  return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
+}
+
+/* ================= model ================= */
+const ROLES={pm:{label:'PM'},eng:{label:'工程師'},user:{label:'使用者'}};
+const PHASES=[
+  {key:'spec',label:'規格文件',short:'規格'},
+  {key:'dev', label:'Programming',short:'開發'},
+  {key:'demo',label:'程式DEMO',short:'DEMO'},
+  {key:'sit', label:'SIT',short:'SIT'},
+  {key:'uat', label:'UAT',short:'UAT'},
+  {key:'other',label:'其他',short:'其他'},
+];
+const PH=Object.fromEntries(PHASES.map(p=>[p.key,p]));
+const phaseIdx=k=>{const i=PHASES.findIndex(p=>p.key===k);return i<0?99:i};
+const STATUS={todo:'未開始',doing:'進行中',review:'待驗收',done:'已完成',blocked:'卡關'};
+const DSTAT={...STATUS,overdue:'逾期',unsched:'未排程',none:'—'};
+const DEFAULT_HOLIDAYS=[
+  '2026-09-25 中秋節','2026-09-28 教師節','2026-10-09 國慶日(補假)','2026-10-26 光復節(補假)','2026-12-25 行憲紀念日','2027-01-01 元旦'
+].join('\n');
+const DEFAULT_SETTINGS={
+  phaseRole:{spec:'pm',dev:'eng',demo:'eng',sit:'pm',uat:'user',other:'pm'},
+  defDur:{spec:3,dev:10,demo:1,sit:3,uat:5,other:3},
+  template:{spec:true,dev:true,demo:true,sit:true,uat:true,other:false}, // 新功能自動建立的預設任務
+  holidays:DEFAULT_HOLIDAYS,
+  lastExport:null
+};
+// 資料一律存在 Google 試算表，兩種連線方式：
+//  1. 網頁由 Apps Script 提供 → 有 google.script.run
+//  2. 網頁放在別處（本機、GitHub 等）→ 用檔案最上方 API_URL 的部署網址
+// 兩者都沒有 → 顯示設定說明，不提供編輯（瀏覽器只當暫存，不當資料來源）
+const GAS_RUN=!!(window.google&&google.script&&google.script.run);
+const CLOUD=true;
+const KEY='swtl.cloud.v1', UIKEY='swtl.ui.v1';
+const LEGACY_KEY='swtl.data.v1'; // 舊版「本機版」存在瀏覽器的資料，只用來一次性搬到試算表
+function blankProject(name){return {id:uid('p'),name:name||'新專案',modules:[],features:[],tasks:[],baselineAt:null}}
+function blankState(){return {version:1,settings:structuredClone(DEFAULT_SETTINGS),projects:[blankProject('我的專案')],current:null}}
+
+let S=null;
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!S||!Array.isArray(S.projects)||!S.projects.length)S=blankState();
+function normSettings(){
+  S.settings=Object.assign(structuredClone(DEFAULT_SETTINGS),S.settings||{});
+  for(const k of ['phaseRole','defDur','template'])S.settings[k]={...DEFAULT_SETTINGS[k],...(S.settings[k]||{})};
+}
+normSettings();
+if(!S.projects.find(p=>p.id===S.current))S.current=S.projects[0].id;
+
+let UI={view:'dash',zoom:'day',roles:{pm:true,eng:true,user:true},owner:'',status:'',q:'',hideDone:false,baseline:true,collapsed:{},sort:{k:'start',dir:1},theme:''};
+try{Object.assign(UI,JSON.parse(localStorage.getItem(UIKEY))||{})}catch(e){}
+UI.q='';
+if(UI.theme)document.documentElement.dataset.theme=UI.theme;
+
+const P=()=>S.projects.find(p=>p.id===S.current);
+const taskById=id=>P().tasks.find(t=>t.id===id);
+const featById=id=>P().features.find(f=>f.id===id);
+const modById=id=>P().modules.find(m=>m.id===id);
+const roleOf=t=>t.role||S.settings.phaseRole[t.phase]||'pm';
+// 任務排序：拖曳排過的功能用 seq；沒排過的依階段順序
+const tkey=t=>t.seq!=null?t.seq:phaseIdx(t.phase)*1000+(t.order||0);
+const byPhase=(a,b)=>tkey(a)-tkey(b);
+const tasksOf=fid=>P().tasks.filter(t=>t.featureId===fid).sort(byPhase);
+const featsOf=mid=>P().features.filter(f=>f.moduleId===mid);
+const modLabel=m=>(m.code?m.code+' ':'')+m.name;
+
+let _hk=null,_hs=new Map();
+function holidays(){
+  if(_hk!==S.settings.holidays){
+    _hk=S.settings.holidays;_hs=new Map();
+    for(const line of String(_hk||'').split('\n')){
+      const m=line.trim().match(/^(\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2})\s*(.*)$/);
+      if(m)_hs.set(toNum(normDate(m[1])),m[2]||'假日');
+    }
+  }
+  return _hs;
+}
+const isOff=n=>{const d=dowOf(n);return d===0||d===6||holidays().has(n)};
+function workdays(s,e){if(s==null||e==null||e<s)return 0;let c=0;for(let n=s;n<=e;n++)if(!isOff(n))c++;return c}
+function addWorkdays(s,count){ // returns end date so that [s..end] has `count` workdays
+  let n=s;while(isOff(n))n++;let c=1;while(c<count){n++;if(!isOff(n))c++}return n;
+}
+function nextWorkday(n){n++;while(isOff(n))n++;return n}
+/* 執行區段：任務可有多段不連續日期。t.segs=[["YYYY-MM-DD","YYYY-MM-DD"],...]（只有一段時省略，使用 start/end） */
+function taskSegs(t){
+  if(Array.isArray(t.segs)&&t.segs.length)return t.segs.map(([a,b])=>[toNum(a),toNum(b)]).filter(([a,b])=>a!=null&&b!=null);
+  const s=toNum(t.start),e=toNum(t.end);return s!=null&&e!=null?[[s,e]]:[];
+}
+function setSegs(t,segs){
+  segs=segs.filter(x=>x&&x[0]!=null&&x[1]!=null).map(([a,b])=>a<=b?[a,b]:[b,a]).sort((x,y)=>x[0]-y[0]);
+  const out=[];for(const sg of segs){const l=out[out.length-1];if(l&&sg[0]<=l[1]+1)l[1]=Math.max(l[1],sg[1]);else out.push([...sg])}
+  if(!out.length){t.start='';t.end='';delete t.segs;return}
+  t.start=toStr(out[0][0]);t.end=toStr(out[out.length-1][1]);
+  if(out.length>1)t.segs=out.map(([a,b])=>[toStr(a),toStr(b)]);else delete t.segs;
+}
+const taskWd=t=>taskSegs(t).reduce((c,[a,b])=>c+workdays(a,b),0);
+const segText=t=>taskSegs(t).map(([a,b])=>a===b?md(a):`${md(a)}–${md(b)}`).join('、');
+
+function dstat(t){
+  if(t.status==='done')return 'done';
+  if(t.status==='blocked')return 'blocked';
+  const s=toNum(t.start),e=toNum(t.end);
+  if(s==null||e==null)return 'unsched';
+  if(e<TODAY)return 'overdue';
+  if(t.status==='review')return 'review';
+  if(t.status==='doing'||s<=TODAY)return 'doing';
+  return 'todo';
+}
+function aggStatus(ts){
+  if(!ts.length)return 'none';
+  const ds=ts.map(dstat);
+  if(ds.every(d=>d==='done'))return 'done';
+  if(ds.includes('blocked'))return 'blocked';
+  if(ds.includes('overdue'))return 'overdue';
+  if(ds.includes('review'))return 'review';
+  if(ds.includes('doing')||ds.includes('done'))return 'doing';
+  if(ds.every(d=>d==='unsched'))return 'unsched';
+  return 'todo';
+}
+function span(ts){let s=null,e=null;for(const t of ts){const a=toNum(t.start),b=toNum(t.end);if(a==null||b==null)continue;if(s==null||a<s)s=a;if(e==null||b>e)e=b}return s==null?null:[s,e]}
+const doneRatio=ts=>ts.length?ts.filter(t=>t.status==='done').length/ts.length:0;
+function currentPhase(ts){for(const ph of PHASES){const p=ts.filter(t=>t.phase===ph.key);if(p.length&&aggStatus(p)!=='done')return ph.key}return null}
+function depOf(t){return t.dep?taskById(t.dep):null}
+function depConflict(t){const d=depOf(t);if(!d||!d.end||!t.start)return false;return toNum(t.start)<=toNum(d.end)}
+function taskLabel(t){const f=featById(t.featureId);return (f?f.name+' › ':'')+t.name}
+
+/* ================= persistence & history ================= */
+const undoStack=[],redoStack=[];
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('儲存失敗：'+e.message)}if(CLOUD)cloudSchedule()}
+function saveUI(){try{const u={...UI};delete u.q;localStorage.setItem(UIKEY,JSON.stringify(u))}catch(e){}}
+function commit(fn,msg){
+  if(CLOUD&&!Cloud.loaded){toast(/^(NO_URL|BAD_URL)$/.test(Cloud.err)?'尚未連接 Google 試算表，請先完成畫面上的設定步驟':'正在連線 Google 試算表，請稍候再試');return}
+  if(CLOUD&&!Cloud.who){whoDialog();return}
+  undoStack.push(JSON.stringify(S));if(undoStack.length>100)undoStack.shift();redoStack.length=0;
+  fn();persist();render();if(msg)toast(msg);
+  drawer.dataset.dirty='';
+}
+
+/* ================= 雲端同步（Google 試算表） =================
+   做法：每次修改後，比對「上次同步時的資料」與目前資料，只把有變動的欄位送到試算表（apiPush）。
+   每 15 秒檢查一次版本號（apiRev），別人有更新就重新載入（apiLoad）。
+   兩個人同時改同一筆的不同欄位不會互相覆蓋；改到同一欄位則以後送出的為準。 */
+const SYNCF={
+  projects:['name','baselineAt','sort'],
+  modules:['projectId','code','name','sort'],
+  features:['projectId','moduleId','name','sort'],
+  tasks:['projectId','featureId','phase','name','role','owner','start','end','segs','status','progress','tentative','dep','note','order','seq','bStart','bEnd','doneAt'],
+};
+const SETK=['phaseRole','defDur','template','holidays'];
+const lsGet=k=>{try{return localStorage.getItem(k)||''}catch(e){return ''}};
+const lsSet=(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}};
+const Cloud={loaded:false,rev:0,base:null,who:lsGet('swtl.who'),code:lsGet('swtl.code'),people:[],
+  pushing:false,again:false,pulling:false,needPull:false,fail:0,timer:null,retry:null,state:'loading',err:'',syncedAt:null};
+function gcall(fn,...a){
+  if(GAS_RUN)return new Promise((res,rej)=>google.script.run.withSuccessHandler(res).withFailureHandler(rej)[fn](...a));
+  // 跟羽球登記頁相同的做法：直接呼叫 Apps Script 部署網址（text/plain 可避開瀏覽器的跨網域預檢）
+  if(!API_URL.trim())return Promise.reject(new Error('NO_URL'));
+  if(!/^https:\/\/script\.google\.com\/(a\/macros\/[^/]+\/|macros\/)s\/[^/]+\/exec$/.test(API_URL.trim()))return Promise.reject(new Error('BAD_URL'));
+  return fetch(API_URL.trim(),{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn,args:a})})
+    .catch(()=>{throw new Error('NETWORK')}) // 被瀏覽器擋下：通常是部署版本、存取權或授權的問題（Google 的錯誤頁沒有跨網域標頭）
+    .then(async r=>{const tx=await r.text();let d;
+      try{d=JSON.parse(tx)}catch(e){throw new Error(/doPost/.test(tx)?'OLD_VERSION':'BAD_RESPONSE')}
+      if(!d||!d.ok)throw new Error(d&&d.err||'BAD_RESPONSE');return d.r});
+}
+// 把連線錯誤翻成看得懂的說明
+const CLOUD_ERR={
+  NO_URL:'還沒有設定 Google 試算表的連線網址（API_URL）',
+  BAD_URL:'API_URL 網址格式不對：要是 https://script.google.com/macros/s/…/exec（結尾是 /exec，不是 /dev）',
+  NETWORK:'連不到 Apps Script。最常見原因：貼上新程式後沒有發佈「新版本」，請看下方檢查清單',
+  OLD_VERSION:'Apps Script 部署的是舊版程式，請發佈新版本（見下方第 1 點）',
+  BAD_RESPONSE:'Apps Script 回傳的不是資料（可能是 Google 登入頁或錯誤頁），請看下方檢查清單',
+  UNKNOWN_FUNCTION:'Apps Script 部署的是舊版程式，請發佈新版本（見下方第 1 點）',
+};
+const cloudErrText=m=>CLOUD_ERR[m]||m;
+function cloudHelpHtml(){
+  if(Cloud.err==='NO_URL')return `<div class="card" style="padding:10px 14px;margin-top:10px;text-align:left">
+    <b>⚠ ${esc(CLOUD_ERR.NO_URL)}</b>
+    <ol style="margin:8px 0 0;padding-left:20px;line-height:1.7">
+      <li>照 <code>gas/README.md</code> 建立 Google 試算表與 Apps Script，部署後複製「網頁應用程式網址」（結尾是 <code>/exec</code>）。</li>
+      <li>用文字編輯器打開這個 <code>index.html</code>，搜尋 <code>API_URL</code>，把網址貼在 <code>const API_URL = "";</code> 的兩個引號中間，存檔。</li>
+      <li>重新整理這個頁面。</li>
+    </ol>
+    <div class="hint" style="margin-top:6px">也可以不改檔案，直接打開 Apps Script 的部署網址使用。</div>
+  </div>`;
+  const test=API_URL?API_URL.trim()+'?fn=apiRev&args=%5B%5D':'';
+  return `<div class="card" style="padding:10px 14px;margin-top:10px;text-align:left">
+    <b>⚠ ${esc(cloudErrText(Cloud.err))}</b>
+    <ol style="margin:8px 0 0;padding-left:20px;line-height:1.7">
+      <li><b>發佈新版本</b>：Apps Script →「部署 → 管理部署作業」→ 點鉛筆 →「版本」選 <b>新版本</b> →「部署」。<br><span class="hint">每次在編輯器修改程式後都要做這一步，網址不會改變。</span></li>
+      <li><b>部署設定</b>：執行身分「我」、誰可以存取「<b>所有人</b>」。</li>
+      <li><b>授權</b>：在 Apps Script 選 <code>setup</code> 按「執行」，並按「允許」。</li>
+      ${API_URL?`<li><b>網址</b>：API_URL 要用部署畫面上的「網頁應用程式網址」，結尾是 <code>/exec</code>。</li>`:''}
+    </ol>
+    ${test?`<div style="margin-top:8px"><a href="${esc(test)}" target="_blank" rel="noopener">開啟測試連結</a>
+      <span class="hint">— 正常會看到一行 <code>{"ok":true,…}</code>（或含 <code>NEED_CODE</code>）。看到的是<b>工具畫面</b>代表部署的還是舊版（請做第 1 點）；看到 Google 錯誤或登入頁，請把畫面截圖。</span></div>`:''}
+  </div>`;
+}
+function cellOf(k,v){ // 存進試算表的文字（階段 / 狀態 / 角色用中文，方便直接在試算表閱讀）
+  if(v==null)return '';
+  if(k==='phase')return PH[v]?.label||String(v);
+  if(k==='status')return STATUS[v]||String(v);
+  if(k==='role')return ROLES[v]?.label||'';
+  if(k==='tentative')return v?'是':'';
+  if(k==='segs')return Array.isArray(v)?v.map(x=>x.join('~')).join('; '):'';
+  return String(v);
+}
+function flatState(st){
+  const o={projects:{},modules:{},features:{},tasks:{},settings:{}};
+  const row=(x,tb,ex)=>{const r={};for(const k of SYNCF[tb])r[k]=cellOf(k,k in ex?ex[k]:x[k]);return r};
+  st.projects.forEach((p,i)=>{o.projects[p.id]=row(p,'projects',{sort:i});
+    p.modules.forEach((m,j)=>{o.modules[m.id]=row(m,'modules',{projectId:p.id,sort:j})});
+    p.features.forEach((f,j)=>{o.features[f.id]=row(f,'features',{projectId:p.id,sort:j})});
+    p.tasks.forEach(t=>{o.tasks[t.id]=row(t,'tasks',{projectId:p.id})})});
+  for(const k of SETK){const v=st.settings?.[k];o.settings[k]=v==null?undefined:typeof v==='string'?v:JSON.stringify(v)}
+  return o;
+}
+function diffState(a,b){
+  const ops=[];
+  for(const tb of Object.keys(SYNCF)){const A=a[tb]||{},B=b[tb]||{};
+    for(const id in B){const x=A[id],y=B[id];
+      if(!x){ops.push({t:tb,op:'up',id,f:y});continue}
+      const f={};let n=0;for(const k in y)if(x[k]!==y[k]){f[k]=y[k];n++}
+      if(n)ops.push({t:tb,op:'up',id,f})}
+    for(const id in A)if(!B[id])ops.push({t:tb,op:'del',id})}
+  const sf={};let n=0;for(const k of SETK)if(b.settings[k]!==undefined&&a.settings?.[k]!==b.settings[k]){sf[k]=b.settings[k];n++}
+  if(n)ops.push({t:'settings',op:'set',f:sf});
+  return ops;
+}
+function stateFromServer(d){
+  const T=d.tables,num=v=>v===''||v==null||isNaN(+v)?null:+v,srt=(a,b)=>(+a.sort||0)-(+b.sort||0);
+  const meta=(o,r)=>{if(r.updatedBy){o._by=r.updatedBy;o._at=r.updatedAt}return o};
+  const projects=T.projects.slice().sort(srt).map(r=>meta({id:r.id,name:r.name||'未命名專案',baselineAt:num(r.baselineAt),modules:[],features:[],tasks:[]},r));
+  const pm=new Map(projects.map(p=>[p.id,p]));
+  T.modules.slice().sort(srt).forEach(r=>pm.get(r.projectId)?.modules.push({id:r.id,code:r.code||'',name:r.name||''}));
+  T.features.slice().sort(srt).forEach(r=>pm.get(r.projectId)?.features.push({id:r.id,moduleId:r.moduleId,name:r.name||''}));
+  const phk=v=>PH[v]?v:(PHASES.find(p=>p.label===v||p.short===v)?.key||'other');
+  const stk=v=>STATUS[v]?v:(Object.keys(STATUS).find(k=>STATUS[k]===v)||'todo');
+  const rok=v=>ROLES[v]?v:(Object.keys(ROLES).find(k=>ROLES[k].label===v)||'');
+  T.tasks.forEach(r=>{const p=pm.get(r.projectId);if(!p)return;
+    const t={id:r.id,featureId:r.featureId,phase:phk(r.phase),name:r.name||'',owner:r.owner||'',start:normDate(r.start),end:normDate(r.end),status:stk(r.status),progress:+r.progress||0,order:+r.order||0};
+    const rl=rok(r.role);if(rl)t.role=rl;
+    if(/^(是|TRUE|Y|1|V)$/i.test(String(r.tentative||'').trim()))t.tentative=true;
+    if(r.dep)t.dep=r.dep;if(r.note)t.note=r.note;
+    const sq=num(r.seq);if(sq!=null)t.seq=sq;
+    for(const k of ['bStart','bEnd','doneAt']){const v=normDate(r[k]);if(v)t[k]=v}
+    if(r.segs){const sg=String(r.segs).split(/[;；\n]/).map(x=>x.split(/[~～]/).map(s=>normDate(s))).filter(x=>x[0]&&x[1]);if(sg.length>1)t.segs=sg}
+    if(t.end&&!t.start)t.start=t.end;if(t.start&&!t.end)t.end=t.start;
+    p.tasks.push(meta(t,r))});
+  const st={version:1,settings:{},projects,current:S?.current};
+  for(const k of SETK){const v=(d.settings||{})[k];if(v==null||v==='')continue;
+    if(k==='holidays')st.settings[k]=v;else try{st.settings[k]=JSON.parse(v)}catch(e){}}
+  return st;
+}
+function cloudBusy(){
+  const a=document.activeElement;
+  return !!(drag||rdnd||dlg.open||(a&&main.contains(a)&&/INPUT|SELECT|TEXTAREA/.test(a.tagName)));
+}
+function cloudApply(d){
+  const st=stateFromServer(d);const base=flatState(st);
+  st.settings.lastExport=S?.settings?.lastExport||null;
+  if(!st.projects.length){const bp=blankProject('我的專案');bp.id='p_default';st.projects.push(bp)} // 固定 ID：多人同時開啟空白試算表不會產生重複專案
+  S=st;normSettings();if(!S.projects.find(p=>p.id===S.current))S.current=S.projects[0].id;
+  Cloud.base=base;Cloud.rev=d.rev;Cloud.people=(d.tables.people||[]).filter(r=>r.id);
+  Cloud.loaded=true;Cloud.syncedAt=new Date();
+  undoStack.length=0;redoStack.length=0; // 別人的更新進來後，舊的復原紀錄可能會蓋掉別人的修改，所以清空
+  try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem(KEY+'.base',JSON.stringify(base))}catch(e){}
+  render();
+  if(!drawer.dataset.dirty)refreshDrawer();
+  if(diffState(Cloud.base,flatState(S)).length)cloudSchedule();else setCloud('ok');
+}
+function cloudSchedule(){if(!Cloud.loaded)return;clearTimeout(Cloud.timer);Cloud.timer=setTimeout(cloudPush,500);setCloud('saving')}
+async function cloudPush(){
+  if(!Cloud.loaded)return;
+  if(Cloud.pushing){Cloud.again=true;return}
+  const cur=flatState(S);const ops=diffState(Cloud.base,cur);
+  if(!ops.length){setCloud('ok');if(Cloud.needPull)cloudPull();return}
+  Cloud.pushing=true;setCloud('saving');let ok=false;
+  try{
+    const r=await gcall('apiPush',Cloud.code,Cloud.who||'未具名',ops);
+    Cloud.base=cur;if(r.prevRev!==Cloud.rev)Cloud.needPull=true;Cloud.rev=r.rev;Cloud.fail=0;ok=true;Cloud.syncedAt=new Date();
+    try{localStorage.setItem(KEY+'.base',JSON.stringify(cur))}catch(e){}
+  }catch(e){cloudError(e)}
+  finally{Cloud.pushing=false}
+  if(!ok){clearTimeout(Cloud.retry);Cloud.retry=setTimeout(cloudPush,Math.min(30000,2000*2**Math.min(Cloud.fail,4)));return}
+  if(Cloud.again){Cloud.again=false;return cloudPush()}
+  setCloud('ok');
+  if(Cloud.needPull)cloudPull();
+}
+async function cloudPull(){
+  if(!Cloud.loaded||Cloud.pulling)return;
+  if(cloudBusy()){Cloud.needPull=true;return}
+  if(diffState(Cloud.base,flatState(S)).length){Cloud.needPull=true;return cloudPush()}
+  Cloud.pulling=true;
+  try{
+    const d=await gcall('apiLoad',Cloud.code);
+    if(diffState(Cloud.base,flatState(S)).length||cloudBusy()){Cloud.needPull=true;return} // 等這邊的修改先送出
+    Cloud.needPull=false;cloudApply(d);
+  }catch(e){cloudError(e)}
+  finally{Cloud.pulling=false}
+}
+async function cloudPoll(){
+  if(!Cloud.loaded||document.visibilityState==='hidden')return;
+  if(Cloud.needPull){cloudPull();return}
+  try{const r=await gcall('apiRev',Cloud.code);if(r!==Cloud.rev)cloudPull();else if(Cloud.state==='error'&&!Cloud.pushing)setCloud('ok')}catch(e){cloudError(e)}
+}
+function cloudError(e){
+  const m=String(e&&e.message||e);
+  if(/NEED_CODE/.test(m)){Cloud.state='error';codeDialog();return}
+  Cloud.fail++;Cloud.err=m;setCloud('error');
+  if(!Cloud.loaded&&!dlg.open)render(); // 還沒載入成功：直接在畫面上顯示原因與檢查清單
+}
+async function cloudBoot(){
+  setCloud('loading');render();
+  let pending=[];
+  try{const b=JSON.parse(lsGet(KEY+'.base')||'null');if(b&&lsGet(KEY))pending=diffState(b,flatState(S))}catch(e){}
+  try{
+    if(pending.length){await gcall('apiPush',Cloud.code,Cloud.who||'未具名',pending);setTimeout(()=>toast(`已上傳上次未同步的 ${pending.length} 項變更`),400)}
+    const d=await gcall('apiLoad',Cloud.code);
+    cloudApply(d);
+    if(!Cloud.who)whoDialog();
+    if(!cloudBoot._t){cloudBoot._t=setInterval(cloudPoll,15000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')cloudPoll()})}
+  }catch(e){
+    cloudError(e);
+    if(!/NEED_CODE|NO_URL|BAD_URL/.test(String(e&&e.message||e)))setTimeout(cloudBoot,5000); // 設定問題重試也沒用
+  }
+}
+function setCloud(st){
+  Cloud.state=st;const b=$('#cloudBtn');if(!b)return;
+  const tm=Cloud.syncedAt?Cloud.syncedAt.toTimeString().slice(0,5):'';
+  b.hidden=false;b.className='ghost cloud c-'+st;
+  b.textContent={ok:'☁ 已同步',saving:'⟳ 儲存中…',loading:'☁ 連線中…',error:'⚠ 未同步'}[st]||st;
+  b.title=st==='error'?`無法連線 Google 試算表：${cloudErrText(Cloud.err)}\n點這裡看檢查清單。變更會先暫存在這台電腦，恢復連線後自動上傳。`:`資料存在 Google 試算表${tm?'・最後同步 '+tm:''}`;
+  const w=$('#whoBtn');w.hidden=false;w.textContent='👤 '+(Cloud.who||'選擇身分');
+}
+window.addEventListener('beforeunload',e=>{
+  if(CLOUD&&Cloud.loaded&&(Cloud.pushing||diffState(Cloud.base,flatState(S)).length)){e.preventDefault();e.returnValue=''}
+});
+function knownPeople(){
+  const m=new Map();
+  for(const r of Cloud.people)m.set(r.id,r.role||'');
+  for(const p of S.projects)for(const t of p.tasks)if(t.owner&&!m.has(t.owner))m.set(t.owner,ROLES[roleOf(t)]?.label||'');
+  return [...m].sort((a,b)=>a[0].localeCompare(b[0],'zh-Hant'));
+}
+function whoDialog(){
+  const ps=knownPeople();
+  openDialog('你是誰？',`
+    <div class="hint" style="margin-bottom:10px">選擇你的名字，之後的修改會記錄是誰改的（記在試算表的「最後更新者」與「修改紀錄」分頁）。這個選擇只存在這台電腦的瀏覽器。</div>
+    ${ps.length?`<div class="whos">${ps.map(([n,r])=>`<button type="button" data-who="${esc(n)}"${n===Cloud.who?' class="primary"':''}>${esc(n)}${r?`<span class="hint">${esc(r)}</span>`:''}</button>`).join('')}</div>`:''}
+    <div class="row2" style="margin-top:12px"><label class="fld"><span>${ps.length?'不在清單中？輸入姓名':'輸入你的姓名'}</span><input id="whoName" placeholder="例：王小明"></label>
+      <label class="fld"><span>角色</span><select id="whoRole">${Object.values(ROLES).map(r=>`<option>${r.label}</option>`).join('')}</select></label></div>`,
+    `<span class="sp"></span><button class="primary" id="whoOk">確定</button>`);
+  const pick=(name,role)=>{
+    name=name.trim();if(!name)return;Cloud.who=name;lsSet('swtl.who',name);dlg.close();setCloud(Cloud.state);toast(`你好，${name}`);
+    if(!Cloud.people.some(r=>r.id===name))gcall('apiPush',Cloud.code,name,[{t:'people',op:'up',id:name,f:{role}}]).then(r=>{Cloud.people.push({id:name,role});if(r.prevRev===Cloud.rev)Cloud.rev=r.rev;else Cloud.needPull=true}).catch(cloudError);
+  };
+  $$('[data-who]',dlg).forEach(b=>b.onclick=()=>pick(b.dataset.who,(ps.find(([x])=>x===b.dataset.who)||[])[1]||''));
+  const ok=()=>{const n=$('#whoName').value.trim();if(!n)return $('#whoName').focus();pick(n,$('#whoRole').value)};
+  $('#whoOk').onclick=ok;$('#whoName').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();ok()}};
+}
+function codeDialog(){
+  if(dlg.open&&$('#codeIn'))return;
+  openDialog('請輸入團隊通行碼',`
+    <div class="hint" style="margin-bottom:10px">這個工具已設定通行碼，請向專案 PM 索取。輸入一次後，這台電腦會記住。</div>
+    <label class="fld"><span>通行碼</span><input id="codeIn" type="password" autocomplete="off"></label>
+    ${Cloud.code?'<div class="warn">通行碼不正確，請再確認。</div>':''}`,
+    `<span class="sp"></span><button class="primary" id="codeOk">確定</button>`);
+  const ok=()=>{Cloud.code=$('#codeIn').value.trim();lsSet('swtl.code',Cloud.code);dlg.close();if(Cloud.loaded)cloudPoll();else cloudBoot()};
+  $('#codeOk').onclick=ok;$('#codeIn').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();ok()}};
+  setTimeout(()=>$('#codeIn')?.focus(),30);
+}
+function cloudDialog(){
+  const tm=Cloud.syncedAt?Cloud.syncedAt.toLocaleString():'尚未同步';
+  openDialog('雲端同步',`
+    <p style="margin-top:0">資料存在 <b>Google 試算表</b>，所有拿到網址的人都看得到最新內容；每 15 秒自動檢查別人的更新。</p>
+    <div class="hint">狀態：${{ok:'已同步',saving:'儲存中',loading:'連線中',error:'未同步'}[Cloud.state]||Cloud.state}<br>最後同步：${tm}<br>目前身分：${esc(Cloud.who||'未選擇')}</div>
+    ${Cloud.state==='error'?cloudHelpHtml():'<div class="hint" style="margin-top:10px">在試算表裡也可以直接查看或修改；「修改紀錄」分頁會記錄每一次變更是誰改的。</div>'}`,
+    `<button id="cdWho">切換身分</button><span class="sp"></span><button class="primary" id="cdSync">${Cloud.state==='error'?'重新連線':'立即重新整理'}</button>`);
+  $('#cdWho').onclick=whoDialog;
+  $('#cdSync').onclick=()=>{dlg.close();if(!Cloud.loaded){cloudBoot();return}Cloud.needPull=true;cloudPush()};
+}
+function undo(){if(!undoStack.length)return toast('沒有可復原的動作');redoStack.push(JSON.stringify(S));S=JSON.parse(undoStack.pop());persist();refreshDrawer();render();toast('已復原')}
+function redo(){if(!redoStack.length)return;undoStack.push(JSON.stringify(S));S=JSON.parse(redoStack.pop());persist();refreshDrawer();render();toast('已重做')}
+
+/* ================= filters ================= */
+function filtering(){return !!(UI.owner||UI.status||UI.q||UI.hideDone||!UI.roles.pm||!UI.roles.eng||!UI.roles.user)}
+function passTask(t){
+  if(!UI.roles[roleOf(t)])return false;
+  if(UI.owner&&(t.owner||'')!==UI.owner)return false;
+  const d=dstat(t);
+  if(UI.status&&d!==UI.status)return false;
+  if(UI.hideDone&&d==='done')return false;
+  if(UI.q){const f=featById(t.featureId);const m=f&&modById(f.moduleId);
+    const hay=[t.name,f&&f.name,m&&modLabel(m),t.owner,t.note].join(' ').toLowerCase();
+    if(!hay.includes(UI.q.toLowerCase()))return false}
+  return true;
+}
+function owners(){return [...new Set(P().tasks.map(t=>t.owner).filter(Boolean))].sort()}
+
+/* ================= render root ================= */
+const main=$('#main');
+function render(){
+  const p=P();
+  $('#projSel').innerHTML=S.projects.map(x=>`<option value="${x.id}"${x.id===S.current?' selected':''}>${esc(x.name)}</option>`).join('')+'<option value="__new">＋ 建立新專案…</option>';
+  $$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.view===UI.view));
+  $$('.chip[data-role]').forEach(c=>c.classList.toggle('off',!UI.roles[c.dataset.role]));
+  const ow=owners();
+  $('#fOwner').innerHTML='<option value="">全部負責人</option>'+ow.map(o=>`<option${o===UI.owner?' selected':''}>${esc(o)}</option>`).join('');
+  $('#fStatus').value=UI.status;$('#fHide').checked=UI.hideDone;$('#fBase').checked=UI.baseline;
+  $('#ganttCtl').style.display=UI.view==='gantt'?'':'none';
+  $('#fBase').parentElement.style.display=p.baselineAt?'':'none';
+  $$('#zoom button').forEach(b=>b.classList.toggle('on',b.dataset.z===UI.zoom));
+  $('#undo').disabled=!undoStack.length;$('#redo').disabled=!redoStack.length;
+  const needBackup=!CLOUD&&p.tasks.length&&(!S.settings.lastExport||(Date.now()-S.settings.lastExport)>7*DAY);
+  $('#btnData').classList.toggle('badge-dot',!!needBackup);
+  $('#btnData').title=needBackup?'超過 7 天未匯出備份':'匯入 / 匯出';
+  document.title=p.name+' · 專案時程管理';
+  // 有篩選條件把任務藏起來時，明確告訴使用者，並提供一鍵顯示全部
+  const fn=$('#fnote'),hid=UI.view!=='dash'&&filtering()?p.tasks.filter(t=>!passTask(t)).length:0;
+  if(hid){
+    const why=[];if(UI.hideDone)why.push('隱藏已完成');if(UI.status)why.push('狀態：'+($('#fStatus').selectedOptions[0]?.text||UI.status));
+    if(UI.owner)why.push('負責人：'+UI.owner);if(UI.q)why.push(`搜尋「${UI.q}」`);
+    const off=Object.keys(ROLES).filter(k=>!UI.roles[k]).map(k=>ROLES[k].label);if(off.length)why.push('不顯示 '+off.join('、'));
+    fn.innerHTML=`<span>🔍 篩選中（${esc(why.join('・'))}），有 <b>${hid}</b> 項任務沒有顯示</span><button data-act="clearfilter">顯示全部任務</button>`;fn.hidden=false;
+  }else fn.hidden=true;
+
+  const setupErr=/^(NO_URL|BAD_URL)$/.test(Cloud.err);
+  if(!Cloud.loaded&&(!lsGet(KEY)||setupErr)){main.innerHTML=Cloud.state==='error'
+    ?(setupErr?`<div class="emptystate card"><h2>尚未連接 Google 試算表</h2><p class="hint">這個工具的資料一律存在 Google 試算表，設定好連線就能開始使用。</p>${cloudHelpHtml()}</div>`
+      :`<div class="emptystate card"><h2>連不到 Google 試算表</h2><p class="hint">每 5 秒會自動重試。照下面的清單檢查後，重新整理這個頁面即可。</p>${cloudHelpHtml()}</div>`)
+    :'<div class="emptystate card"><h2>正在從 Google 試算表載入資料…</h2><p class="hint">第一次開啟可能需要幾秒鐘。</p></div>';return}
+  if(!p.modules.length){main.innerHTML=emptyState();return}
+  const sl=main.scrollLeft,st=main.scrollTop;
+  if(UI.view==='gantt')renderGantt();
+  else if(UI.view==='matrix')renderMatrix();
+  else if(UI.view==='list')renderList();
+  else if(UI.view==='load')renderLoad();
+  else renderDash();
+  if(UI.view===render._last){main.scrollLeft=sl;main.scrollTop=st}
+  else{main.scrollTop=0;main.scrollLeft=0;if(UI.view==='gantt')scrollToToday()}
+  render._last=UI.view;
+}
+function legacyData(){ // 舊版「本機版」存在這台電腦瀏覽器的資料
+  try{const d=JSON.parse(localStorage.getItem(LEGACY_KEY)||'null');if(d&&Array.isArray(d.projects)&&d.projects.some(p=>p.tasks&&p.tasks.length))return d}catch(e){}
+  return null;
+}
+function emptyState(){
+  const old=S.projects.every(p=>!p.tasks.length)?legacyData():null;
+  const n=old?old.projects.reduce((a,p)=>a+p.tasks.length,0):0;
+  return `<div class="emptystate card">
+    ${old?`<div class="card" style="padding:12px 14px;margin-bottom:16px;text-align:left;border-color:var(--accent)">
+      <b>這台電腦有舊版（本機版）的資料</b>：${old.projects.map(p=>esc(p.name)).join('、')}，共 ${n} 項任務。
+      <div class="hint" style="margin:4px 0 8px">要把它搬進 Google 試算表嗎？搬完之後大家都看得到。</div>
+      <button class="primary" data-act="migrate">搬到 Google 試算表</button></div>`:''}
+    <h2>開始建立專案時程</h2>
+    <p>可直接匯入目前 Excel 匯出的 CSV（「功能規格書及開發 / 開始時間 / 結束時間」格式），或從空白開始新增模組與功能。也可以把 CSV 檔拖曳到這個視窗。</p>
+    <div class="btnrow" style="justify-content:center;margin-top:16px">
+      <button class="primary" data-act="outline">貼上模組 / 功能清單建立</button>
+      <button data-act="import">匯入 CSV / JSON</button>
+      <button data-act="newfeat">＋ 新增第一個功能</button>
+    </div></div>`;
+}
+
+/* ================= Gantt ================= */
+const DW={day:30,week:13,month:4};
+const LW=470;
+function ganttRange(){
+  const sp=span(P().tasks);
+  let s=sp?Math.min(sp[0],TODAY):TODAY-7, e=sp?Math.max(sp[1],TODAY):TODAY+60;
+  s-=((dowOf(s)+6)%7)+7; e+=28;
+  return [s,e];
+}
+function renderGantt(){
+  const p=P();const [rs,re]=ganttRange();const dw=DW[UI.zoom];const days=re-rs+1;const W=days*dw;
+  const x=n=>(n-rs)*dw;
+  // header
+  let hm='',lo='';
+  for(let n=rs;n<=re;){
+    const d=new Date(n*DAY),y=d.getUTCFullYear(),m=d.getUTCMonth();
+    const e=Math.min(re,Math.round(Date.UTC(y,m+1,1)/DAY)-1);const w=(e-n+1)*dw;
+    hm+=`<div class="hm" style="left:${x(n)}px;width:${w}px">${w>70?`${y} 年 ${m+1} 月`:w>22?(m+1)+'月':''}</div>`;n=e+1;
+  }
+  const hol=holidays();
+  if(UI.zoom==='day'){
+    for(let n=rs;n<=re;n++){const h=hol.get(n);
+      lo+=`<div class="hd${isOff(n)?' off':''}${n===TODAY?' today':''}" style="left:${x(n)}px;width:${dw}px"${h?` title="${esc(h)}"`:''}><b>${new Date(n*DAY).getUTCDate()}</b><i>${h?'假':WD[dowOf(n)]}</i></div>`}
+  }else{
+    for(let n=rs;n<=re;n+=7)lo+=`<div class="hw" style="left:${x(n)}px;width:${7*dw}px">${UI.zoom==='week'?md(n):new Date(n*DAY).getUTCDate()}</div>`;
+  }
+  // background
+  let bg='';
+  for(let n=rs;n<=re;n++)if(isOff(n))bg+=`<div class="off${hol.has(n)?' hol':''}" style="left:${x(n)}px;width:${dw}px"></div>`;
+  if(UI.zoom!=='day')for(let n=rs;n<=re;n+=7)bg+=`<div class="wl" style="left:${x(n)}px"></div>`;
+  if(TODAY>=rs&&TODAY<=re)bg+=`<div class="todayline" style="left:${x(TODAY)+dw/2}px"></div>`;
+  // rows
+  const F=filtering();let rows='';
+  const leftCols=(a,b,c,d)=>`<span>${a}</span><span>${b}</span><span>${c}</span><span>${d}</span>`;
+  for(const m of p.modules){
+    const feats=featsOf(m.id);
+    const fvis=feats.map(f=>({f,ts:tasksOf(f.id),vt:tasksOf(f.id).filter(passTask)})).filter(o=>!F||o.vt.length);
+    if(F&&!fvis.length)continue;
+    const mts=feats.flatMap(f=>tasksOf(f.id));const msp=span(mts);const mc=UI.collapsed[m.id];
+    rows+=`<div class="gr mod" data-kind="mod" data-id="${m.id}" data-mid="${m.id}"><div class="gl"><span class="grip" draggable="true" data-grip="mod" data-id="${m.id}" title="拖曳調整模組順序">⠿</span><div class="gname"><span class="caret${mc?' closed':''}" data-toggle="${m.id}">▼</span><span class="tx" data-open-module="${m.id}">${esc(modLabel(m))}</span><button class="addbtn" data-add-feature="${m.id}" title="新增功能">＋</button></div>${leftCols('',msp?md(msp[0]):'',msp?md(msp[1]):'',`${Math.round(doneRatio(mts)*100)}%`)}</div>
+      <div class="gt" style="width:${W}px">${msp?`<div class="msum" style="left:${x(msp[0])}px;width:${(msp[1]-msp[0]+1)*dw}px"></div>`:''}</div></div>`;
+    if(mc)continue;
+    for(const {f,ts,vt} of fvis){
+      const fsp=span(ts);const fc=UI.collapsed[f.id];const ag=aggStatus(ts);const pct=Math.round(doneRatio(ts)*100);
+      rows+=`<div class="gr feat" data-kind="feat" data-id="${f.id}" data-mid="${m.id}" data-fid="${f.id}"><div class="gl"><span class="grip" draggable="true" data-grip="feat" data-id="${f.id}" title="拖曳調整功能順序（可拖到其他模組）">⠿</span><div class="gname" style="padding-left:14px"><span class="caret${fc?' closed':''}" data-toggle="${f.id}">▼</span><span class="tx" data-open-feature="${f.id}">${esc(f.name)}</span><button class="addbtn" data-add-task="${f.id}" title="新增任務">＋</button></div>${leftCols(`<span class="pill s-${ag}">${DSTAT[ag]}</span>`,fsp?md(fsp[0]):'',fsp?md(fsp[1]):'',pct+'%')}</div>
+        <div class="gt" style="width:${W}px">${fsp?`<div class="sum" style="left:${x(fsp[0])}px;width:${(fsp[1]-fsp[0]+1)*dw}px"><span style="width:${pct}%"></span><i class="bl">${esc(f.name)}</i></div>`:''}</div></div>`;
+      if(fc)continue;
+      for(const t of (F?vt:ts)){
+        const s=toNum(t.start),e=toNum(t.end);const r=roleOf(t);const d=dstat(t);
+        const warn=depConflict(t)?`<span class="warn" title="開始日早於前置任務「${esc(depOf(t).name)}」的結束日">⚠</span>`:'';
+        let bar='';const segs=taskSegs(t);
+        if(segs.length){
+          const cls=`bar r-${r} s-${d}${t.tentative?' tent':''}`;
+          if(segs.length>1)bar+=`<div class="segline r-${r}" style="left:${x(segs[0][1]+1)}px;width:${(segs[segs.length-1][0]-segs[0][1]-1)*dw}px"></div>`;
+          segs.forEach(([a,b],i)=>{
+            let om='';if(UI.zoom!=='month')for(let n=a;n<=b;n++)if(isOff(n))om+=`<i class="om${holidays().has(n)?' hol':''}" style="left:${(n-a)*dw}px;width:${dw}px"></i>`;
+            bar+=`<div class="${cls}" data-id="${t.id}" data-si="${i}" style="left:${x(a)}px;width:${(b-a+1)*dw}px">${segs.length===1?`<span class="pg" style="width:${t.progress||0}%"></span>`:''}${om}${d==='done'&&i===0?'<em>✓</em>':''}${i===segs.length-1?`<span class="bl">${esc(t.name)}${t.owner?' · '+esc(t.owner):''}</span>`:''}</div>`;
+          });
+        }
+        if(UI.baseline&&p.baselineAt&&t.bStart&&t.bEnd){const bs=toNum(t.bStart),be=toNum(t.bEnd);bar=`<div class="base" style="left:${x(bs)}px;width:${(be-bs+1)*dw}px" title="基準：${mdS(t.bStart)}–${mdS(t.bEnd)}"></div>`+bar}
+        rows+=`<div class="gr task" data-kind="task" data-id="${t.id}" data-mid="${m.id}" data-fid="${f.id}"><div class="gl"><span class="grip" draggable="true" data-grip="task" data-id="${t.id}" title="拖曳調整任務順序（可拖到其他功能）">⠿</span><div class="gname" data-open-task="${t.id}"><span class="rtag r-${r}">${PH[t.phase]?.short||t.phase}</span><span class="tx" title="${esc(t.name)}">${esc(t.name)}</span>${segs.length>1?`<span class="segtag" title="${esc(segText(t))}">${segs.length}段</span>`:''}${warn}</div>${leftCols(esc(t.owner||ROLES[r].label),s!=null?md(s):'—',e!=null?md(e):'—',segs.length?taskWd(t):'')}</div>
+          <div class="gt${s==null?' empty':''}" data-tid="${t.id}" style="width:${W}px">${bar}</div></div>`;
+      }
+    }
+  }
+  main.innerHTML=`<div class="gw" style="--lw:${LW}px;width:${LW+W}px">
+    <div class="ghead"><div class="gl"><span>模組 / 功能 / 任務</span><span>負責人</span><span>開始</span><span>結束</span><span>天</span></div><div class="gtime" style="width:${W}px">${hm}${lo}</div></div>
+    <div class="gbody" data-rs="${rs}"><div class="gbg" style="left:${LW}px;width:${W}px">${bg}</div>${rows||'<div class="empty-note pad">沒有符合篩選條件的任務</div>'}</div></div>`;
+}
+function scrollToToday(){const [rs]=ganttRange();main.scrollLeft=Math.max(0,(TODAY-rs)*DW[UI.zoom]-260)}
+
+/* row reordering (drag the ⠿ grip) */
+let rdnd=null;
+const blockEnd=(attr,id)=>{const rs=main.querySelectorAll(`.gr[data-${attr}="${id}"]`);return rs[rs.length-1]};
+function rowTarget(e){
+  const row=e.target.closest?.('.gr[data-kind]');if(!row||!rdnd)return null;
+  const k=row.dataset.kind,id=row.dataset.id,r=row.getBoundingClientRect(),after=e.clientY>r.top+r.height/2;
+  if(rdnd.type==='task'){
+    if(k==='task'){if(id===rdnd.id)return null;return {ind:row,cls:after?'drop-after':'drop-before',fid:row.dataset.fid,ref:id,after}}
+    if(k==='feat')return {ind:row,cls:'drop-in',fid:id,ref:null};
+    return null;
+  }
+  if(rdnd.type==='feat'){
+    if(k==='mod')return {ind:row,cls:'drop-in',mid:id,ref:null};
+    const fid=row.dataset.fid;if(fid===rdnd.id)return null;
+    const a=k==='task'?true:after;
+    return {ind:a?blockEnd('fid',fid):row,cls:a?'drop-after':'drop-before',mid:row.dataset.mid,ref:fid,after:a};
+  }
+  const mid=row.dataset.mid;if(mid===rdnd.id)return null;
+  const a=k==='mod'?after:true;
+  return {ind:a?blockEnd('mid',mid):row,cls:a?'drop-after':'drop-before',ref:mid,after:a};
+}
+const clearDrop=()=>main.querySelectorAll('.drop-before,.drop-after,.drop-in').forEach(x=>x.classList.remove('drop-before','drop-after','drop-in'));
+main.addEventListener('dragstart',e=>{
+  const g=e.target.closest?.('.grip');if(!g)return;const row=g.closest('.gr');
+  rdnd={type:g.dataset.grip,id:g.dataset.id,row};
+  e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',g.dataset.id);
+  try{e.dataTransfer.setDragImage(row,24,15)}catch(_){}
+  setTimeout(()=>row.classList.add('drg-src'));document.body.classList.add('dnd-on');hideTip();
+});
+main.addEventListener('dragover',e=>{
+  if(!rdnd)return;const tg=rowTarget(e);clearDrop();rdnd.tg=tg;if(!tg)return;
+  e.preventDefault();e.dataTransfer.dropEffect='move';tg.ind.classList.add(tg.cls);
+});
+main.addEventListener('drop',e=>{
+  if(!rdnd||!rdnd.tg)return;e.preventDefault();const {type,id,tg}=rdnd;clearDrop();
+  if(type==='task'){const t=taskById(id);const from=t.featureId;
+    commit(()=>moveTask(id,tg.fid,tg.ref,tg.after),from!==tg.fid?`已將「${t.name}」移到「${featById(tg.fid).name}」`:'');
+    if(tg.cls==='drop-in'&&UI.collapsed[tg.fid]){UI.collapsed[tg.fid]=false;saveUI();render()}}
+  else if(type==='feat'){const f=featById(id);const from=f.moduleId;
+    commit(()=>moveFeat(id,tg.mid,tg.ref,tg.after),from!==tg.mid?`已將「${f.name}」移到「${modLabel(modById(tg.mid))}」`:'')}
+  else commit(()=>moveMod(id,tg.ref,tg.after),'');
+  refreshDrawer();
+});
+main.addEventListener('dragend',()=>{clearDrop();rdnd?.row?.classList.remove('drg-src');document.body.classList.remove('dnd-on');rdnd=null});
+
+/* drag & drop on gantt */
+let drag=null;
+main.addEventListener('pointerdown',e=>{
+  if(UI.view!=='gantt'||e.button!==0)return;
+  const body=e.target.closest('.gbody');if(!body)return;
+  const rs=+body.dataset.rs,dw=DW[UI.zoom];
+  const bar=e.target.closest('.bar');
+  if(bar){
+    const t=taskById(bar.dataset.id);const r=bar.getBoundingClientRect();
+    const si=+bar.dataset.si||0;const sg=taskSegs(t)[si];
+    const mode=e.clientX-r.left<7?'l':(r.right-e.clientX<7?'r':'m');
+    bar.classList.add('dragging');
+    drag={id:t.id,bar,si,mode,x0:e.clientX,s0:sg[0],e0:sg[1],moved:false,dw,rs};
+    e.preventDefault();return;
+  }
+  const tr=e.target.closest('.gt[data-tid]');
+  if(tr&&(tr.classList.contains('empty')||e.shiftKey)){
+    const t=taskById(tr.dataset.tid);const box=tr.getBoundingClientRect();
+    const n=rs+Math.floor((e.clientX-box.left)/dw);
+    const b=document.createElement('div');b.className=`bar dragging r-${roleOf(t)} s-todo`;b.style.left=(n-rs)*dw+'px';b.style.width=dw+'px';tr.appendChild(b);
+    drag={id:t.id,bar:b,mode:'c',add:!tr.classList.contains('empty'),x0:e.clientX,s0:n,e0:n,s:n,e:n,moved:true,dw,rs};
+    e.preventDefault();
+  }
+});
+window.addEventListener('pointermove',e=>{
+  if(!drag){
+    if(UI.view==='gantt'){const b=e.target.closest&&e.target.closest('.bar[data-id]');if(b)showTip(e,barTip(taskById(b.dataset.id)));else hideTip();
+      const em=e.target.closest&&e.target.closest('.gt.empty');if(em)em.style.setProperty('--hx',(e.clientX-em.getBoundingClientRect().left+12)+'px')}
+    return;
+  }
+  const dd=Math.round((e.clientX-drag.x0)/drag.dw);let s=drag.s0,en=drag.e0;
+  if(drag.mode==='m'){s+=dd;en+=dd}
+  else if(drag.mode==='l'){s=Math.min(drag.s0+dd,en)}
+  else if(drag.mode==='r'){en=Math.max(drag.e0+dd,s)}
+  else if(drag.mode==='c'){if(dd>=0)en=drag.s0+dd;else s=drag.s0+dd}
+  if(dd!==0)drag.moved=true;
+  drag.s=s;drag.e=en;
+  drag.bar.style.left=(s-drag.rs)*drag.dw+'px';drag.bar.style.width=(en-s+1)*drag.dw+'px';
+  showTip(e,`<b>${md(s)} – ${md(en)}</b>（${WD[dowOf(s)]}–${WD[dowOf(en)]}）<br>${workdays(s,en)} 個工作天`);
+});
+window.addEventListener('pointerup',()=>{
+  if(!drag)return;const d=drag;drag=null;hideTip();d.bar.classList.remove('dragging');
+  if(d.moved&&d.s!=null){
+    if(d.mode!=='c'&&d.s===d.s0&&d.e===d.e0){render();return}
+    commit(()=>{const t=taskById(d.id);const segs=taskSegs(t);
+      if(d.mode==='c'){if(d.add)segs.push([d.s,d.e]);else segs.splice(0,segs.length,[d.s,d.e]);if(t.status==='done'&&!d.add)t.status='todo'}
+      else segs[d.si]=[d.s,d.e];
+      setSegs(t,segs)},d.add?`已新增區段：${md(d.s)} – ${md(d.e)}`:`已排程：${md(d.s)} – ${md(d.e)}`);
+  }else openTask(d.id);
+});
+function barTip(t){
+  if(!t)return '';const d=dstat(t);const n=taskSegs(t).length;
+  let h=`<b>${esc(taskLabel(t))}</b><br>${ROLES[roleOf(t)].label}${t.owner?'・'+esc(t.owner):''}　${DSTAT[d]}${t.tentative?'（暫定）':''}<br>${segText(t)}　${taskWd(t)} 工作天${n>1?`（${n} 段）`:''}`;
+  if(t.bEnd&&t.bEnd!==t.end){const sl=toNum(t.end)-toNum(t.bEnd);h+=`<br>較基準 ${sl>0?'延後':'提前'} ${Math.abs(sl)} 天`}
+  if(t.note)h+=`<br><span style="opacity:.8">${esc(t.note)}</span>`;
+  return h;
+}
+
+/* ================= Matrix ================= */
+function renderMatrix(){
+  const p=P();const q=UI.q.toLowerCase();
+  const MP=PHASES.filter(ph=>ph.key!=='other'||p.tasks.some(t=>t.phase==='other'));
+  let h=`<div class="pad"><div class="card" style="overflow:auto"><table class="mx"><thead><tr><th>功能</th>${MP.map(ph=>{const r=S.settings.phaseRole[ph.key];return `<th class="r-${r}"><span class="rdot"></span>${ph.label}<small>${ROLES[r].label}</small></th>`}).join('')}<th>進度</th></tr></thead><tbody>`;
+  let any=false;
+  for(const m of p.modules){
+    const feats=featsOf(m.id).filter(f=>{const ts=tasksOf(f.id);
+      if(q&&!(f.name+' '+modLabel(m)+' '+ts.map(t=>t.name+' '+(t.owner||'')).join(' ')).toLowerCase().includes(q))return false;
+      if(UI.hideDone&&ts.length&&aggStatus(ts)==='done')return false;
+      if(UI.status&&!ts.some(t=>dstat(t)===UI.status))return false;
+      if(UI.owner&&!ts.some(t=>t.owner===UI.owner))return false;
+      return true});
+    if(!feats.length&&filtering())continue;
+    any=true;
+    h+=`<tr class="mxm"><td colspan="${MP.length+2}"><span data-open-module="${m.id}" style="cursor:pointer">${esc(modLabel(m))}</span> <button class="addbtn" style="opacity:1" data-add-feature="${m.id}" title="新增功能">＋</button></td></tr>`;
+    for(const f of feats){
+      const ts=tasksOf(f.id);const cur=currentPhase(ts);const pct=Math.round(doneRatio(ts)*100);
+      h+=`<tr><td class="fn" data-open-feature="${f.id}">${esc(f.name)}</td>`;
+      for(const ph of MP){
+        const pts=ts.filter(t=>t.phase===ph.key);
+        if(!pts.length){h+=`<td class="mxc empty" data-add-phase="${ph.key}" data-fid="${f.id}" title="新增${ph.label}">＋</td>`;continue}
+        const a=aggStatus(pts);const sp=span(pts);const ow=[...new Set(pts.map(t=>t.owner).filter(Boolean))].join('、');
+        const attr=pts.length>1?`data-open-feature="${f.id}"`:`data-open-task="${pts[0].id}"`;
+        h+=`<td class="mxc s-${a}${cur===ph.key?' cur':''}" ${attr}><div class="box"><div class="mxs"><i class="sd"></i>${DSTAT[a]}${pts.some(t=>t.tentative)?' <span class="hint">暫定</span>':''}</div>
+          <div class="mxd">${sp?`${md(sp[0])} – ${md(sp[1])}・${workdays(sp[0],sp[1])}天`:'點擊設定日期'}</div>${pts.length>1||ow?`<div class="mxd">${pts.length>1?pts.length+' 項':''}${pts.length>1&&ow?'・':''}${esc(ow)}</div>`:''}</div></td>`;
+      }
+      h+=`<td style="vertical-align:middle;padding:6px 12px"><div class="prog"><span style="width:${pct}%"></span></div><div class="hint" style="margin-top:3px">${pct}%</div></td></tr>`;
+    }
+  }
+  h+=`</tbody></table>${any?'':'<div class="empty-note pad">沒有符合篩選條件的功能</div>'}</div>
+    <div class="legend">${['todo','doing','review','done','overdue','blocked','unsched'].map(k=>`<span class="s-${k}"><i class="sd"></i>${DSTAT[k]}</span>`).join('')}<span>藍框＝目前所在階段</span></div></div>`;
+  main.innerHTML=h;
+}
+
+/* ================= List ================= */
+const LCOLS=[
+  ['mod','模組'],['feat','功能'],['phase','階段'],['name','任務'],['role','角色'],['owner','負責人'],
+  ['start','開始'],['end','結束'],['wd','工作天'],['status','狀態'],['progress','進度'],['slip','基準偏差'],['note','備註']];
+function listRows(){
+  const p=P();
+  return p.tasks.filter(passTask).map(t=>{const f=featById(t.featureId);const m=f&&modById(f.moduleId);const s=toNum(t.start),e=toNum(t.end);
+    return {t,mod:m?modLabel(m):'',feat:f?f.name:'',phase:phaseIdx(t.phase),name:t.name,role:roleOf(t),owner:t.owner||'',start:s??1e9,end:e??1e9,wd:taskWd(t),
+      status:Object.keys(DSTAT).indexOf(dstat(t)),progress:t.progress||0,slip:(t.bEnd&&t.end)?toNum(t.end)-toNum(t.bEnd):0,note:t.note||'',
+      mi:p.modules.indexOf(m),fi:p.features.indexOf(f)}});
+}
+function renderList(){
+  const rows=listRows();const {k,dir}=UI.sort;
+  rows.sort((a,b)=>{let va=a[k],vb=b[k];if(k==='mod'||k==='feat'){va=a.mi*1e4+a.fi;vb=b.mi*1e4+b.fi}
+    if(va<vb)return -dir;if(va>vb)return dir;return (a.mi-b.mi)||(a.fi-b.fi)||(a.phase-b.phase)});
+  let h=`<div class="pad"><div class="card" style="overflow:auto"><table class="lt"><thead><tr>${LCOLS.map(([c,l])=>`<th data-sort="${c}">${l}${k===c?(dir>0?' ▲':' ▼'):''}</th>`).join('')}</tr></thead><tbody>`;
+  for(const r of rows){const t=r.t;const d=dstat(t);
+    h+=`<tr data-row="${t.id}"><td>${esc(r.mod)}</td><td class="nm" data-open-feature="${t.featureId}">${esc(r.feat)}</td><td>${PH[t.phase]?.label||''}</td>
+      <td class="nm" data-open-task="${t.id}" title="${esc(t.name)}">${esc(t.name)}${t.tentative?' <span class="hint">暫定</span>':''}${depConflict(t)?' <span class="warn">⚠</span>':''}</td>
+      <td><span class="rtag r-${r.role}">${ROLES[r.role].label}</span></td>
+      <td><input class="own" data-f="owner" value="${esc(t.owner||'')}" list="ownerList"></td>
+      ${t.segs?`<td colspan="2" class="nm" data-open-task="${t.id}" title="多段日期請在任務編輯中修改">${esc(segText(t))} <span class="segtag">${taskSegs(t).length}段</span></td>`:`<td><input type="date" data-f="start" value="${t.start||''}"></td><td><input type="date" data-f="end" value="${t.end||''}"></td>`}
+      <td style="text-align:right">${r.wd||''}</td>
+      <td><select data-f="status">${Object.entries(STATUS).map(([v,l])=>`<option value="${v}"${(t.status||'todo')===v?' selected':''}>${l}</option>`).join('')}</select> ${d==='overdue'||d==='unsched'?`<span class="pill s-${d}">${DSTAT[d]}</span>`:''}</td>
+      <td><input type="number" min="0" max="100" step="10" data-f="progress" value="${t.progress||0}" style="width:58px">%</td>
+      <td>${r.slip?`<span class="slip${r.slip<0?' neg':''}">${r.slip>0?'+':''}${r.slip} 天</span>`:''}</td>
+      <td style="max-width:240px;overflow:hidden;text-overflow:ellipsis" title="${esc(r.note)}">${esc(r.note)}</td></tr>`}
+  h+=`</tbody></table>${rows.length?'':'<div class="empty-note pad">沒有符合篩選條件的任務</div>'}</div><div class="hint" style="padding:8px 2px">共 ${rows.length} 筆・可直接在表格內修改負責人、日期、狀態與進度</div></div>
+    <datalist id="ownerList">${owners().map(o=>`<option value="${esc(o)}">`).join('')}</datalist>`;
+  main.innerHTML=h;
+}
+main.addEventListener('change',e=>{
+  const el=e.target;const tr=el.closest('tr[data-row]');if(!tr||!el.dataset.f)return;
+  const id=tr.dataset.row;const f=el.dataset.f;let v=el.value;
+  commit(()=>{const t=taskById(id);
+    if(f==='progress'){v=Math.max(0,Math.min(100,+v||0));t.progress=v;if(v===100&&t.status!=='done'){t.status='done';t.doneAt=t.doneAt||toStr(TODAY)}}
+    else if(f==='status'){t.status=v;if(v==='done'){t.progress=100;t.doneAt=t.doneAt||toStr(TODAY)}}
+    else if(f==='start'||f==='end'){t[f]=v;if(t.start&&t.end&&t.end<t.start){if(f==='start')t.end=t.start;else t.start=t.end}}
+    else t[f]=v.trim();
+  });
+});
+
+/* ================= Workload ================= */
+function renderLoad(){
+  const p=P();const [rs0,re]=ganttRange();const rs=rs0;
+  const weeks=[];for(let n=rs;n<=re;n+=7)weeks.push(n);
+  const groups={pm:new Map(),eng:new Map(),user:new Map()};
+  for(const t of p.tasks){if(!passTask(t))continue;const segs=taskSegs(t);if(!segs.length)continue;
+    const r=roleOf(t);const who=t.owner||`（未指定${ROLES[r].label}）`;
+    if(!groups[r].has(who))groups[r].set(who,weeks.map(()=>({v:0,ts:[]})));
+    const arr=groups[r].get(who);
+    weeks.forEach((w,i)=>{let c=0;for(const [s,e] of segs){const a=Math.max(s,w),b=Math.min(e,w+6);if(a<=b)c+=workdays(a,b)}
+      if(c){arr[i].v+=c;arr[i].ts.push(`${taskLabel(t)}（${c}天）`)}});
+  }
+  const curW=weeks.findIndex(w=>TODAY>=w&&TODAY<w+7);
+  let h=`<div class="pad"><div class="card" style="overflow:auto"><table class="wl"><thead><tr><th style="text-align:left;padding-left:10px;position:sticky;left:0;z-index:3">負責人</th>${weeks.map((w,i)=>`<th class="${i===curW?'now':''}">${md(w)}</th>`).join('')}</tr></thead><tbody>`;
+  let any=false;
+  for(const r of ['pm','eng','user']){
+    if(!groups[r].size)continue;any=true;
+    h+=`<tr class="rh r-${r}"><td colspan="${weeks.length+1}"><span class="rdot"></span> ${ROLES[r].label}</td></tr>`;
+    for(const [who,arr] of groups[r]){
+      h+=`<tr class="r-${r}"><td class="who">${esc(who)}</td>${arr.map((c,i)=>{const l=c.v===0?'':c.v<=2?'l1':c.v<=5?'l2':'l3';
+        return `<td class="c ${l}"${c.ts.length?` title="${esc(c.ts.join('\n'))}"`:''} style="${i===curW?'background:var(--accent-soft)':''}"><div>${c.v||''}</div></td>`}).join('')}</tr>`;
+    }
+  }
+  h+=`</tbody></table>${any?'':'<div class="empty-note pad">沒有已排程的任務</div>'}</div>
+    <div class="legend"><span>數字＝該週分配的工作天數（同週多任務會累加）</span><span><i class="sd" style="background:var(--overdue)"></i>超過 5 天＝同時段任務重疊，可能超載</span><span>滑鼠移到格子上可看任務明細</span></div></div>`;
+  main.innerHTML=h;
+}
+
+/* ================= Dashboard ================= */
+function renderDash(){
+  const p=P();const ts=p.tasks;const ds=ts.map(dstat);const cnt=k=>ds.filter(d=>d===k).length;
+  const pct=ts.length?Math.round(cnt('done')/ts.length*100):0;
+  const sp=span(ts);
+  const kpi=(v,k,cls='')=>`<div class="card kpi ${cls}"><div class="v">${v}</div><div class="k">${k}</div></div>`;
+  const horizon=14;
+  const up={pm:[],eng:[],user:[]};
+  for(const t of ts){const d=dstat(t);if(d==='done'||d==='unsched')continue;const s=toNum(t.start),e=toNum(t.end);
+    if(e<TODAY||s>TODAY+horizon)continue;up[roleOf(t)].push(t)}
+  const item=t=>{const e=toNum(t.end);const d=dstat(t);return `<div class="it" data-open-task="${t.id}"><div class="dt">${md(e)}<div class="hint" style="font-weight:400">週${WD[dowOf(e)]}</div></div><div style="min-width:0"><div class="t1">${esc(t.name)} <span class="pill s-${d}">${DSTAT[d]}</span></div><div class="t2">${esc(featById(t.featureId)?.name||'')}${t.owner?'・'+esc(t.owner):''}</div></div></div>`};
+  const risk=ts.filter(t=>['overdue','blocked'].includes(dstat(t))).sort((a,b)=>(a.end||'').localeCompare(b.end||''));
+  const conflicts=ts.filter(depConflict);
+  let mods='';
+  for(const m of p.modules){const mt=featsOf(m.id).flatMap(f=>tasksOf(f.id));const n=mt.length||1;const msp=span(mt);
+    const segs=['done','review','doing','todo','overdue','blocked','unsched'].map(k=>{const c=mt.filter(t=>dstat(t)===k).length;return c?`<span class="s-${k}" style="width:${c/n*100}%" title="${DSTAT[k]} ${c}"></span>`:''}).join('');
+    mods+=`<div class="mrow"><div style="font-weight:600;cursor:pointer" data-open-module="${m.id}">${esc(modLabel(m))}<div class="hint" style="font-weight:400">${featsOf(m.id).length} 個功能・${mt.length} 項任務</div></div><div class="stack">${segs}</div><div style="text-align:right;font-weight:700">${Math.round(doneRatio(mt)*100)}%</div><div class="hint" style="text-align:right">${msp?'至 '+md(msp[1]):'未排程'}</div></div>`}
+  // features waiting UAT / go-live
+  main.innerHTML=`<div class="dash">
+    ${kpi(pct+'%','整體完成率')}${kpi(cnt('doing')+cnt('review'),'進行中 / 待驗收')}${kpi(cnt('overdue'),'逾期',cnt('overdue')?'red':'')}${kpi(cnt('blocked'),'卡關',cnt('blocked')?'red':'')}${kpi(cnt('unsched'),'尚未排程')}${kpi(sp?md(sp[1]):'—','目前排程最晚日期'+(cnt('unsched')?'（尚有未排程）':''))}
+    <div class="card span12"><h3>近兩週各角色交付 <small>${md(TODAY)} – ${md(TODAY+horizon)}，含進行中項目</small></h3>
+      <div class="cols3">${['pm','eng','user'].map(r=>`<div class="r-${r}"><h4><span class="rdot"></span>${ROLES[r].label}<span class="hint">${up[r].length} 項</span></h4>${up[r].sort((a,b)=>a.end.localeCompare(b.end)).map(item).join('')||'<div class="empty-note">近兩週沒有交付項目</div>'}</div>`).join('')}</div></div>
+    <div class="card span8"><h3>模組進度</h3>${mods}<div class="legend">${['done','review','doing','todo','overdue','blocked','unsched'].map(k=>`<span class="s-${k}"><i class="sd"></i>${DSTAT[k]}</span>`).join('')}</div></div>
+    <div class="card span4"><h3>風險項目 <small>逾期・卡關・相依衝突</small></h3><div style="padding:4px 16px 10px">
+      ${risk.map(item).join('')}${conflicts.map(t=>`<div class="it" data-open-task="${t.id}"><div class="dt warn">⚠</div><div><div class="t1">${esc(t.name)}</div><div class="t2">開始日早於前置「${esc(depOf(t).name)}」結束日</div></div></div>`).join('')}
+      ${risk.length||conflicts.length?'':'<div class="empty-note">目前沒有風險項目 🎉</div>'}</div></div>
+  </div>`;
+}
+
+/* ================= Drawer editors ================= */
+const drawer=$('#drawer');let drawerRef=null;
+function closeDrawer(){drawer.classList.remove('open');drawerRef=null;drawer.dataset.dirty=''}
+drawer.addEventListener('input',()=>{drawer.dataset.dirty='1'}); // 編輯中不被別人的更新刷掉
+function refreshDrawer(){if(!drawerRef)return;const [k,id]=drawerRef;if(k==='task'&&taskById(id))openTask(id);else if(k==='feature'&&featById(id))openFeature(id);else if(k==='module'&&modById(id))openModule(id);else closeDrawer()}
+function featOptions(sel){return P().modules.map(m=>`<optgroup label="${esc(modLabel(m))}">${featsOf(m.id).map(f=>`<option value="${f.id}"${f.id===sel?' selected':''}>${esc(f.name)}</option>`).join('')}</optgroup>`).join('')}
+function openTask(id){
+  const t=taskById(id);if(!t)return;drawerRef=['task',id];
+  const r=roleOf(t);const s=toNum(t.start),e=toNum(t.end);
+  const deps=P().tasks.filter(x=>x.id!==t.id);
+  drawer.innerHTML=`<div class="dh"><span class="rtag r-${r}">${ROLES[r].label}</span><h2>${esc(t.name)}</h2><button class="ghost" data-close>✕</button></div>
+  <form class="db" id="tf" autocomplete="off">
+    <label class="fld"><span>任務名稱</span><input name="name" value="${esc(t.name)}" required></label>
+    <div class="row2"><label class="fld"><span>所屬功能</span><select name="featureId">${featOptions(t.featureId)}</select></label>
+      <label class="fld"><span>階段</span><select name="phase">${PHASES.map(p=>`<option value="${p.key}"${p.key===t.phase?' selected':''}>${p.label}</option>`).join('')}</select></label></div>
+    <div class="row2"><label class="fld"><span>角色</span><select name="role"><option value="">依階段預設（${ROLES[S.settings.phaseRole[t.phase]]?.label}）</option>${Object.entries(ROLES).map(([k,v])=>`<option value="${k}"${t.role===k?' selected':''}>${v.label}</option>`).join('')}</select></label>
+      <label class="fld"><span>負責人</span><input name="owner" value="${esc(t.owner||'')}" list="ownerList2" placeholder="姓名"></label></div>
+    <div class="fld"><span>執行日期 <b id="segTotal"></b></span>
+      <div class="seghead"><span>開始日</span><span></span><span>結束日</span><span>工作天</span><span></span></div>
+      <div id="segs">${(taskSegs(t).length?taskSegs(t):[[null,null]]).map(([a,b])=>segRow(a,b)).join('')}</div>
+      <div><button type="button" id="addSeg">＋ 新增日期區段</button></div>
+      <div class="hint">實際執行日期不連續時（例如中途暫停、插單），可加入多個區段，甘特圖會分段顯示色塊。輸入「工作天」會自動推算結束日（排除週末與假日）。</div>
+    </div>
+    <div class="row2"><label class="fld"><span>狀態</span><select name="status">${Object.entries(STATUS).map(([k,v])=>`<option value="${k}"${(t.status||'todo')===k?' selected':''}>${v}</option>`).join('')}</select></label>
+      <label class="fld"><span>進度 <b id="pgv">${t.progress||0}%</b></span><input type="range" name="progress" min="0" max="100" step="10" value="${t.progress||0}"></label></div>
+    <label class="ck"><input type="checkbox" name="tentative"${t.tentative?' checked':''}> 日期為暫定（甘特圖以斜紋顯示）</label>
+    <label class="fld"><span>前置任務（完成後才能開始）</span><select name="dep"><option value="">無</option>${P().modules.map(m=>featsOf(m.id).map(f=>{const xs=tasksOf(f.id).filter(x=>x.id!==t.id);return xs.length?`<optgroup label="${esc(f.name)}">${xs.map(x=>`<option value="${x.id}"${t.dep===x.id?' selected':''}>${esc(x.name)}${x.end?'（'+mdS(x.end)+'）':''}</option>`).join('')}</optgroup>`:''}).join('')).join('')}</select></label>
+    ${depConflict(t)?`<div class="warn">⚠ 開始日早於前置任務結束日（${mdS(depOf(t).end)}）<button type="button" data-fixdep style="margin-left:6px">順延到前置任務之後</button></div>`:''}
+    <label class="fld"><span>交付物連結 / 備註</span><textarea name="note" rows="4" placeholder="例如 Figma、GitHub、測試報告連結，或驗收意見">${esc(t.note||'')}</textarea></label>
+    ${t.doneAt?`<div class="hint">完成日：${esc(t.doneAt)}</div>`:''}
+    ${t._by?`<div class="hint">最後更新：${esc(t._by)}・${esc(t._at||'')}</div>`:''}
+    ${t.bStart?`<div class="hint">基準計畫：${mdS(t.bStart)} – ${mdS(t.bEnd)}${t.end&&t.bEnd!==t.end?`（${toNum(t.end)-toNum(t.bEnd)>0?'延後':'提前'} ${Math.abs(toNum(t.end)-toNum(t.bEnd))} 天）`:''}</div>`:''}
+    <datalist id="ownerList2">${owners().map(o=>`<option value="${esc(o)}">`).join('')}</datalist>
+  </form>
+  <div class="df"><button class="danger" data-del-task="${t.id}">刪除</button><button data-dup-task="${t.id}">複製</button><span class="sp"></span><button data-open-feature="${t.featureId}">所屬功能</button><button class="primary" data-save-task="${t.id}">儲存</button></div>`;
+  drawer.classList.add('open');
+  const f=$('#tf');const segBox=$('#segs');
+  const segTotal=()=>{const n=readSegs().reduce((c,[a,b])=>c+workdays(a,b),0);const k=$$('.segrow',segBox).length;$('#segTotal').textContent=n?`共 ${n} 工作天${k>1?`・${k} 段`:''}`:'';
+    $$('.segdel',segBox).forEach(b=>b.style.visibility=k>1?'visible':'hidden')};
+  segBox.addEventListener('change',e=>{const row=e.target.closest('.segrow');if(!row)return;const ss=$('.ss',row),se=$('.se',row),sw=$('.sw',row);
+    if(e.target===ss&&ss.value){if(+sw.value>0)se.value=toStr(addWorkdays(toNum(ss.value),+sw.value));else if(!se.value)se.value=ss.value}
+    if(ss.value&&se.value&&se.value<ss.value)se.value=ss.value;
+    if(e.target!==sw&&ss.value&&se.value)sw.value=workdays(toNum(ss.value),toNum(se.value));
+    segTotal()});
+  segBox.addEventListener('input',e=>{if(!e.target.classList.contains('sw'))return;const row=e.target.closest('.segrow');const ss=$('.ss',row);
+    if(ss.value&&+e.target.value>0)$('.se',row).value=toStr(addWorkdays(toNum(ss.value),+e.target.value));segTotal()});
+  segBox.addEventListener('click',e=>{const b=e.target.closest('.segdel');if(!b)return;b.closest('.segrow').remove();segTotal()});
+  $('#addSeg').onclick=()=>{const segs=readSegs();const last=segs.length?segs[segs.length-1][1]:null;
+    const st=last!=null?nextWorkday(last):null;segBox.insertAdjacentHTML('beforeend',segRow(st,st));segTotal();$$('.ss',segBox).pop().focus()};
+  segTotal();
+  f.progress.addEventListener('input',()=>$('#pgv').textContent=f.progress.value+'%');
+  f.addEventListener('submit',e=>{e.preventDefault();saveTask(t.id)});
+  const fx=drawer.querySelector('[data-fixdep]');
+  if(fx)fx.onclick=()=>{const d=depOf(t);const segs=readSegs();if(!segs.length)return;const delta=nextWorkday(toNum(d.end))-segs[0][0];
+    $$('.segrow',segBox).forEach(r=>{const ss=$('.ss',r),se=$('.se',r);if(ss.value)ss.value=toStr(toNum(ss.value)+delta);if(se.value)se.value=toStr(toNum(se.value)+delta);
+      if(ss.value&&se.value)$('.sw',r).value=workdays(toNum(ss.value),toNum(se.value))});
+    segTotal();fx.parentElement.textContent='已整體順延，記得按「儲存」'};
+  setTimeout(()=>f.name.focus({preventScroll:true}),50);
+}
+function segRow(a,b){
+  return `<div class="segrow"><input type="date" class="ss" value="${a!=null?toStr(a):''}"><span class="hint">→</span><input type="date" class="se" value="${b!=null?toStr(b):''}"><input type="number" class="sw" min="1" value="${a!=null&&b!=null?workdays(a,b):''}"><button type="button" class="ghost segdel" title="刪除此區段">✕</button></div>`;
+}
+function readSegs(){ // 讀取編輯器中的日期區段（只有開始日時視為單日）
+  return $$('#segs .segrow').map(r=>{const a=toNum($('.ss',r).value),b=toNum($('.se',r).value)??a;return [a,b]}).filter(([a,b])=>a!=null&&b!=null).map(([a,b])=>a<=b?[a,b]:[b,a]).sort((x,y)=>x[0]-y[0]);
+}
+function saveTask(id){
+  const f=$('#tf');if(!f.reportValidity())return;
+  commit(()=>{const t=taskById(id);
+    t.name=f.name.value.trim();t.featureId=f.featureId.value;t.phase=f.phase.value;t.role=f.role.value||undefined;
+    t.owner=f.owner.value.trim();setSegs(t,readSegs());
+    const ns=f.status.value;if(ns==='done'&&t.status!=='done')t.doneAt=toStr(TODAY);if(ns!=='done')delete t.doneAt;t.status=ns;
+    t.progress=ns==='done'?100:+f.progress.value;t.tentative=f.tentative.checked;t.dep=f.dep.value||undefined;t.note=f.note.value;
+  },'已儲存');
+  const t=taskById(id);if(t&&!passTask(t))toast('已儲存。這個任務不符合目前的篩選條件，所以暫時不顯示');
+  openTask(id);
+}
+function openFeature(id){
+  const f=featById(id);if(!f)return;drawerRef=['feature',id];
+  const ts=tasksOf(id);const sp=span(ts);const ag=aggStatus(ts);
+  drawer.innerHTML=`<div class="dh"><span class="pill s-${ag}">${DSTAT[ag]}</span><h2>${esc(f.name)}</h2><button class="ghost" data-close>✕</button></div>
+  <form class="db" id="ff" autocomplete="off">
+    <label class="fld"><span>功能名稱</span><input name="name" value="${esc(f.name)}" required></label>
+    <label class="fld"><span>所屬模組</span><select name="moduleId">${P().modules.map(m=>`<option value="${m.id}"${m.id===f.moduleId?' selected':''}>${esc(modLabel(m))}</option>`).join('')}</select></label>
+    <div class="hint">${sp?`期間 ${md(sp[0])} – ${md(sp[1])}・共 ${workdays(sp[0],sp[1])} 工作天・`:''}完成 ${Math.round(doneRatio(ts)*100)}%</div>
+    <div class="fld"><span>階段任務（點擊編輯，↑↓ 調整順序）</span>
+      ${ts.map((t,i)=>{const d=dstat(t);return `<div class="ftask t4" data-open-task="${t.id}"><span class="rtag r-${roleOf(t)}">${PH[t.phase]?.short}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.name)}<span class="hint">${t.owner?'・'+esc(t.owner):''}</span></span><span style="text-align:right"><span class="pill s-${d}">${t.start?mdS(t.start)+'–'+mdS(t.end):DSTAT[d]}</span></span><span class="mv"><button type="button" class="ghost" data-move-task="${t.id}" data-dir="-1" title="上移"${i===0?' disabled':''}>↑</button><button type="button" class="ghost" data-move-task="${t.id}" data-dir="1" title="下移"${i===ts.length-1?' disabled':''}>↓</button></span></div>`}).join('')||'<div class="empty-note">尚無任務</div>'}
+    </div>
+    <div class="btnrow"><button type="button" data-add-task="${f.id}">＋ 新增任務（可自訂名稱）</button><button type="button" data-fill="${f.id}" title="依「設定」中的預設任務範本補上缺少的任務">補齊預設任務</button></div>
+    <div class="card" style="padding:10px 12px">
+      <b>自動排程</b><div class="hint" style="margin:4px 0 8px">為「尚未排程」的階段依序排日期：每個階段接在上一個階段之後，天數採用設定中的預設工作天。</div>
+      <div class="btnrow"><input type="date" id="autoStart" value="${toStr(nextWorkday(TODAY-1))}"><button type="button" data-auto="${f.id}">依序排程</button></div>
+    </div>
+  </form>
+  <div class="df"><button class="danger" data-del-feature="${f.id}">刪除功能</button><button type="button" data-move-feature="${f.id}" data-dir="-1">上移</button><button type="button" data-move-feature="${f.id}" data-dir="1">下移</button><span class="sp"></span><button class="primary" data-save-feature="${f.id}">儲存</button></div>`;
+  drawer.classList.add('open');
+  $('#ff').addEventListener('submit',e=>{e.preventDefault();saveFeature(id)});
+}
+function saveFeature(id){const f=$('#ff');if(!f.reportValidity())return;commit(()=>{const x=featById(id);x.name=f.name.value.trim();x.moduleId=f.moduleId.value},'已儲存');openFeature(id)}
+function openModule(id){
+  const m=modById(id);if(!m)return;drawerRef=['module',id];
+  drawer.innerHTML=`<div class="dh"><h2>${esc(modLabel(m))}</h2><button class="ghost" data-close>✕</button></div>
+  <form class="db" id="mf" autocomplete="off">
+    <div class="row3" style="grid-template-columns:90px 1fr"><label class="fld"><span>編號</span><input name="code" value="${esc(m.code||'')}"></label><label class="fld"><span>模組名稱</span><input name="name" value="${esc(m.name)}" required></label></div>
+    <div class="fld"><span>功能</span>${featsOf(id).map(f=>`<div class="ftask" style="grid-template-columns:1fr 90px" data-open-feature="${f.id}"><span>${esc(f.name)}</span><span style="text-align:right"><span class="pill s-${aggStatus(tasksOf(f.id))}">${DSTAT[aggStatus(tasksOf(f.id))]}</span></span></div>`).join('')||'<div class="empty-note">尚無功能</div>'}</div>
+    <div class="btnrow"><button type="button" data-add-feature="${id}">＋ 新增功能</button></div>
+  </form>
+  <div class="df"><button class="danger" data-del-module="${id}">刪除模組</button><button type="button" data-move-module="${id}" data-dir="-1">上移</button><button type="button" data-move-module="${id}" data-dir="1">下移</button><span class="sp"></span><button class="primary" data-save-module="${id}">儲存</button></div>`;
+  drawer.classList.add('open');
+  $('#mf').addEventListener('submit',e=>{e.preventDefault();saveModule(id)});
+}
+function saveModule(id){const f=$('#mf');if(!f.reportValidity())return;commit(()=>{const m=modById(id);m.code=f.code.value.trim();m.name=f.name.value.trim()},'已儲存');openModule(id)}
+
+/* create helpers */
+function makeTask(fid,phase,name,extra={}){
+  const p=P();const order=p.tasks.filter(t=>t.featureId===fid&&t.phase===phase).length;
+  const t={id:uid('t'),featureId:fid,phase,name:name||PH[phase].label,owner:'',start:'',end:'',status:'todo',progress:0,order,...extra};
+  p.tasks.push(t);placeTask(t);return t;
+}
+/* ordering helpers */
+const renumber=list=>list.forEach((x,k)=>x.seq=(k+1)*10);
+function placeTask(t){ // 功能已自訂排序時，新任務插在同階段（或之前階段）最後一項之後
+  const sib=P().tasks.filter(x=>x.featureId===t.featureId&&x!==t);
+  if(!sib.some(x=>x.seq!=null))return;
+  const sorted=sib.sort(byPhase);const pi=phaseIdx(t.phase);let i=0;
+  sorted.forEach((x,k)=>{if(phaseIdx(x.phase)<=pi)i=k+1});
+  sorted.splice(i,0,t);renumber(sorted);
+}
+function moveTask(id,fid,refId,after){
+  const t=taskById(id);const list=tasksOf(fid).filter(x=>x!==t);
+  let i=refId?list.findIndex(x=>x.id===refId):-1;i=i<0?list.length:i+(after?1:0);
+  list.splice(i,0,t);t.featureId=fid;renumber(list);
+}
+function moveTaskStep(id,dir){
+  const t=taskById(id);const list=tasksOf(t.featureId);const i=list.indexOf(t),j=i+dir;
+  if(j<0||j>=list.length)return false;[list[i],list[j]]=[list[j],list[i]];renumber(list);return true;
+}
+function moveFeat(id,mid,refId,after){
+  const fs=P().features;const f=featById(id);fs.splice(fs.indexOf(f),1);f.moduleId=mid;let i;
+  if(refId){i=fs.findIndex(x=>x.id===refId)+(after?1:0)}
+  else{const sib=fs.filter(x=>x.moduleId===mid);i=sib.length?fs.indexOf(sib[sib.length-1])+1:fs.length}
+  fs.splice(i,0,f);
+}
+function moveMod(id,refId,after){
+  const ms=P().modules;const m=modById(id);ms.splice(ms.indexOf(m),1);
+  ms.splice(ms.findIndex(x=>x.id===refId)+(after?1:0),0,m);
+}
+const tplPhases=()=>PHASES.filter(p=>p.key!=='other'&&S.settings.template[p.key]);
+function fillPhases(fid,specName){
+  const ts=tasksOf(fid);
+  for(const ph of tplPhases()){if(!ts.some(t=>t.phase===ph.key))makeTask(fid,ph.key,ph.key==='spec'?(specName||'規格文件'):ph.label)}
+}
+function newTaskDialog(fid,phase){
+  phase=phase||'other';
+  openDialog('新增任務',`
+    <label class="fld"><span>所屬功能</span><select id="ntF">${featOptions(fid)}</select></label>
+    <label class="fld"><span>任務名稱</span><input id="ntName" placeholder="例：教育訓練、資安弱掃、上線部署、需求訪談"></label>
+    <div class="row2"><label class="fld"><span>類別（決定預設排序與矩陣欄位）</span><select id="ntPh">${PHASES.map(p=>`<option value="${p.key}"${p.key===phase?' selected':''}>${p.label}</option>`).join('')}</select></label>
+      <label class="fld"><span>角色</span><select id="ntRole"><option value="">依類別預設</option>${Object.entries(ROLES).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('')}</select></label></div>
+    <label class="fld"><span>負責人（可留空）</span><input id="ntOwner" list="ownerList4"><datalist id="ownerList4">${owners().map(o=>`<option value="${esc(o)}">`).join('')}</datalist></label>
+    <div class="hint">建立後會開啟任務編輯，接著設定日期即可。</div>`,
+    `<span class="sp"></span><button data-dclose>取消</button><button class="primary" id="ntOk">建立</button>`);
+  const ok=()=>{const ph=$('#ntPh').value;const name=$('#ntName').value.trim()||PH[ph].label;const role=$('#ntRole').value;let t;
+    commit(()=>{t=makeTask($('#ntF').value,ph,name,{owner:$('#ntOwner').value.trim(),...(role?{role}:{})})},`已新增任務「${name}」`);
+    dlg.close();openTask(t.id)};
+  $('#ntOk').onclick=ok;$('#ntName').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();ok()}};
+  setTimeout(()=>$('#ntName')?.focus(),30);
+}
+function autoSchedule(fid,startStr){
+  const ts=tasksOf(fid);let cur=toNum(startStr);let c=0;
+  // start after last scheduled task that precedes unscheduled ones
+  for(const t of ts){
+    if(t.start&&t.end){cur=Math.max(cur,nextWorkday(toNum(t.end)));continue}
+    while(isOff(cur))cur++;
+    const d=S.settings.defDur[t.phase]||3;const e=addWorkdays(cur,d);
+    t.start=toStr(cur);t.end=toStr(e);t.tentative=true;cur=nextWorkday(e);c++;
+  }
+  return c;
+}
+
+/* ================= dialogs ================= */
+const dlg=$('#dlg');
+function openDialog(title,body,foot){dlg.innerHTML=`<div class="dh"><h2>${title}</h2><button class="ghost" data-dclose>✕</button></div><div class="db">${body}</div>${foot?`<div class="df">${foot}</div>`:''}`;dlg.showModal()}
+dlg.addEventListener('click',e=>{if(e.target===dlg||e.target.closest('[data-dclose]'))dlg.close()});
+
+function newFeatureDialog(mid){
+  const p=P();
+  openDialog('新增功能',`
+    <label class="fld"><span>模組</span><select id="nfMod">${p.modules.map(m=>`<option value="${m.id}"${m.id===mid?' selected':''}>${esc(modLabel(m))}</option>`).join('')}<option value="__new"${p.modules.length?'':' selected'}>＋ 新模組…</option></select></label>
+    <div class="row3" id="nfNewMod" style="grid-template-columns:90px 1fr;${p.modules.length?'display:none':''}"><label class="fld"><span>模組編號</span><input id="nfCode" placeholder="08"></label><label class="fld"><span>模組名稱</span><input id="nfMName" placeholder="例：報表中心"></label></div>
+    <label class="fld"><span>功能名稱</span><input id="nfName" placeholder="例：08-1 月報表"></label>
+    <label class="ck"><input type="checkbox" id="nfTpl" checked> 自動建立預設任務：${tplPhases().map(p=>`${p.label}(${ROLES[S.settings.phaseRole[p.key]].label})`).join(' → ')}</label>
+    <label class="fld"><span>工程師（Programming / DEMO 負責人，可留空）</span><input id="nfEng" list="ownerList3"><datalist id="ownerList3">${owners().map(o=>`<option value="${esc(o)}">`).join('')}</datalist></label>`,
+    `<span class="sp"></span><button data-dclose>取消</button><button class="primary" id="nfOk">建立</button>`);
+  $('#nfMod').onchange=()=>$('#nfNewMod').style.display=$('#nfMod').value==='__new'?'':'none';
+  $('#nfName').focus();
+  $('#nfOk').onclick=()=>{
+    const name=$('#nfName').value.trim();if(!name){$('#nfName').focus();return}
+    let fid;
+    commit(()=>{let mId=$('#nfMod').value;
+      if(mId==='__new'){const m={id:uid('m'),code:$('#nfCode').value.trim(),name:$('#nfMName').value.trim()||'新模組'};P().modules.push(m);mId=m.id}
+      const f={id:uid('f'),moduleId:mId,name};P().features.push(f);fid=f.id;
+      if($('#nfTpl').checked){fillPhases(f.id,name);const eng=$('#nfEng').value.trim();if(eng)tasksOf(f.id).forEach(t=>{if(roleOf(t)==='eng')t.owner=eng})}
+      else makeTask(f.id,'spec',name);
+      UI.collapsed[mId]=false;
+    },'已新增功能');
+    dlg.close();openFeature(fid);
+  };
+}
+/* ===== 以「模組 / 功能」大綱建立專案 ===== */
+function parseOutline(text){
+  // 支援：(1) 從 Excel 複製兩欄「模組<Tab>功能」，模組欄空白則沿用上一列；(2) 無縮排＝模組、縮排或「-」開頭＝功能
+  const mods=[];let cur=null;
+  const ensure=()=>{if(!cur){cur={name:'未分類',feats:[]};mods.push(cur)}};
+  for(const raw of String(text).split(/\r?\n/)){
+    if(!raw.trim())continue;
+    if(raw.includes('\t')){const [a,b]=raw.split('\t').map(s=>(s||'').trim());
+      if(a&&(!cur||cur.name!==a)){cur={name:a,feats:[]};mods.push(cur)}
+      if(b){ensure();cur.feats.push(b)}continue}
+    if(/^[\s　]+|^[-*•・]/.test(raw)){ensure();cur.feats.push(raw.replace(/^[\s　]*[-*•・]?\s*/,'').trim())}
+    else{cur={name:raw.trim(),feats:[]};mods.push(cur)}
+  }
+  return mods.filter(m=>m.name);
+}
+function outlineFromRows(rows){ // CSV：欄位「模組、功能」
+  const H=rows[0].map(h=>h.trim());const im=H.indexOf('模組'),iF=H.indexOf('功能');
+  return parseOutline(rows.slice(1).map(r=>`${(r[im]||'').trim()}\t${iF>=0?(r[iF]||'').trim():''}`).join('\n'));
+}
+function applyOutline(p,mods,withTpl,eng){
+  let nf=0;
+  for(const om of mods){
+    const mm=om.name.match(/^(\d+)\s+(.+)$/);const code=mm?mm[1]:'',name=mm?mm[2]:om.name;
+    let m=p.modules.find(x=>x.name===name&&(x.code||'')===code);
+    if(!m){m={id:uid('m'),code,name};p.modules.push(m)}
+    const feats=om.feats.length?om.feats:[om.name];
+    for(const fn of feats){
+      if(p.features.some(f=>f.moduleId===m.id&&f.name===fn))continue;
+      const f={id:uid('f'),moduleId:m.id,name:fn};p.features.push(f);nf++;
+      if(withTpl){for(const ph of tplPhases())p.tasks.push({id:uid('t'),featureId:f.id,phase:ph.key,name:ph.key==='spec'?fn:ph.label,
+        owner:(eng&&(S.settings.phaseRole[ph.key]==='eng'))?eng:'',start:'',end:'',status:'todo',progress:0,order:0})}
+    }
+  }
+  return nf;
+}
+function outlineDialog(prefill){
+  const hasCur=P().modules.length>0;
+  openDialog('用「模組 / 功能」建立專案',`
+    <div class="row2"><label class="fld"><span>加入到</span><select id="olTarget"><option value="new">建立新專案</option>${hasCur?`<option value="cur">目前專案「${esc(P().name)}」</option>`:''}</select></label>
+      <label class="fld" id="olNameBox"><span>專案名稱</span><input id="olName" placeholder="例：吞嚥管理系統"></label></div>
+    <label class="fld"><span>模組與功能清單</span><textarea id="olText" rows="11" style="font-family:ui-monospace,Menlo,monospace;font-size:12px" placeholder="可直接從 Excel 複製「模組、功能」兩欄貼上，或用縮排表示功能：
+
+01 待排任務管理
+  01-1 門診待排名單
+  01-2 住院待排名單
+02 服務任務及課表
+  02-1 任務總覽
+05 系統設定">${esc(prefill||'')}</textarea></label>
+    <div class="hint">沒有縮排的行＝模組，縮排或「-」開頭＝功能。模組底下沒有功能時，會以模組名稱建立一個功能。</div>
+    <label class="ck"><input type="checkbox" id="olTpl" checked> 每個功能自動建立預設任務：${tplPhases().map(p=>p.label).join('、')||'（設定中未勾選任何類別）'}</label>
+    <label class="fld"><span>工程師（開發 / DEMO 負責人，可留空）</span><input id="olEng" list="ownerList5"><datalist id="ownerList5">${owners().map(o=>`<option value="${esc(o)}">`).join('')}</datalist></label>
+    <div class="card" style="padding:8px 12px"><b id="olPrev">尚未輸入</b></div>`,
+    `<button id="olTplCsv">下載 CSV 範本</button><span class="sp"></span><button data-dclose>取消</button><button class="primary" id="olOk">建立</button>`);
+  const prev=()=>{const ms=parseOutline($('#olText').value);const nf=ms.reduce((c,m)=>c+(m.feats.length||1),0);const nt=$('#olTpl').checked?nf*tplPhases().length:0;
+    $('#olPrev').textContent=ms.length?`將建立 ${ms.length} 個模組、${nf} 個功能、${nt} 項任務`:'尚未輸入'};
+  $('#olText').oninput=prev;$('#olTpl').onchange=prev;prev();
+  $('#olTarget').onchange=()=>$('#olNameBox').style.visibility=$('#olTarget').value==='new'?'visible':'hidden';
+  $('#olTplCsv').onclick=()=>download('模組功能匯入範本.csv',toCSV([['模組','功能'],['01 待排任務管理','01-1 門診待排名單'],['','01-2 住院待排名單'],['02 服務任務及課表','02-1 任務總覽'],['05 系統設定','']]),'text/csv');
+  $('#olOk').onclick=()=>{
+    const ms=parseOutline($('#olText').value);if(!ms.length){$('#olText').focus();return}
+    const toCur=$('#olTarget').value==='cur';let nf=0;
+    commit(()=>{let p;
+      if(toCur)p=P();else{p=blankProject($('#olName').value.trim()||'新專案');
+        S.projects=S.projects.filter(x=>x.tasks.length||x.modules.length); // 移除空白的預設專案
+        S.projects.push(p);S.current=p.id}
+      nf=applyOutline(p,ms,$('#olTpl').checked,$('#olEng').value.trim());
+    },'');
+    UI.view='matrix';saveUI();dlg.close();render();toast(`已建立 ${nf} 個功能，可在「階段矩陣」點各格設定日期`);
+  };
+  setTimeout(()=>{if($('#olTarget')?.value==='new')$('#olName')?.focus()},30);
+}
+function settingsDialog(){
+  const st=S.settings;
+  openDialog('設定',`
+    <label class="fld"><span>專案名稱</span><input id="stName" value="${esc(P().name)}"></label>
+    <div class="fld"><span>任務類別：預設角色、預設工作天，以及新功能是否自動建立（預設任務範本）</span>
+      <div class="row3 hint" style="grid-template-columns:110px 1fr 80px 90px"><span>類別</span><span>預設角色</span><span>預設工作天</span><span>自動建立</span></div>
+      ${PHASES.map(p=>`<div class="row3" style="grid-template-columns:110px 1fr 80px 90px;align-items:center"><b>${p.label}</b><select data-pr="${p.key}">${Object.entries(ROLES).map(([k,v])=>`<option value="${k}"${st.phaseRole[p.key]===k?' selected':''}>${v.label}</option>`).join('')}</select><input type="number" min="1" data-dd="${p.key}" value="${st.defDur[p.key]}" title="預設工作天">${p.key==='other'?'<span class="hint">自訂任務用</span>':`<label class="ck"><input type="checkbox" data-tpl="${p.key}"${st.template[p.key]?' checked':''}> 建立</label>`}</div>`).join('')}
+    </div>
+    <label class="fld"><span>國定假日 / 公司休假（一行一筆：日期 名稱）</span><textarea id="stHol" rows="7">${esc(st.holidays)}</textarea></label>
+    <div class="hint">預設已填入 2026 年 9–12 月台灣國定假日，請依人事行政總處公告確認或增補。</div>
+    <div class="btnrow"><button id="stNewProj">＋ 建立新專案</button><button class="danger" id="stDelProj">刪除此專案</button></div>`,
+    `<span class="sp"></span><button data-dclose>取消</button><button class="primary" id="stOk">儲存設定</button>`);
+  $('#stOk').onclick=()=>{commit(()=>{P().name=$('#stName').value.trim()||P().name;
+    $$('[data-pr]',dlg).forEach(s=>st.phaseRole[s.dataset.pr]=s.value);
+    $$('[data-dd]',dlg).forEach(s=>st.defDur[s.dataset.dd]=Math.max(1,+s.value||1));
+    $$('[data-tpl]',dlg).forEach(s=>st.template[s.dataset.tpl]=s.checked);
+    st.holidays=$('#stHol').value},'設定已儲存');dlg.close()};
+  $('#stNewProj').onclick=()=>outlineDialog();
+  $('#stDelProj').onclick=()=>{if(!confirm(`確定刪除專案「${P().name}」？（可用「復原」救回）`))return;commit(()=>{S.projects=S.projects.filter(p=>p.id!==S.current);if(!S.projects.length)S.projects.push(blankProject('我的專案'));S.current=S.projects[0].id},'已刪除專案');dlg.close()};
+}
+function dataDialog(){
+  const p=P();
+  openDialog('資料匯入 / 匯出',`
+    <div class="datagrid">
+      <button id="dImp"><b>匯入 CSV / JSON</b><small>Excel 時程 CSV、「模組、功能」兩欄 CSV、清單 CSV 或 JSON 備份</small></button>
+      <button id="dOutline"><b>貼上模組 / 功能建立</b><small>只需模組與功能，自動產生預設任務</small></button>
+      <button id="dJson"><b>匯出 JSON 備份</b><small>完整保存所有專案（建議每週一次）</small></button>
+      <button id="dCsv"><b>匯出任務清單 CSV</b><small>可用 Excel 開啟、修改後再匯入</small></button>
+      <button id="dGantt"><b>匯出 Excel 甘特格式</b><small>與原本 Excel 相同版面，方便寄給同仁</small></button>
+      <button id="dBase"><b>${p.baselineAt?'更新':'設定'}基準線</b><small>${p.baselineAt?'目前基準：'+new Date(p.baselineAt).toLocaleDateString():'凍結目前計畫，之後可比對延遲天數'}</small></button>
+      <button id="dPrint"><b>列印 / 存成 PDF</b><small>列印目前頁面</small></button>
+    </div>
+    <div class="hint">${CLOUD?'資料儲存在 Google 試算表，所有成員共用；試算表本身有版本記錄（檔案 → 版本記錄）。':`資料儲存在此瀏覽器的 localStorage。清除瀏覽器資料會遺失，請定期匯出 JSON 備份。${S.settings.lastExport?'上次備份：'+new Date(S.settings.lastExport).toLocaleString():'尚未備份過。'}`}</div>`);
+  $('#dImp').onclick=()=>{dlg.close();$('#fileIn').click()};
+  $('#dOutline').onclick=()=>outlineDialog();
+  $('#dJson').onclick=()=>{S.settings.lastExport=Date.now();persist();download(`timeline-backup-${toStr(TODAY)}.json`,JSON.stringify(S,null,1),'application/json');dlg.close();render()};
+  $('#dCsv').onclick=()=>{download(`${p.name}-任務清單.csv`,toCSV(exportList()),'text/csv');dlg.close()};
+  $('#dGantt').onclick=()=>{download(`${p.name}-甘特時程.csv`,toCSV(exportGantt()),'text/csv');dlg.close()};
+  $('#dBase').onclick=()=>{commit(()=>{p.baselineAt=Date.now();p.tasks.forEach(t=>{t.bStart=t.start||'';t.bEnd=t.end||''})},'已設定基準線');UI.baseline=true;saveUI();dlg.close();render()};
+  $('#dPrint').onclick=()=>{dlg.close();setTimeout(()=>window.print(),200)};
+}
+
+/* ================= CSV ================= */
+function parseCSV(text){
+  text=text.replace(/^﻿/,'');const rows=[];let row=[],f='',q=false;
+  for(let i=0;i<text.length;i++){const c=text[i];
+    if(q){if(c==='"'){if(text[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
+    else if(c==='"')q=true;else if(c===','){row.push(f);f=''}
+    else if(c==='\n'||c==='\r'){if(c==='\r'&&text[i+1]==='\n')i++;row.push(f);rows.push(row);row=[];f=''}
+    else f+=c}
+  if(f||row.length){row.push(f);rows.push(row)}
+  return rows;
+}
+const toCSV=rows=>'﻿'+rows.map(r=>r.map(v=>{v=String(v??'');return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(',')).join('\r\n');
+function download(name,data,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:type+';charset=utf-8'}));a.download=name.replace(/[\\/:*?"<>|]/g,'_');a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+
+const LIST_HEAD=['模組','功能','階段','任務','角色','負責人','開始','結束','工作天','狀態','進度','暫定','前置任務','基準開始','基準結束','完成日','備註','執行區段'];
+const segsToText=t=>t.segs?taskSegs(t).map(([a,b])=>`${ymd(a)}-${ymd(b)}`).join(';'):'';
+function textToSegs(s){return String(s||'').split(/[;；\n]/).map(x=>{const m=x.trim().match(/^(\d{4}[\/\-.]\d{1,2}[\/\-.]\d{1,2})\s*(?:[-~～–]\s*(\d{4}[\/\-.]\d{1,2}[\/\-.]\d{1,2}))?$/);
+  if(!m)return null;const a=toNum(normDate(m[1])),b=m[2]?toNum(normDate(m[2])):a;return [a,b]}).filter(Boolean)}
+function exportList(){
+  const p=P();const rows=[LIST_HEAD];
+  for(const m of p.modules)for(const f of featsOf(m.id))for(const t of tasksOf(f.id)){
+    const d=depOf(t);
+    rows.push([modLabel(m),f.name,PH[t.phase]?.label,t.name,ROLES[roleOf(t)].label,t.owner||'',t.start?ymd(toNum(t.start)):'',t.end?ymd(toNum(t.end)):'',
+      t.start?taskWd(t):'',STATUS[t.status||'todo'],t.progress||0,t.tentative?'Y':'',d?d.name:'',t.bStart||'',t.bEnd||'',t.doneAt||'',t.note||'',segsToText(t)])}
+  return rows;
+}
+function exportGantt(){
+  const p=P();const sp=span(p.tasks)||[TODAY,TODAY+30];const s=sp[0],e=sp[1];
+  const days=[];for(let n=s;n<=e;n++)days.push(n);
+  const rows=[['','功能規格書及開發','開始時間','結束時間',...days.map(md)],['','','','',...days.map(n=>holidays().has(n)?'假':WD[dowOf(n)])]];
+  const line=(a,b,t)=>{const sg=t?taskSegs(t):[];return [a,b,sg.length?ymd(sg[0][0]):'',sg.length?ymd(sg[sg.length-1][1]):'',...days.map(n=>sg.some(([x,y])=>n>=x&&n<=y)&&!isOff(n)?'■':'')]};
+  for(const m of p.modules){let first=true;
+    for(const f of featsOf(m.id)){const ts=tasksOf(f.id);
+      rows.push(line(first?modLabel(m):'','規格文件'));first=false;
+      ts.filter(t=>t.phase==='spec').forEach(t=>rows.push(line('',t.name,t)));
+      const engs=[...new Set(ts.filter(t=>roleOf(t)==='eng'&&t.owner).map(t=>t.owner))];
+      rows.push(line('',`系統開發${engs.length?'('+engs.join('、')+')':''}`));
+      ts.filter(t=>t.phase!=='spec').forEach(t=>rows.push(line('',t.name,t)));
+    }
+    if(first)rows.push(line(modLabel(m),''));
+  }
+  return rows;
+}
+function inferStatus(t){
+  const s=toNum(t.start),e=toNum(t.end);
+  if(/未完成/.test(t.name)){t.status='doing';return}
+  if(s==null){t.status='todo';return}
+  if(e<TODAY){t.status='done';t.progress=100;t.doneAt=t.end}
+  else if(s<=TODAY)t.status='doing';else t.status='todo';
+}
+function importExcelGantt(rows,name){
+  const p=blankProject(name);let mod=null,feat=null,mode=null,specs=[],engOwner='';
+  const finishFeat=()=>{if(feat&&specs.length>1&&mod){feat.name=modLabel(mod)}};
+  const phaseOf=n=>/^programming|^開發|^程式開發/i.test(n)?'dev':/demo/i.test(n)?'demo':/^sit/i.test(n)?'sit':/^uat/i.test(n)?'uat':'other';
+  // 日期欄（第 5 欄起，表頭為 M/D）若填入 ■ 等標記，視為實際執行日，可還原不連續區段
+  const MARK=/^[■●◼█vVxX✓✔○]$/;
+  let yr=null;for(const r of rows){const d=normDate(r[2]);if(d){yr=+d.slice(0,4);break}}if(!yr)yr=new Date().getFullYear();
+  const colDay=[];let pm=0;
+  (rows[0]||[]).forEach((h,ci)=>{if(ci<4)return;const m=String(h).trim().match(/^(\d{1,2})\/(\d{1,2})$/);if(!m)return;const mo=+m[1];if(pm&&mo<pm)yr++;pm=mo;colDay[ci]=Math.round(Date.UTC(yr,mo-1,+m[2])/DAY)});
+  const marksToSegs=r=>{const days=[];r.forEach((v,ci)=>{if(colDay[ci]!=null&&MARK.test(String(v).trim()))days.push(colDay[ci])});days.sort((a,b)=>a-b);
+    const segs=[];for(const n of days){const l=segs[segs.length-1];if(l){let allOff=true;for(let k=l[1]+1;k<n;k++)if(!isOff(k)){allOff=false;break}if(allOff){l[1]=n;continue}}segs.push([n,n])}return segs};
+  for(let i=1;i<rows.length;i++){
+    const r=rows[i];const c0=(r[0]||'').trim(),c1=(r[1]||'').trim();
+    if(!c0&&!c1)continue;
+    if(c0){finishFeat();const m=c0.match(/^(\d+)\s*(.*)$/);mod={id:uid('m'),code:m?m[1]:'',name:m?m[2]:c0};p.modules.push(mod);feat=null}
+    if(!mod){mod={id:uid('m'),code:'',name:'未分類'};p.modules.push(mod)}
+    if(c1==='規格文件'||c1.startsWith('規格')){finishFeat();feat={id:uid('f'),moduleId:mod.id,name:''};p.features.push(feat);mode='spec';specs=[];engOwner='';continue}
+    const dm=c1.match(/^系統開發(?:[（(](.+?)[)）])?/);
+    if(dm){engOwner=dm[1]||'';mode='dev';if(!feat){feat={id:uid('f'),moduleId:mod.id,name:modLabel(mod)};p.features.push(feat)}continue}
+    if(!c1)continue;
+    if(!feat){feat={id:uid('f'),moduleId:mod.id,name:c1};p.features.push(feat);mode='spec';specs=[]}
+    const start=normDate(r[2]),end=normDate(r[3])||normDate(r[2]);
+    let t;
+    if(mode==='spec'){t={id:uid('t'),featureId:feat.id,phase:'spec',name:c1,owner:'',start,end,order:specs.length,progress:0};specs.push(t);if(!feat.name)feat.name=c1}
+    else{const ph=phaseOf(c1);t={id:uid('t'),featureId:feat.id,phase:ph,name:c1,owner:(ph==='dev'||ph==='demo')?engOwner:'',start,end:start?end:'',order:0,progress:0}}
+    if(t.start&&!t.end)t.end=t.start;
+    const ms=marksToSegs(r);if(ms.length)setSegs(t,ms);
+    inferStatus(t);p.tasks.push(t);
+  }
+  finishFeat();
+  p.features.forEach(f=>{if(!f.name)f.name='未命名功能'});
+  return p;
+}
+function importList(rows,name){
+  const p=blankProject(name);const H=rows[0].map(h=>h.trim());const ix=k=>H.indexOf(k);
+  const mods=new Map(),feats=new Map(),byName=[];
+  const phaseKey=l=>(PHASES.find(p=>p.label===l||p.short===l)||{key:'other'}).key;
+  const roleKey=l=>(Object.entries(ROLES).find(([k,v])=>v.label===l)||[''])[0];
+  const statKey=l=>(Object.entries(STATUS).find(([k,v])=>v===l)||['todo'])[0];
+  for(const r of rows.slice(1)){
+    const ml=(r[ix('模組')]||'').trim();const fl=(r[ix('功能')]||'').trim();if(!ml&&!fl)continue;
+    if(!mods.has(ml)){const m=ml.match(/^(\d+)\s+(.*)$/);const o={id:uid('m'),code:m?m[1]:'',name:m?m[2]:ml||'未分類'};mods.set(ml,o);p.modules.push(o)}
+    const fk=ml+'|'+fl;if(!feats.has(fk)){const o={id:uid('f'),moduleId:mods.get(ml).id,name:fl||'未命名功能'};feats.set(fk,o);p.features.push(o)}
+    const ph=phaseKey((r[ix('階段')]||'').trim());const rk=roleKey((r[ix('角色')]||'').trim());
+    const t={id:uid('t'),featureId:feats.get(fk).id,phase:ph,name:(r[ix('任務')]||'').trim()||PH[ph].label,owner:(r[ix('負責人')]||'').trim(),
+      start:normDate(r[ix('開始')]),end:normDate(r[ix('結束')]),status:statKey((r[ix('狀態')]||'').trim()),progress:+(r[ix('進度')]||0)||0,
+      tentative:(r[ix('暫定')]||'').trim().toUpperCase()==='Y',bStart:normDate(r[ix('基準開始')]),bEnd:normDate(r[ix('基準結束')]),doneAt:normDate(r[ix('完成日')])||undefined,note:r[ix('備註')]||'',order:p.tasks.filter(x=>x.featureId===feats.get(fk).id&&x.phase===ph).length,seq:(p.tasks.filter(x=>x.featureId===feats.get(fk).id).length+1)*10};
+    if(rk&&rk!==S.settings.phaseRole[ph])t.role=rk;
+    if(ix('執行區段')>=0){const sg=textToSegs(r[ix('執行區段')]);if(sg.length>1)setSegs(t,sg)}
+    if(t.bStart)p.baselineAt=p.baselineAt||Date.now();
+    p.tasks.push(t);byName.push([t,(r[ix('前置任務')]||'').trim()]);
+  }
+  for(const [t,dn] of byName)if(dn){const d=p.tasks.find(x=>x.name===dn&&x.featureId===t.featureId)||p.tasks.find(x=>x.name===dn);if(d&&d!==t)t.dep=d.id}
+  return p;
+}
+function importFile(file){
+  const rd=new FileReader();
+  rd.onload=()=>{
+    const text=String(rd.result);const base=file.name.replace(/\.(csv|json)$/i,'');
+    try{
+      if(/\.json$/i.test(file.name)||/^\s*\{/.test(text)){
+        const d=JSON.parse(text);
+        if(d.projects){if(!confirm(CLOUD?'匯入 JSON 備份會取代 Google 試算表中「所有人」的全部專案資料，確定？':'匯入 JSON 備份會取代目前所有專案資料（可用「復原」救回），確定？'))return;
+          commit(()=>{S=d;normSettings();if(!S.projects.find(p=>p.id===S.current))S.current=S.projects[0].id},'已匯入備份');}
+        else throw new Error('不是有效的備份檔');
+        return;
+      }
+      const rows=parseCSV(text);if(!rows.length)throw new Error('檔案是空的');
+      const h=rows[0].map(x=>x.trim());
+      const nameGuess=base.replace(/^\d{4}\s*-\s*ProductBacklog\s*-\s*/i,'').split(/\s+[-－]\s+/)[0].trim()||base;
+      let p;
+      if(h.includes('模組')&&!h.includes('任務')){ // 只有模組／功能 → 開啟大綱對話框確認
+        const ms=outlineFromRows(rows);
+        outlineDialog(ms.map(m=>[m.name,...m.feats.map(f=>'  '+f)].join('\n')).join('\n'));
+        $('#olName').value=nameGuess;$('#olText').dispatchEvent(new Event('input'));return;
+      }
+      if(h[0]==='模組'&&h.includes('任務'))p=importList(rows,nameGuess);
+      else if(h.includes('開始時間')||h[1]==='功能規格書及開發')p=importExcelGantt(rows,nameGuess);
+      else throw new Error('無法辨識的 CSV 格式（需為 Excel 時程格式或本工具匯出的清單格式）');
+      commit(()=>{S.projects.push(p);S.current=p.id},`已匯入「${p.name}」：${p.modules.length} 個模組、${p.features.length} 個功能、${p.tasks.length} 項任務`);
+      UI.view='gantt';saveUI();render();
+    }catch(err){alert('匯入失敗：'+err.message)}
+  };
+  rd.readAsText(file,'utf-8');
+}
+
+/* ================= misc UI ================= */
+const tip=$('#tip');
+function showTip(e,html){if(!html)return hideTip();tip.innerHTML=html;tip.style.display='block';const w=tip.offsetWidth,h=tip.offsetHeight;
+  let x=e.clientX+14,y=e.clientY+16;if(x+w>innerWidth-8)x=e.clientX-w-14;if(y+h>innerHeight-8)y=e.clientY-h-14;tip.style.left=x+'px';tip.style.top=y+'px'}
+function hideTip(){tip.style.display='none'}
+let _tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('on'),2200)}
+
+/* global click delegation */
+document.addEventListener('click',e=>{
+  if(e.target.closest('.grip'))return;
+  const el=e.target.closest('[data-view],[data-toggle],[data-move-task],[data-open-task],[data-open-feature],[data-open-module],[data-add-feature],[data-add-task],[data-add-phase],[data-close],[data-save-task],[data-del-task],[data-dup-task],[data-save-feature],[data-del-feature],[data-move-feature],[data-fill],[data-auto],[data-save-module],[data-del-module],[data-move-module],[data-sort],[data-role],[data-z],[data-act]');
+  if(!el)return;const d=el.dataset;
+  if(d.view){UI.view=d.view;saveUI();render();return}
+  if(d.z){UI.zoom=d.z;saveUI();render._last=null;render();return}
+  if(d.role&&el.classList.contains('chip')){UI.roles[d.role]=!UI.roles[d.role];saveUI();render();return}
+  if(d.toggle){UI.collapsed[d.toggle]=!UI.collapsed[d.toggle];saveUI();render();return}
+  if(d.sort){UI.sort=UI.sort.k===d.sort?{k:d.sort,dir:-UI.sort.dir}:{k:d.sort,dir:1};saveUI();render();return}
+  if(d.act==='import'){$('#fileIn').click();return}
+  if(d.act==='newfeat'){newFeatureDialog();return}
+  if(d.act==='outline'){outlineDialog();return}
+  if(d.act==='migrate'){const old=legacyData();if(!old)return;
+    if(!confirm(`把這台電腦的舊資料（${old.projects.length} 個專案）搬到 Google 試算表？`))return;
+    commit(()=>{S.projects=old.projects;S.settings={...S.settings,...old.settings};normSettings();S.current=S.projects[0].id},'已搬到 Google 試算表');return}
+  if(d.act==='clearfilter'){UI.owner='';UI.status='';UI.q='';$('#q').value='';UI.hideDone=false;UI.roles={pm:true,eng:true,user:true};saveUI();render();toast('已顯示全部任務');return}
+  if(d.close!==undefined){closeDrawer();return}
+  if(d.moveTask){const fid=taskById(d.moveTask).featureId;commit(()=>moveTaskStep(d.moveTask,+d.dir));openFeature(fid);return}
+  if(d.openTask){openTask(d.openTask);return}
+  if(d.openFeature){openFeature(d.openFeature);return}
+  if(d.openModule){openModule(d.openModule);return}
+  if(d.addFeature){newFeatureDialog(d.addFeature);return}
+  if(d.addTask){newTaskDialog(d.addTask);return}
+  if(d.addPhase){let t;commit(()=>{t=makeTask(d.fid,d.addPhase)});openTask(t.id);return}
+  if(d.saveTask){saveTask(d.saveTask);return}
+  if(d.delTask){const t=taskById(d.delTask);commit(()=>{P().tasks=P().tasks.filter(x=>x.id!==t.id);P().tasks.forEach(x=>{if(x.dep===t.id)delete x.dep})},`已刪除「${t.name}」（⌘Z 可復原）`);openFeature(t.featureId);return}
+  if(d.dupTask){const t=taskById(d.dupTask);let n;commit(()=>{n={...structuredClone(t),id:uid('t'),name:t.name+'（複製）',order:(t.order||0)+.5};if(n.seq!=null)n.seq+=5;P().tasks.push(n)});openTask(n.id);return}
+  if(d.saveFeature){saveFeature(d.saveFeature);return}
+  if(d.delFeature){const f=featById(d.delFeature);if(!confirm(`刪除功能「${f.name}」及其 ${tasksOf(f.id).length} 項任務？（⌘Z 可復原）`))return;
+    commit(()=>{const ids=new Set(tasksOf(f.id).map(t=>t.id));P().tasks=P().tasks.filter(t=>t.featureId!==f.id);P().tasks.forEach(x=>{if(ids.has(x.dep))delete x.dep});P().features=P().features.filter(x=>x.id!==f.id)},'已刪除功能');closeDrawer();return}
+  if(d.moveFeature){commit(()=>{const fs=P().features;const f=featById(d.moveFeature);const sib=fs.filter(x=>x.moduleId===f.moduleId);const i=sib.indexOf(f);const j=i+(+d.dir);if(j<0||j>=sib.length)return;const a=fs.indexOf(f),b=fs.indexOf(sib[j]);[fs[a],fs[b]]=[fs[b],fs[a]]});return}
+  if(d.fill){commit(()=>fillPhases(d.fill,featById(d.fill).name),'已補齊預設任務');openFeature(d.fill);return}
+  if(d.auto){const s=$('#autoStart').value;if(!s)return;let c;commit(()=>{c=autoSchedule(d.auto,s)},'');toast(c?`已排程 ${c} 個階段（標示為暫定）`:'所有階段都已有日期');openFeature(d.auto);return}
+  if(d.saveModule){saveModule(d.saveModule);return}
+  if(d.delModule){const m=modById(d.delModule);const fs=featsOf(m.id);if(!confirm(`刪除模組「${modLabel(m)}」及其 ${fs.length} 個功能？（⌘Z 可復原）`))return;
+    commit(()=>{const fids=new Set(fs.map(f=>f.id));P().tasks=P().tasks.filter(t=>!fids.has(t.featureId));P().features=P().features.filter(f=>!fids.has(f.id));P().modules=P().modules.filter(x=>x.id!==m.id)},'已刪除模組');closeDrawer();return}
+  if(d.moveModule){commit(()=>{const ms=P().modules;const i=ms.findIndex(x=>x.id===d.moveModule);const j=i+(+d.dir);if(j<0||j>=ms.length)return;[ms[i],ms[j]]=[ms[j],ms[i]]});return}
+});
+$('#projSel').onchange=e=>{if(e.target.value==='__new'){e.target.value=S.current;outlineDialog();return}S.current=e.target.value;persist();closeDrawer();render._last=null;render()};
+$('#fOwner').onchange=e=>{UI.owner=e.target.value;saveUI();render()};
+$('#fStatus').onchange=e=>{UI.status=e.target.value;saveUI();render()};
+$('#fHide').onchange=e=>{UI.hideDone=e.target.checked;saveUI();render()};
+$('#fBase').onchange=e=>{UI.baseline=e.target.checked;saveUI();render()};
+let _qt;$('#q').oninput=e=>{clearTimeout(_qt);_qt=setTimeout(()=>{UI.q=e.target.value.trim();render()},150)};
+$('#btnToday').onclick=scrollToToday;
+$('#btnAdd').onclick=()=>newFeatureDialog(drawerRef&&drawerRef[0]==='module'?drawerRef[1]:undefined);
+$('#btnSettings').onclick=settingsDialog;
+$('#btnData').onclick=dataDialog;
+$('#cloudBtn').onclick=cloudDialog;$('#whoBtn').onclick=whoDialog;
+$('#undo').onclick=undo;$('#redo').onclick=redo;
+$('#btnTheme').onclick=()=>{const dark=matchMedia('(prefers-color-scheme: dark)').matches;const cur=UI.theme||(dark?'dark':'light');UI.theme=cur==='dark'?'light':'dark';document.documentElement.dataset.theme=UI.theme;saveUI()};
+$('#fileIn').onchange=e=>{const f=e.target.files[0];if(f)importFile(f);e.target.value=''};
+document.addEventListener('keydown',e=>{
+  const inField=/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName);
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='z'&&!inField){e.preventDefault();e.shiftKey?redo():undo()}
+  else if(e.key==='Escape'&&!dlg.open)closeDrawer();
+  else if((e.metaKey||e.ctrlKey)&&e.key==='Enter'&&drawerRef){const b=drawer.querySelector('.df .primary');if(b)b.click()}
+});
+const isFileDrag=e=>[...(e.dataTransfer?.types||[])].includes('Files');
+['dragover','dragenter'].forEach(t=>document.addEventListener(t,e=>{if(!isFileDrag(e))return;e.preventDefault();document.body.classList.add('drop')}));
+['dragleave','drop'].forEach(t=>document.addEventListener(t,e=>{if(!isFileDrag(e))return;e.preventDefault();if(t==='drop'||!e.relatedTarget)document.body.classList.remove('drop')}));
+document.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f)importFile(f)});
+
+/* 啟動：一律從 Google 試算表載入 */
+cloudBoot();
+</script>
+</body>
+</html>

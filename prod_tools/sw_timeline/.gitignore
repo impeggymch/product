@@ -1,0 +1,9 @@
+# 由 ClaudeMCH/prod_tools/sw_timeline/publish.py 產生：不能公開的檔案
+# 這些檔案含有專案的實際時程資料，只留在本機
+seed.js
+*.csv
+*.png
+*.jpg
+*.json
+*.xlsx
+.DS_Store
